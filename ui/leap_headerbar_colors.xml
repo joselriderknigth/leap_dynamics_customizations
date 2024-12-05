@@ -1,0 +1,11 @@
+<!-- https://learn.microsoft.com/en-us/power-apps/maker/model-driven-apps/modern-theme-overrides -->
+<AppHeaderColors 
+  background="#fcba03"
+  foreground="#FFFFFF" 
+  backgroundHover="#fcba03" 
+  foregroundHover="#FFFFFF"
+  backgroundPressed="#fcba03"
+  foregroundPressed="#FFFFFF"
+  backgroundSelected="#fcba03" 
+  foregroundSelected="#FFFFFF"
+/>
