@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.34902.97
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "Leap Surgical - Usage Form - Export to PDF", "Leap Surgical - Usage Form - Export to PDF\Leap Surgical - Usage Form - Export to PDF.rptproj", "{617E2561-B70D-46F9-AE69-594BC371AFF1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Default = Debug|Default
+		DebugLocal|Default = DebugLocal|Default
+		Release|Default = Release|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{617E2561-B70D-46F9-AE69-594BC371AFF1}.Debug|Default.ActiveCfg = Debug
+		{617E2561-B70D-46F9-AE69-594BC371AFF1}.Debug|Default.Build.0 = Debug
+		{617E2561-B70D-46F9-AE69-594BC371AFF1}.Debug|Default.Deploy.0 = Debug
+		{617E2561-B70D-46F9-AE69-594BC371AFF1}.DebugLocal|Default.ActiveCfg = DebugLocal
+		{617E2561-B70D-46F9-AE69-594BC371AFF1}.DebugLocal|Default.Build.0 = DebugLocal
+		{617E2561-B70D-46F9-AE69-594BC371AFF1}.Release|Default.ActiveCfg = Release
+		{617E2561-B70D-46F9-AE69-594BC371AFF1}.Release|Default.Build.0 = Release
+		{617E2561-B70D-46F9-AE69-594BC371AFF1}.Release|Default.Deploy.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F6CE18B1-54A8-46C7-9EC9-6B43121E3DE1}
+	EndGlobalSection
+EndGlobal
