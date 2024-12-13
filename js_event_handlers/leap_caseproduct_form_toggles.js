@@ -1,8 +1,77 @@
+const rolesAllowedCaseProductEdit = ['System Administrator'];
+const caseStatusesWhereAllUsersEditAllowed = [1, 293360000];
+const caseStatusesWhereElevatedUsersEditAllowed = [293360007];
+
+class CaseInfo {
+    constructor(status, needsReset) {
+        this.status = status;
+        this.needsReset = needsReset;
+    }
+}
+
+/*
+* Utility
+*/
+
+function getCaseInfo(caseId) {
+    return Xrm.WebApi.retrieveRecord("leap_case", caseId, "?$select=statuscode,leap_needsreset")
+        .then(result => {
+            if (result == null) {
+                throw Error(`[Event Handler] Retrieved case with ID ${caseId} is null.`);
+            }
+            return new CaseInfo(result.statuscode, result.leap_needsreset);
+        }).catch(error => {
+            throw Error(`[Event Handler] Error retrieving case with ID ${caseId} - ${error.message}`);
+        });
+}
+
+function userRoleAllowsElevatedEdit(caseInfo) {
+    var userRoles = Xrm.Utility.getGlobalContext().userSettings.roles.getAll();
+    var hasProperRole = false;
+    for(const userRole of userRoles) {
+        if(rolesAllowedCaseProductEdit.includes(userRole.name)) {
+            hasProperRole = true;
+            break;
+        }
+    }
+
+    return hasProperRole && (caseStatusesWhereElevatedUsersEditAllowed.includes(caseInfo.status) && caseInfo.needsReset);
+}
+
+function caseStatusAllowsEdit(caseStatus) {
+    return caseStatusesWhereAllUsersEditAllowed.includes(caseStatus);
+}
+
+function isQuickCreate(formContext) {
+    return formContext.data?.entity?.getId() == null || formContext.data?.entity?.getId() == undefined;
+}
+
+async function isEditAllowed(formContext) {
+    if(isQuickCreate(formContext)) {
+        return true;
+    }
+
+    var caseId = formContext.getAttribute("leap_caseid")?.getValue()[0]?.id;
+    if (caseId == null || caseId == undefined) {
+        return false;
+    } else {
+        try {
+            let caseInfo = await getCaseInfo(caseId);
+            // TODO: for now we only care about the status but once we add the changes to N52 'amR' we can uncomment this
+            // return caseStatusAllowsEdit(caseInfo.status) || userRoleAllowsElevatedEdit(caseInfo);
+            return caseStatusAllowsEdit(caseInfo.status);
+        } catch(error) {
+            console.log(error.message);
+            return false;
+        } 
+    }
+}
+
 /*
 * PRODUCT
 */
 
-function hideProductField(formContext) {
+function handleProductField(formContext, showField) {
     var productFieldCtrl = formContext.getControl("leap_productid");
     var productField = formContext.getAttribute("leap_productid");
     var unitPriceFieldCtrl = formContext.getControl("leap_unitprice");
@@ -10,168 +79,174 @@ function hideProductField(formContext) {
     var unitPriceOverrideFieldCtrl = formContext.getControl("leap_unitpriceoverride");
     var unitPriceOverrideField = formContext.getAttribute("leap_unitpriceoverride");
 
-    productField.setValue(null);
-    productField.setRequiredLevel('none');
-    unitPriceField.setValue(null);
-    unitPriceField.setRequiredLevel('none');
-    productFieldCtrl.setVisible(false);
-    unitPriceFieldCtrl.setVisible(false);
-    unitPriceOverrideFieldCtrl.setLabel('New Product Price');
-    unitPriceOverrideField.setValue(null);
-    unitPriceOverrideField.setRequiredLevel('required');
+    productFieldCtrl.setVisible(showField);
+    unitPriceFieldCtrl.setVisible(showField);
+
+    if(showField) { 
+        productField.setRequiredLevel('required');
+        unitPriceField.setValue(null);
+        unitPriceField.setRequiredLevel('required');
+        unitPriceOverrideFieldCtrl.setLabel('Unit Price Override');
+        unitPriceOverrideField.setValue(null);
+        unitPriceOverrideField.setRequiredLevel('none');
+    } else {
+        productField.setValue(null);
+        productField.setRequiredLevel('none');
+        unitPriceField.setValue(null);
+        unitPriceField.setRequiredLevel('none');
+        unitPriceOverrideFieldCtrl.setLabel('New Product Price');
+        unitPriceOverrideField.setValue(null);
+        unitPriceOverrideField.setRequiredLevel('required');
+    }
 }
 
-function showProductField(formContext) {
-    var productFieldCtrl = formContext.getControl("leap_productid");
-    var productField = formContext.getAttribute("leap_productid");
-    var unitPriceFieldCtrl = formContext.getControl("leap_unitprice");
-    var unitPriceField = formContext.getAttribute("leap_unitprice");
-    var unitPriceOverrideFieldCtrl = formContext.getControl("leap_unitpriceoverride");
-    var unitPriceOverrideField = formContext.getAttribute("leap_unitpriceoverride");
-
-    productFieldCtrl.setVisible(true);
-    productField.setRequiredLevel('required');
-    unitPriceFieldCtrl.setVisible(true);
-    unitPriceField.setValue(null);
-    unitPriceField.setRequiredLevel('required');
-    unitPriceOverrideFieldCtrl.setLabel('Unit Price Override');
-    unitPriceOverrideField.setValue(null);
-    unitPriceOverrideField.setRequiredLevel('none');
-}
-
-function hideNewProductField(formContext) {
+function handleNewProductField(formContext, showField) {
     var newProductFieldCtrl = formContext.getControl("leap_newproductname");
     var newProductIdFieldCtrl = formContext.getControl("leap_newproductid");
     var newProductField = formContext.getAttribute("leap_newproductname");
     var newProductIdField = formContext.getAttribute("leap_newproductid");
 
-    newProductField.setValue(null);
-    newProductIdField.setValue(null);
-    newProductField.setRequiredLevel('none');
-    newProductIdField.setRequiredLevel('none');
-    newProductFieldCtrl.setVisible(false);
-    newProductIdFieldCtrl.setVisible(false);
-}
+    newProductFieldCtrl.setVisible(showField);
+    newProductIdFieldCtrl.setVisible(showField);
 
-function showNewProductField(formContext) {
-    var newProductFieldCtrl = formContext.getControl("leap_newproductname");
-    var newProductIdFieldCtrl = formContext.getControl("leap_newproductid");
-    var newProductField = formContext.getAttribute("leap_newproductname");
-    var newProductIdField = formContext.getAttribute("leap_newproductid");
-
-    newProductFieldCtrl.setVisible(true);
-    newProductIdFieldCtrl.setVisible(true);
-    newProductField.setRequiredLevel('required');
-    newProductIdField.setRequiredLevel('required');
+    if(showField) {
+        newProductField.setRequiredLevel('required');
+        newProductIdField.setRequiredLevel('required');
+    } else {
+        newProductField.setValue(null);
+        newProductIdField.setValue(null);
+        newProductField.setRequiredLevel('none');
+        newProductIdField.setRequiredLevel('none');
+    }
 }
 
 /*
 * SUPPLIER
 */
 
-function hideSupplierField(formContext) {
+function handleSupplierField(formContext, showField) {
     var supplierFieldCtrl = formContext.getControl("leap_supplier");
     var supplierField = formContext.getAttribute("leap_supplier");
     var productType = formContext.getAttribute("leap_producttype");
 
-    supplierField.setValue(null);
-    supplierField.setRequiredLevel('none');
-    supplierFieldCtrl.setVisible(false);
-    productType.setValue(null);
+    supplierFieldCtrl.setVisible(showField);
+
+    if(showField) {
+        supplierField.setRequiredLevel('required');
+        productType.setValue(null);
+    } else {
+        supplierField.setValue(null);
+        supplierField.setRequiredLevel('none');
+        productType.setValue(null);
+    }
 }
 
-function showSupplierField(formContext) {
-    var supplierFieldCtrl = formContext.getControl("leap_supplier");
-    var supplierField = formContext.getAttribute("leap_supplier");
-    var productType = formContext.getAttribute("leap_producttype");
-
-    supplierFieldCtrl.setVisible(true);
-    supplierField.setRequiredLevel('required');
-    productType.setValue(null);
-}
-
-function hideNewSupplierField(formContext) {
+function handleNewSupplierField(formContext, showField) {
     var newSupplierFieldCtrl = formContext.getControl("leap_newsuppliername");
     var newSupplierField = formContext.getAttribute("leap_newsuppliername");
 
-    newSupplierField.setValue(null);
-    newSupplierField.setRequiredLevel('none');
-    newSupplierFieldCtrl.setVisible(false);
-}
+    newSupplierFieldCtrl.setVisible(showField);
 
-function showNewSupplierField(formContext) {
-    var newSupplierFieldCtrl = formContext.getControl("leap_newsuppliername");
-    var newSupplierField = formContext.getAttribute("leap_newsuppliername");
-
-    newSupplierFieldCtrl.setVisible(true);
-    newSupplierField.setRequiredLevel('required');
+    if(showField) {
+        newSupplierField.setRequiredLevel('required');
+    } else {
+        newSupplierField.setValue(null);
+        newSupplierField.setRequiredLevel('none');
+    }
 }
 
 /*
 * HANDLERS
 */
 
-function addNewProductHandler(executionContext) {
+function addNewProductToggleHandler(executionContext) {
     var formContext = executionContext.getFormContext();
     var newProductToggle = formContext.getAttribute("leap_addanewproduct");
     var existingProduct = formContext.getAttribute("leap_existingproduct");
     var existingSupplierToggleCtrl = formContext.getControl("leap_existingsupplier");
     var existingSupplierToggle = formContext.getAttribute("leap_existingsupplier");
 
-    if(newProductToggle.getValue() == 0) { // No
-        existingProduct.setValue(true);
-        showProductField(formContext);
-        hideNewProductField(formContext);
-
-        existingSupplierToggle.setValue(true);
-        showSupplierField(formContext);
-        hideNewSupplierField(formContext);
-        existingSupplierToggleCtrl.setVisible(false);
-    } else {
-        existingProduct.setValue(false);
-        hideProductField(formContext);
-        showNewProductField(formContext);
-        existingSupplierToggleCtrl.setVisible(true);
-    }
+    isEditAllowed(formContext)
+        .then(function (isAllowed) {
+            if (isAllowed == null) {
+                console.log('[Event Handler] unable to determine if edit is allowed.');
+            } else if(isAllowed) {
+                if(newProductToggle.getValue() == 0) { // No
+                    existingProduct.setValue(true);
+                    handleProductField(formContext, true);
+                    handleNewProductField(formContext, false);
+            
+                    existingSupplierToggle.setValue(true);
+                    handleSupplierField(formContext, true);
+                    handleNewSupplierField(formContext, false);
+                    // existingSupplierToggleCtrl.setVisible(false); // Hide toggle for now
+                } else {
+                    existingProduct.setValue(false);
+                    handleProductField(formContext, false);
+                    handleNewProductField(formContext, true);
+                    // existingSupplierToggleCtrl.setVisible(true); // Hide toggle for now
+                }
+            }
+        }).catch(function (error) {
+            console.log(`[Event Handler] error trying to determine if edit is allowed. - ${error.message}`);
+        });
 }
 
-function showHideProduct(executionContext) {
+function existingProductToggleHandler(executionContext) {
     var formContext = executionContext.getFormContext();
     var existingProduct = formContext.getAttribute("leap_existingproduct");
 
-    if (existingProduct.getValue() == 0) { // No
-        hideProductField(formContext);
-        showNewProductField(formContext);
-    } else { // Yes
-        showProductField(formContext);
-        hideNewProductField(formContext);
-    }
+    isEditAllowed(formContext)
+        .then(function (isAllowed) {
+            if (isAllowed == null) {
+                console.log('[Event Handler] unable to determine if edit is allowed.');
+            } else if(isAllowed) {
+                if (existingProduct.getValue() == 0) { // No
+                    handleProductField(formContext, false);
+                    handleNewProductField(formContext, true);
+                } else { // Yes
+                    handleProductField(formContext, true);
+                    handleNewProductField(formContext, false);
+                }
+            }
+        }).catch(function (error) {
+            console.log(`[Event Handler] error trying to determine if edit is allowed. - ${error.message}`);
+        });
 }
 
-function showHideSupplier(executionContext) {
+function existingSupplierToggleHandler(executionContext) {
     var formContext = executionContext.getFormContext();
     var existingsupplier = formContext.getAttribute("leap_existingsupplier");
     var existingProductCtrl = formContext.getControl("leap_existingproduct");
     var existingProduct = formContext.getAttribute("leap_existingproduct");
 
-    if (existingsupplier.getValue() == 0) { // No
-        hideProductField(formContext);
-        showNewProductField(formContext);
-
-        existingProduct.setValue(false);
-        existingProductCtrl.setDisabled(true);
- 
-        hideSupplierField(formContext);
-        showNewSupplierField(formContext);
-    } else { // Yes
-        existingProductCtrl.setDisabled(false);
-
-        showSupplierField(formContext);
-        hideNewSupplierField(formContext);
-    }
+    isEditAllowed(formContext)
+        .then(function (isAllowed) {
+            if (isAllowed == null) {
+                console.log('[Event Handler] unable to determine if edit is allowed.');
+            } else if(isAllowed) {
+                if (existingsupplier.getValue() == 0) { // No
+                    handleProductField(formContext, false);
+                    handleNewProductField(formContext, true);
+            
+                    existingProduct.setValue(false);
+                    existingProductCtrl.setDisabled(true);
+                    
+                    handleSupplierField(formContext, false);
+                    handleNewSupplierField(formContext, true);
+                } else { // Yes
+                    existingProductCtrl.setDisabled(false);
+            
+                    handleSupplierField(formContext, true);
+                    handleNewSupplierField(formContext, false);
+                }
+            }
+        }).catch(function (error) {
+            console.log(`[Event Handler] error trying to determine if edit is allowed. - ${error.message}`);
+        });
 }
 
-function showHideProductDetails(executionContext) {
+function showProductDetailsToggleHandler(executionContext) {
     var formContext = executionContext.getFormContext();
     var showProductDetails = formContext.getAttribute("leap_showproductdetails");
 
