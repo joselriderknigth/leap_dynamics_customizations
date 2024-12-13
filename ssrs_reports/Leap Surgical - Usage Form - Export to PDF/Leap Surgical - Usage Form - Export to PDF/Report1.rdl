@@ -825,7 +825,9 @@
                                 <TextRun>
                                   <Value>Account Name</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -868,7 +870,9 @@
                                 <TextRun>
                                   <Value>Hospital Account ID#</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -917,7 +921,9 @@
                                 <TextRun>
                                   <Value>Billing Address</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -961,7 +967,9 @@
                                 <TextRun>
                                   <Value>Shipping Address</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1017,7 +1025,7 @@
             <DataSetName>DynamicsUsageFormCase</DataSetName>
             <Top>1.34965in</Top>
             <Left>5.20042in</Left>
-            <Height>0.70967in</Height>
+            <Height>0.70968in</Height>
             <Width>4.81432in</Width>
             <ZIndex>2</ZIndex>
             <Style>
@@ -1051,7 +1059,9 @@
                                 <TextRun>
                                   <Value>Purchase Order #</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1094,7 +1104,9 @@
                                 <TextRun>
                                   <Value>Leap Surgical Order #</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1213,7 +1225,9 @@
                                 <TextRun>
                                   <Value>Date</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1256,7 +1270,9 @@
                                 <TextRun>
                                   <Value>Surgeon Name</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1304,7 +1320,9 @@
                                 <TextRun>
                                   <Value>Surgery Type</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1347,7 +1365,9 @@
                                 <TextRun>
                                   <Value>Patient ID #</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1519,19 +1539,19 @@
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>0.91732in</Width>
+                  <Width>0.97963in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>0.86469in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>3.38417in</Width>
+                  <Width>3.29327in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>0.91488in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>0.70537in</Width>
+                  <Width>0.67164in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>0.52552in</Width>
@@ -1546,7 +1566,7 @@
                   <Width>0.84385in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>0.86934in</Width>
+                  <Width>0.93166in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -1564,8 +1584,9 @@
                                 <TextRun>
                                   <Value>Item #</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Normal</FontWeight>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1599,8 +1620,9 @@
                                 <TextRun>
                                   <Value>Lot #</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Normal</FontWeight>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1634,8 +1656,9 @@
                                 <TextRun>
                                   <Value>Product Description</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Normal</FontWeight>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1669,8 +1692,9 @@
                                 <TextRun>
                                   <Value>Serial #</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Normal</FontWeight>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1706,7 +1730,7 @@
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Normal</FontWeight>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1742,7 +1766,7 @@
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Normal</FontWeight>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1778,7 +1802,7 @@
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Normal</FontWeight>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1814,7 +1838,7 @@
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Normal</FontWeight>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1850,7 +1874,7 @@
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Normal</FontWeight>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1886,7 +1910,7 @@
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Normal</FontWeight>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -2358,7 +2382,9 @@
                                 <TextRun>
                                   <Value>First and Last Name (or Loaner Set ID#)</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -2401,7 +2427,9 @@
                                 <TextRun>
                                   <Value>Ship to Acct #</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -2448,7 +2476,9 @@
                                 <TextRun>
                                   <Value>Address, City, State, Zip</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -2498,7 +2528,9 @@
                                 <TextRun>
                                   <Value>Required Date</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -2701,8 +2733,9 @@
                                 <TextRun>
                                   <Value>Instrument Charge</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Normal</FontWeight>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -2772,8 +2805,9 @@
                                 <TextRun>
                                   <Value>Shipping &amp; Delivery</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Normal</FontWeight>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -2843,6 +2877,7 @@
                                 <TextRun>
                                   <Value>Total</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
                                     <FontWeight>Bold</FontWeight>
                                   </Style>
@@ -2954,8 +2989,9 @@
                   <TextRun>
                     <Value>Authorized Signature</Value>
                     <Style>
+                      <FontFamily>Arial</FontFamily>
                       <FontSize>8pt</FontSize>
-                      <FontWeight>Normal</FontWeight>
+                      <FontWeight>Bold</FontWeight>
                     </Style>
                   </TextRun>
                 </TextRuns>
@@ -2990,7 +3026,7 @@
                     <Value>Printed Name</Value>
                     <Style>
                       <FontSize>8pt</FontSize>
-                      <FontWeight>Normal</FontWeight>
+                      <FontWeight>Bold</FontWeight>
                     </Style>
                   </TextRun>
                 </TextRuns>
@@ -3024,8 +3060,9 @@
                   <TextRun>
                     <Value>Date</Value>
                     <Style>
+                      <FontFamily>Arial</FontFamily>
                       <FontSize>8pt</FontSize>
-                      <FontWeight>Normal</FontWeight>
+                      <FontWeight>Bold</FontWeight>
                     </Style>
                   </TextRun>
                 </TextRuns>
@@ -3059,7 +3096,7 @@
                   <TextRun>
                     <Value>=First(Fields!ai_leap_hospital.Value, "DynamicsUsageFormCase") + " - " + First(Fields!ai_leap_surgeon.Value, "DynamicsUsageFormCase") + " - " + First(Fields!ai_leap_procedure.Value, "DynamicsUsageFormCase")</Value>
                     <Style>
-                      <FontSize>8pt</FontSize>
+                      <FontSize>9pt</FontSize>
                       <FontWeight>Bold</FontWeight>
                     </Style>
                   </TextRun>
@@ -3071,9 +3108,9 @@
             </Paragraphs>
             <rd:DefaultName>leap_name</rd:DefaultName>
             <Top>0.8634in</Top>
-            <Left>2.19965in</Left>
+            <Left>2.06423in</Left>
             <Height>0.24478in</Height>
-            <Width>6.18437in</Width>
+            <Width>6.46562in</Width>
             <ZIndex>17</ZIndex>
             <Style>
               <Border>
@@ -3319,7 +3356,9 @@
                                 <TextRun>
                                   <Value>Name</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -3362,7 +3401,9 @@
                                 <TextRun>
                                   <Value>Rep ID#</Value>
                                   <Style>
+                                    <FontFamily>arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -3466,7 +3507,14 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>Usage Form Status: </Value>
+                    <Value>Usage Form Status:</Value>
+                    <Style>
+                      <FontFamily>Arial</FontFamily>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                  <TextRun>
+                    <Value xml:space="preserve"> </Value>
                     <Style />
                   </TextRun>
                   <TextRun>
@@ -3520,7 +3568,9 @@
                                 <TextRun>
                                   <Value>Agency Name</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -3568,7 +3618,9 @@
                                 <TextRun>
                                   <Value>Agency Address &amp; Phone No.</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -3616,7 +3668,7 @@
               </TablixMembers>
             </TablixRowHierarchy>
             <DataSetName>DynamicsUsageFormOwningUserAgency</DataSetName>
-            <Top>1.70307in</Top>
+            <Top>1.70308in</Top>
             <Left>0.06249in</Left>
             <Height>0.72265in</Height>
             <Width>2.43601in</Width>
@@ -3649,7 +3701,9 @@
                                 <TextRun>
                                   <Value>Fax PO To</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -3697,7 +3751,9 @@
                                 <TextRun>
                                   <Value>Email PO To</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -3747,7 +3803,7 @@
             <DataSetName>DynamicsUsageFormSupplier</DataSetName>
             <Top>1.69938in</Top>
             <Left>2.4985in</Left>
-            <Height>0.72634in</Height>
+            <Height>0.72635in</Height>
             <Width>2.42309in</Width>
             <ZIndex>29</ZIndex>
             <Style>
