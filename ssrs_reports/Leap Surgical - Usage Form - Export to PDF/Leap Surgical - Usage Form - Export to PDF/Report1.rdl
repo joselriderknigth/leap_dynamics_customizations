@@ -13,173 +13,6 @@
     </DataSource>
   </DataSources>
   <DataSets>
-    <DataSet Name="DynamicsUsageForm">
-      <Query>
-        <DataSourceName>LeapSurgicalDynamicsCRM</DataSourceName>
-        <QueryParameters>
-          <QueryParameter Name="CRM_FilteredUsageForm">
-            <Value>=Parameters!CRM_FilteredUsageForm.Value</Value>
-            <rd:UserDefined>true</rd:UserDefined>
-          </QueryParameter>
-        </QueryParameters>
-        <CommandText>&lt;fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="true"&gt;
-  &lt;entity name="leap_usageform" enableprefiltering="1" prefilterparametername="CRM_FilteredUsageForm"&gt;
-      &lt;attribute name="ownerid" /&gt;
-      &lt;attribute name="leap_name" /&gt;
-      &lt;attribute name="leap_hospital" /&gt;
-      &lt;attribute name="leap_purchaseordernumber" /&gt;
-      &lt;attribute name="leap_surgicalnotes" /&gt;
-      &lt;attribute name="leap_detailsubtotal" /&gt;
-      &lt;attribute name="leap_shipto" /&gt;
-      &lt;attribute name="leap_requireddate" /&gt;
-      &lt;attribute name="leap_instrumentcharge" /&gt;
-      &lt;attribute name="leap_shippingdelivery" /&gt;
-      &lt;attribute name="leap_signature" /&gt;
-      &lt;attribute name="leap_signeefullname" /&gt;
-      &lt;attribute name="leap_signaturecapturedate" /&gt;
-      &lt;attribute name="leap_total" /&gt;
-      &lt;attribute name="leap_usageformnumber" /&gt;
-	  &lt;attribute name="leap_primarycontact" /&gt;
-	  &lt;attribute name="leap_shiptoaddress" /&gt;
-	  &lt;attribute name="statuscode" /&gt;
-	  &lt;attribute name="leap_newsuppliername" /&gt;
-    &lt;order attribute="leap_name" descending="false" /&gt;
-  &lt;/entity&gt;
-&lt;/fetch&gt;</CommandText>
-        <Timeout>1</Timeout>
-        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
-      </Query>
-      <Fields>
-        <Field Name="leap_detailsubtotal">
-          <DataField>leap_detailsubtotal</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_detailsubtotalValue">
-          <DataField>leap_detailsubtotalValue</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-        <Field Name="leap_name">
-          <DataField>leap_name</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_purchaseordernumber">
-          <DataField>leap_purchaseordernumber</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="ownerid">
-          <DataField>ownerid</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="owneridValue">
-          <DataField>owneridValue</DataField>
-          <rd:TypeName>System.Guid</rd:TypeName>
-        </Field>
-        <Field Name="owneridEntityName">
-          <DataField>owneridEntityName</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_hospital">
-          <DataField>leap_hospital</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_hospitalValue">
-          <DataField>leap_hospitalValue</DataField>
-          <rd:TypeName>System.Guid</rd:TypeName>
-        </Field>
-        <Field Name="leap_hospitalEntityName">
-          <DataField>leap_hospitalEntityName</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_surgicalnotes">
-          <DataField>leap_surgicalnotes</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_shipto">
-          <DataField>leap_shipto</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_shiptoValue">
-          <DataField>leap_shiptoValue</DataField>
-          <rd:TypeName>System.Guid</rd:TypeName>
-        </Field>
-        <Field Name="leap_shiptoEntityName">
-          <DataField>leap_shiptoEntityName</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_requireddate">
-          <DataField>leap_requireddate</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_requireddateValue">
-          <DataField>leap_requireddateValue</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
-        </Field>
-        <Field Name="leap_instrumentcharge">
-          <DataField>leap_instrumentcharge</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_instrumentchargeValue">
-          <DataField>leap_instrumentchargeValue</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-        <Field Name="leap_shippingdelivery">
-          <DataField>leap_shippingdelivery</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_shippingdeliveryValue">
-          <DataField>leap_shippingdeliveryValue</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-        <Field Name="leap_signature">
-          <DataField>leap_signature</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_total">
-          <DataField>leap_total</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_signeefullname">
-          <DataField>leap_signeefullname</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_totalValue">
-          <DataField>leap_totalValue</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-        <Field Name="leap_signaturecapturedate">
-          <DataField>leap_signaturecapturedate</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_usageformnumber">
-          <DataField>leap_usageformnumber</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_signaturecapturedateValue">
-          <DataField>leap_signaturecapturedateValue</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
-        </Field>
-        <Field Name="leap_primarycontact">
-          <DataField>leap_primarycontact</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="leap_shiptoaddress">
-          <DataField>leap_shiptoaddress</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="statuscode">
-          <DataField>statuscode</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="statuscodeValue">
-          <DataField>statuscodeValue</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="leap_newsuppliername">
-          <DataField>leap_newsuppliername</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-      </Fields>
-    </DataSet>
     <DataSet Name="DynamicsUsageFormDetail">
       <Query>
         <DataSourceName>LeapSurgicalDynamicsCRM</DataSourceName>
@@ -325,7 +158,7 @@
         </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="DynamicsUsageFormSupplier">
+    <DataSet Name="DynamicsUsageFormDetailProduct">
       <Query>
         <DataSourceName>LeapSurgicalDynamicsCRM</DataSourceName>
         <QueryParameters>
@@ -336,7 +169,38 @@
         <CommandText>&lt;fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="true"&gt;
   &lt;entity name="leap_usageform" enableprefiltering="1" prefilterparametername="CRM_FilteredUsageForm"&gt;
     &lt;order attribute="leap_name" descending="false" /&gt;
-    &lt;link-entity name="account" from="accountid" to="leap_supplier" link-type="inner" alias="aa"&gt;
+    &lt;link-entity name="leap_usageformdetail" from="leap_usageform" to="leap_usageformid" link-type="inner" alias="ad"&gt;
+      &lt;link-entity name="product" from="productid" to="leap_product" link-type="inner" alias="ae"&gt;
+        &lt;attribute name="producttypecode" /&gt;
+      &lt;/link-entity&gt;
+    &lt;/link-entity&gt;
+  &lt;/entity&gt;
+&lt;/fetch&gt;</CommandText>
+        <Timeout>1</Timeout>
+      </Query>
+      <Fields>
+        <Field Name="ae_producttypecode">
+          <DataField>ae_producttypecode</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ae_producttypecodeValue">
+          <DataField>ae_producttypecodeValue</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="SupplierSalesRepSalesRepAgency">
+      <Query>
+        <DataSourceName>LeapSurgicalDynamicsCRM</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="CRM_FilteredUsageForm">
+            <Value>=Parameters!CRM_FilteredUsageForm.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandText>&lt;fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="true"&gt;
+  &lt;entity name="leap_usageform" enableprefiltering="1" prefilterparametername="CRM_FilteredUsageForm"&gt;
+    &lt;order attribute="leap_name" descending="false" /&gt;
+	&lt;link-entity name="account" from="accountid" to="leap_supplier" link-type="inner" alias="aa"&gt;
       &lt;attribute name="leap_companylogo" /&gt;
       &lt;attribute name="name" /&gt;
       &lt;attribute name="leap_npi" /&gt;
@@ -354,12 +218,31 @@
       &lt;attribute name="address2_line3" /&gt;
       &lt;attribute name="address2_line2" /&gt;
       &lt;attribute name="address2_line1" /&gt;
-     &lt;/link-entity&gt;
+    &lt;/link-entity&gt;
+    &lt;link-entity name="systemuser" from="systemuserid" to="owninguser" alias="ak"&gt;
+	  &lt;attribute name="employeeid" /&gt;
+	  &lt;attribute name="leap_agency" /&gt;
+	  &lt;attribute name="fullname" /&gt;
+	  &lt;link-entity name="account" from="accountid" to="leap_agency" alias="az"&gt;
+	    &lt;attribute name="name" /&gt;
+		&lt;attribute name="address1_city" /&gt;
+		&lt;attribute name="address1_line1" /&gt;
+		&lt;attribute name="address1_line2" /&gt;
+		&lt;attribute name="address1_line3" /&gt;
+		&lt;attribute name="address1_postalcode" /&gt;
+		&lt;attribute name="address1_stateorprovince" /&gt;
+		&lt;attribute name="telephone1" /&gt;
+	  &lt;/link-entity&gt;
+	&lt;/link-entity&gt;
   &lt;/entity&gt;
 &lt;/fetch&gt;</CommandText>
         <Timeout>1</Timeout>
       </Query>
       <Fields>
+        <Field Name="aa_leap_companylogo">
+          <DataField>aa_leap_companylogo</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
         <Field Name="aa_name">
           <DataField>aa_name</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -368,20 +251,16 @@
           <DataField>aa_leap_npi</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="aa_leap_companylogo">
-          <DataField>aa_leap_companylogo</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
         <Field Name="aa_leap_poemail">
           <DataField>aa_leap_poemail</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="aa_address1_postalcode">
-          <DataField>aa_address1_postalcode</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
         <Field Name="aa_leap_pofax">
           <DataField>aa_leap_pofax</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="aa_address1_postalcode">
+          <DataField>aa_address1_postalcode</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="aa_address1_stateorprovince">
@@ -428,40 +307,61 @@
           <DataField>aa_address2_line1</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-      </Fields>
-    </DataSet>
-    <DataSet Name="DynamicsUsageFormDetailProduct">
-      <Query>
-        <DataSourceName>LeapSurgicalDynamicsCRM</DataSourceName>
-        <QueryParameters>
-          <QueryParameter Name="CRM_FilteredUsageForm">
-            <Value>=Parameters!CRM_FilteredUsageForm.Value</Value>
-          </QueryParameter>
-        </QueryParameters>
-        <CommandText>&lt;fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="true"&gt;
-  &lt;entity name="leap_usageform" enableprefiltering="1" prefilterparametername="CRM_FilteredUsageForm"&gt;
-    &lt;order attribute="leap_name" descending="false" /&gt;
-    &lt;link-entity name="leap_usageformdetail" from="leap_usageform" to="leap_usageformid" link-type="inner" alias="ad"&gt;
-      &lt;link-entity name="product" from="productid" to="leap_product" link-type="inner" alias="ae"&gt;
-        &lt;attribute name="producttypecode" /&gt;
-      &lt;/link-entity&gt;
-    &lt;/link-entity&gt;
-  &lt;/entity&gt;
-&lt;/fetch&gt;</CommandText>
-        <Timeout>1</Timeout>
-      </Query>
-      <Fields>
-        <Field Name="ae_producttypecode">
-          <DataField>ae_producttypecode</DataField>
+        <Field Name="ak_employeeid">
+          <DataField>ak_employeeid</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="ae_producttypecodeValue">
-          <DataField>ae_producttypecodeValue</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
+        <Field Name="ak_leap_agency">
+          <DataField>ak_leap_agency</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ak_leap_agencyValue">
+          <DataField>ak_leap_agencyValue</DataField>
+          <rd:TypeName>System.Guid</rd:TypeName>
+        </Field>
+        <Field Name="ak_leap_agencyEntityName">
+          <DataField>ak_leap_agencyEntityName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ak_fullname">
+          <DataField>ak_fullname</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="az_name">
+          <DataField>az_name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="az_address1_city">
+          <DataField>az_address1_city</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="az_address1_line1">
+          <DataField>az_address1_line1</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="az_address1_line2">
+          <DataField>az_address1_line2</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="az_address1_line3">
+          <DataField>az_address1_line3</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="az_address1_postalcode">
+          <DataField>az_address1_postalcode</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="az_address1_stateorprovince">
+          <DataField>az_address1_stateorprovince</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="az_telephone1">
+          <DataField>az_telephone1</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="DynamicsUsageFormCase">
+    <DataSet Name="UsageFormCaseHospital">
       <Query>
         <DataSourceName>LeapSurgicalDynamicsCRM</DataSourceName>
         <QueryParameters>
@@ -472,6 +372,25 @@
         <CommandText>&lt;fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="true"&gt;
   &lt;entity name="leap_usageform" enableprefiltering="1" prefilterparametername="CRM_FilteredUsageForm"&gt;
     &lt;order attribute="leap_name" descending="false" /&gt;
+	&lt;attribute name="ownerid" /&gt;
+      &lt;attribute name="leap_name" /&gt;
+      &lt;attribute name="leap_hospital" /&gt;
+      &lt;attribute name="leap_purchaseordernumber" /&gt;
+      &lt;attribute name="leap_surgicalnotes" /&gt;
+      &lt;attribute name="leap_detailsubtotal" /&gt;
+      &lt;attribute name="leap_shipto" /&gt;
+      &lt;attribute name="leap_requireddate" /&gt;
+      &lt;attribute name="leap_instrumentcharge" /&gt;
+      &lt;attribute name="leap_shippingdelivery" /&gt;
+      &lt;attribute name="leap_signature" /&gt;
+      &lt;attribute name="leap_signeefullname" /&gt;
+      &lt;attribute name="leap_signaturecapturedate" /&gt;
+      &lt;attribute name="leap_total" /&gt;
+      &lt;attribute name="leap_usageformnumber" /&gt;
+	  &lt;attribute name="leap_primarycontact" /&gt;
+	  &lt;attribute name="leap_shiptoaddress" /&gt;
+	  &lt;attribute name="statuscode" /&gt;
+	  &lt;attribute name="leap_newsuppliername" /&gt;
     &lt;link-entity name="leap_case" from="leap_caseid" to="leap_case" link-type="inner" alias="ai"&gt;
       &lt;attribute name="leap_casestarttime" /&gt;
       &lt;attribute name="leap_hospital" /&gt;
@@ -503,6 +422,134 @@
         <Timeout>1</Timeout>
       </Query>
       <Fields>
+        <Field Name="ownerid">
+          <DataField>ownerid</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="owneridValue">
+          <DataField>owneridValue</DataField>
+          <rd:TypeName>System.Guid</rd:TypeName>
+        </Field>
+        <Field Name="owneridEntityName">
+          <DataField>owneridEntityName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_name">
+          <DataField>leap_name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_hospital">
+          <DataField>leap_hospital</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_hospitalValue">
+          <DataField>leap_hospitalValue</DataField>
+          <rd:TypeName>System.Guid</rd:TypeName>
+        </Field>
+        <Field Name="leap_hospitalEntityName">
+          <DataField>leap_hospitalEntityName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_purchaseordernumber">
+          <DataField>leap_purchaseordernumber</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_surgicalnotes">
+          <DataField>leap_surgicalnotes</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_detailsubtotal">
+          <DataField>leap_detailsubtotal</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_detailsubtotalValue">
+          <DataField>leap_detailsubtotalValue</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="leap_shipto">
+          <DataField>leap_shipto</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_shiptoValue">
+          <DataField>leap_shiptoValue</DataField>
+          <rd:TypeName>System.Guid</rd:TypeName>
+        </Field>
+        <Field Name="leap_shiptoEntityName">
+          <DataField>leap_shiptoEntityName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_requireddate">
+          <DataField>leap_requireddate</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_requireddateValue">
+          <DataField>leap_requireddateValue</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="leap_instrumentcharge">
+          <DataField>leap_instrumentcharge</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_instrumentchargeValue">
+          <DataField>leap_instrumentchargeValue</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="leap_shippingdelivery">
+          <DataField>leap_shippingdelivery</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_shippingdeliveryValue">
+          <DataField>leap_shippingdeliveryValue</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="leap_signature">
+          <DataField>leap_signature</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_signeefullname">
+          <DataField>leap_signeefullname</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_signaturecapturedate">
+          <DataField>leap_signaturecapturedate</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_signaturecapturedateValue">
+          <DataField>leap_signaturecapturedateValue</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="leap_total">
+          <DataField>leap_total</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_totalValue">
+          <DataField>leap_totalValue</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="leap_usageformnumber">
+          <DataField>leap_usageformnumber</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_primarycontact">
+          <DataField>leap_primarycontact</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="leap_shiptoaddress">
+          <DataField>leap_shiptoaddress</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="statuscode">
+          <DataField>statuscode</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="statuscodeValue">
+          <DataField>statuscodeValue</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="leap_newsuppliername">
+          <DataField>leap_newsuppliername</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
         <Field Name="ai_leap_casestarttime">
           <DataField>ai_leap_casestarttime</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -515,28 +562,28 @@
           <DataField>ai_leap_hospital</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="ai_leap_procedure">
-          <DataField>ai_leap_procedure</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
         <Field Name="ai_leap_hospitalValue">
           <DataField>ai_leap_hospitalValue</DataField>
-          <rd:TypeName>System.Guid</rd:TypeName>
-        </Field>
-        <Field Name="ai_leap_procedureValue">
-          <DataField>ai_leap_procedureValue</DataField>
           <rd:TypeName>System.Guid</rd:TypeName>
         </Field>
         <Field Name="ai_leap_hospitalEntityName">
           <DataField>ai_leap_hospitalEntityName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="ai_leap_procedureEntityName">
-          <DataField>ai_leap_procedureEntityName</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
         <Field Name="ai_leap_patientid">
           <DataField>ai_leap_patientid</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ai_leap_procedure">
+          <DataField>ai_leap_procedure</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ai_leap_procedureValue">
+          <DataField>ai_leap_procedureValue</DataField>
+          <rd:TypeName>System.Guid</rd:TypeName>
+        </Field>
+        <Field Name="ai_leap_procedureEntityName">
+          <DataField>ai_leap_procedureEntityName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="ai_leap_signature">
@@ -625,111 +672,6 @@
         </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="DynamicsUsageFormOwningUser">
-      <Query>
-        <DataSourceName>LeapSurgicalDynamicsCRM</DataSourceName>
-        <QueryParameters>
-          <QueryParameter Name="CRM_FilteredUsageForm">
-            <Value>=Parameters!CRM_FilteredUsageForm.Value</Value>
-          </QueryParameter>
-        </QueryParameters>
-        <CommandText>&lt;fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="true"&gt;
-  &lt;entity name="leap_usageform" enableprefiltering="1" prefilterparametername="CRM_FilteredUsageForm"&gt;
-    &lt;order attribute="leap_name" descending="false" /&gt;
-    &lt;link-entity name="systemuser" from="systemuserid" to="owninguser" alias="ak"&gt;
-	  &lt;attribute name="employeeid" /&gt;
-	  &lt;attribute name="leap_agency" /&gt;
-	  &lt;attribute name="fullname" /&gt;
-	&lt;/link-entity&gt;
-  &lt;/entity&gt;
-&lt;/fetch&gt;</CommandText>
-        <Timeout>1</Timeout>
-      </Query>
-      <Fields>
-        <Field Name="ak_employeeid">
-          <DataField>ak_employeeid</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="ak_leap_agency">
-          <DataField>ak_leap_agency</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="ak_leap_agencyValue">
-          <DataField>ak_leap_agencyValue</DataField>
-          <rd:TypeName>System.Guid</rd:TypeName>
-        </Field>
-        <Field Name="ak_leap_agencyEntityName">
-          <DataField>ak_leap_agencyEntityName</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="ak_fullname">
-          <DataField>ak_fullname</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-      </Fields>
-    </DataSet>
-    <DataSet Name="DynamicsUsageFormOwningUserAgency">
-      <Query>
-        <DataSourceName>LeapSurgicalDynamicsCRM</DataSourceName>
-        <QueryParameters>
-          <QueryParameter Name="CRM_FilteredUsageForm">
-            <Value>=Parameters!CRM_FilteredUsageForm.Value</Value>
-          </QueryParameter>
-        </QueryParameters>
-        <CommandText>&lt;fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="true"&gt;
-  &lt;entity name="leap_usageform" enableprefiltering="1" prefilterparametername="CRM_FilteredUsageForm"&gt;
-    &lt;order attribute="leap_name" descending="false" /&gt;
-    &lt;link-entity name="systemuser" from="systemuserid" to="owninguser"&gt;
-      &lt;link-entity name="account" from="accountid" to="leap_agency" alias="az"&gt;
-	    &lt;attribute name="name" /&gt;
-		&lt;attribute name="address1_city" /&gt;
-		&lt;attribute name="address1_line1" /&gt;
-		&lt;attribute name="address1_line2" /&gt;
-		&lt;attribute name="address1_line3" /&gt;
-		&lt;attribute name="address1_postalcode" /&gt;
-		&lt;attribute name="address1_stateorprovince" /&gt;
-		&lt;attribute name="telephone1" /&gt;
-	  &lt;/link-entity&gt;
-	&lt;/link-entity&gt;
-  &lt;/entity&gt;
-&lt;/fetch&gt;</CommandText>
-        <Timeout>1</Timeout>
-      </Query>
-      <Fields>
-        <Field Name="az_name">
-          <DataField>az_name</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="az_address1_city">
-          <DataField>az_address1_city</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="az_address1_line1">
-          <DataField>az_address1_line1</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="az_address1_line2">
-          <DataField>az_address1_line2</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="az_address1_line3">
-          <DataField>az_address1_line3</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="az_address1_postalcode">
-          <DataField>az_address1_postalcode</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="az_address1_stateorprovince">
-          <DataField>az_address1_stateorprovince</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="az_telephone1">
-          <DataField>az_telephone1</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-      </Fields>
-    </DataSet>
   </DataSets>
   <ReportSections>
     <ReportSection>
@@ -800,373 +742,6 @@
               <PaddingBottom>2pt</PaddingBottom>
             </Style>
           </Textbox>
-          <Tablix Name="Tablix6">
-            <TablixBody>
-              <TablixColumns>
-                <TablixColumn>
-                  <Width>2.41763in</Width>
-                </TablixColumn>
-                <TablixColumn>
-                  <Width>2.39669in</Width>
-                </TablixColumn>
-              </TablixColumns>
-              <TablixRows>
-                <TablixRow>
-                  <Height>0.34973in</Height>
-                  <TablixCells>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="Textbox38">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>Account Name</Value>
-                                  <Style>
-                                    <FontFamily>Arial</FontFamily>
-                                    <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>=Fields!aj_name.Value</Value>
-                                  <Style>
-                                    <FontSize>9pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>Textbox38</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Style>Solid</Style>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="ah_leap_npi">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>Hospital Account ID#</Value>
-                                  <Style>
-                                    <FontFamily>Arial</FontFamily>
-                                    <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>=Fields!aj_leap_npi.Value</Value>
-                                  <Style>
-                                    <FontFamily>Arial</FontFamily>
-                                    <FontSize>9pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>ah_leap_npi</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Style>Solid</Style>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                  </TablixCells>
-                </TablixRow>
-                <TablixRow>
-                  <Height>0.35995in</Height>
-                  <TablixCells>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="Textbox177">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>Billing Address</Value>
-                                  <Style>
-                                    <FontFamily>Arial</FontFamily>
-                                    <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>=Fields!aj_address1_line1.Value + " " + Fields!aj_address1_line2.Value + " " + Fields!aj_address1_line3.Value + " " + Fields!aj_address1_city.Value + " " + Fields!aj_address1_stateorprovince.Value + " " + Fields!aj_address1_postalcode.Value</Value>
-                                  <Style>
-                                    <FontFamily>Arial</FontFamily>
-                                    <FontSize>9pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>Textbox177</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Style>Solid</Style>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="Textbox178">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>Shipping Address</Value>
-                                  <Style>
-                                    <FontFamily>Arial</FontFamily>
-                                    <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>=Fields!aj_address2_line1.Value + " " + Fields!aj_address2_line2.Value + " " + Fields!aj_address2_line3.Value + " " + Fields!aj_address2_city.Value + " " + Fields!aj_address2_stateorprovince.Value + " " + Fields!aj_address2_postalcode.Value</Value>
-                                  <Style>
-                                    <FontFamily>Arial</FontFamily>
-                                    <FontSize>9pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>Textbox178</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Style>Solid</Style>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                  </TablixCells>
-                </TablixRow>
-              </TablixRows>
-            </TablixBody>
-            <TablixColumnHierarchy>
-              <TablixMembers>
-                <TablixMember />
-                <TablixMember />
-              </TablixMembers>
-            </TablixColumnHierarchy>
-            <TablixRowHierarchy>
-              <TablixMembers>
-                <TablixMember>
-                  <Group Name="Details4" />
-                </TablixMember>
-                <TablixMember>
-                  <KeepWithGroup>Before</KeepWithGroup>
-                </TablixMember>
-              </TablixMembers>
-            </TablixRowHierarchy>
-            <DataSetName>DynamicsUsageFormCase</DataSetName>
-            <Top>1.34965in</Top>
-            <Left>5.20042in</Left>
-            <Height>0.70968in</Height>
-            <Width>4.81432in</Width>
-            <ZIndex>2</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-            </Style>
-          </Tablix>
-          <Tablix Name="Tablix10">
-            <TablixBody>
-              <TablixColumns>
-                <TablixColumn>
-                  <Width>2.41763in</Width>
-                </TablixColumn>
-                <TablixColumn>
-                  <Width>2.39669in</Width>
-                </TablixColumn>
-              </TablixColumns>
-              <TablixRows>
-                <TablixRow>
-                  <Height>0.3664in</Height>
-                  <TablixCells>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="Textbox56">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>Purchase Order #</Value>
-                                  <Style>
-                                    <FontFamily>Arial</FontFamily>
-                                    <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>=Fields!leap_purchaseordernumber.Value</Value>
-                                  <Style>
-                                    <FontSize>9pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>Textbox52</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Style>Solid</Style>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="leap_name1">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>Leap Surgical Order #</Value>
-                                  <Style>
-                                    <FontFamily>Arial</FontFamily>
-                                    <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>=Fields!leap_usageformnumber.Value</Value>
-                                  <Style>
-                                    <FontSize>9pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>leap_name1</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Style>Solid</Style>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                  </TablixCells>
-                </TablixRow>
-              </TablixRows>
-            </TablixBody>
-            <TablixColumnHierarchy>
-              <TablixMembers>
-                <TablixMember />
-                <TablixMember />
-              </TablixMembers>
-            </TablixColumnHierarchy>
-            <TablixRowHierarchy>
-              <TablixMembers>
-                <TablixMember>
-                  <Group Name="Details8" />
-                </TablixMember>
-              </TablixMembers>
-            </TablixRowHierarchy>
-            <DataSetName>DynamicsUsageForm</DataSetName>
-            <Top>2.05932in</Top>
-            <Left>5.20042in</Left>
-            <Height>0.3664in</Height>
-            <Width>4.81432in</Width>
-            <ZIndex>3</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-            </Style>
-          </Tablix>
           <Textbox Name="Textbox5">
             <CanGrow>true</CanGrow>
             <KeepTogether>true</KeepTogether>
@@ -1189,7 +764,7 @@
             <Left>0.0623in</Left>
             <Height>0.20486in</Height>
             <Width>1.61458in</Width>
-            <ZIndex>4</ZIndex>
+            <ZIndex>2</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -1419,12 +994,12 @@
                 </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
-            <DataSetName>DynamicsUsageFormCase</DataSetName>
+            <DataSetName>UsageFormCaseHospital</DataSetName>
             <Top>2.6972in</Top>
             <Left>0.0623in</Left>
             <Height>0.70768in</Height>
             <Width>4.8591in</Width>
-            <ZIndex>5</ZIndex>
+            <ZIndex>3</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -1453,7 +1028,7 @@
             <Left>5.20042in</Left>
             <Height>0.20833in</Height>
             <Width>1.61458in</Width>
-            <ZIndex>6</ZIndex>
+            <ZIndex>4</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -1523,12 +1098,12 @@
                 </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
-            <DataSetName>DynamicsUsageForm</DataSetName>
+            <DataSetName>UsageFormCaseHospital</DataSetName>
             <Top>2.70067in</Top>
             <Left>5.20042in</Left>
             <Height>0.70421in</Height>
             <Width>4.81431in</Width>
-            <ZIndex>7</ZIndex>
+            <ZIndex>5</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -2317,7 +1892,7 @@
             <Left>0.0623in</Left>
             <Height>0.43458in</Height>
             <Width>9.95243in</Width>
-            <ZIndex>8</ZIndex>
+            <ZIndex>6</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -2346,7 +1921,7 @@
             <Left>0.0623in</Left>
             <Height>0.21004in</Height>
             <Width>2.15908in</Width>
-            <ZIndex>9</ZIndex>
+            <ZIndex>7</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -2587,12 +2162,12 @@
                 </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
-            <DataSetName>DynamicsUsageForm</DataSetName>
+            <DataSetName>UsageFormCaseHospital</DataSetName>
             <Top>4.17744in</Top>
             <Left>0.0623in</Left>
             <Height>1.08663in</Height>
             <Width>4.8591in</Width>
-            <ZIndex>10</ZIndex>
+            <ZIndex>8</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -2624,8 +2199,9 @@
                                 <TextRun>
                                   <Value>Subtotal</Value>
                                   <Style>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
-                                    <FontWeight>Normal</FontWeight>
+                                    <FontWeight>Bold</FontWeight>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -2696,12 +2272,12 @@
                 </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
-            <DataSetName>DynamicsUsageForm</DataSetName>
+            <DataSetName>UsageFormCaseHospital</DataSetName>
             <Top>3.92809in</Top>
             <Left>8.32387in</Left>
             <Height>0.22005in</Height>
             <Width>1.69087in</Width>
-            <ZIndex>11</ZIndex>
+            <ZIndex>9</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -2712,10 +2288,10 @@
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>2.64268in</Width>
+                  <Width>2.34847in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.17164in</Width>
+                  <Width>2.46585in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -2956,12 +2532,12 @@
                 </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
-            <DataSetName>DynamicsUsageForm</DataSetName>
+            <DataSetName>UsageFormCaseHospital</DataSetName>
             <Top>4.21759in</Top>
             <Left>5.20042in</Left>
             <Height>1.04648in</Height>
             <Width>4.81432in</Width>
-            <ZIndex>12</ZIndex>
+            <ZIndex>10</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -2973,7 +2549,7 @@
             <Left>0.0623in</Left>
             <Height>0in</Height>
             <Width>9.95243in</Width>
-            <ZIndex>13</ZIndex>
+            <ZIndex>11</ZIndex>
             <Style>
               <Border>
                 <Style>Solid</Style>
@@ -3005,7 +2581,7 @@
             <Left>0.42347in</Left>
             <Height>0.2066in</Height>
             <Width>1.35521in</Width>
-            <ZIndex>14</ZIndex>
+            <ZIndex>12</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -3040,7 +2616,7 @@
             <Left>5.10187in</Left>
             <Height>0.2066in</Height>
             <Width>0.90625in</Width>
-            <ZIndex>15</ZIndex>
+            <ZIndex>13</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -3076,7 +2652,7 @@
             <Left>8.82823in</Left>
             <Height>0.2066in</Height>
             <Width>0.39583in</Width>
-            <ZIndex>16</ZIndex>
+            <ZIndex>14</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -3094,7 +2670,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>=First(Fields!ai_leap_hospital.Value, "DynamicsUsageFormCase") + " - " + First(Fields!ai_leap_surgeon.Value, "DynamicsUsageFormCase") + " - " + First(Fields!ai_leap_procedure.Value, "DynamicsUsageFormCase")</Value>
+                    <Value>=First(Fields!ai_leap_hospital.Value, "UsageFormCaseHospital") + " - " + First(Fields!ai_leap_surgeon.Value, "UsageFormCaseHospital") + " - " + First(Fields!ai_leap_procedure.Value, "UsageFormCaseHospital")</Value>
                     <Style>
                       <FontSize>9pt</FontSize>
                       <FontWeight>Bold</FontWeight>
@@ -3111,7 +2687,7 @@
             <Left>2.06423in</Left>
             <Height>0.24478in</Height>
             <Width>6.46562in</Width>
-            <ZIndex>17</ZIndex>
+            <ZIndex>15</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -3129,7 +2705,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>=First(Fields!ai_leap_signeefullname.Value, "DynamicsUsageFormCase")</Value>
+                    <Value>=First(Fields!ai_leap_signeefullname.Value, "UsageFormCaseHospital")</Value>
                     <Style>
                       <FontSize>9pt</FontSize>
                       <FontWeight>Bold</FontWeight>
@@ -3146,9 +2722,9 @@
             <Left>3.357in</Left>
             <Height>0.22523in</Height>
             <Width>4.42379in</Width>
-            <ZIndex>18</ZIndex>
+            <ZIndex>16</ZIndex>
             <Visibility>
-              <Hidden>=IIF(Len(First(Fields!leap_signature.Value, "DynamicsUsageForm")) &lt;= 0, False, True)</Hidden>
+              <Hidden>=IIF(Len(First(Fields!leap_signature.Value, "UsageFormCaseHospital")) &lt;= 0, False, True)</Hidden>
             </Visibility>
             <Style>
               <Border>
@@ -3162,16 +2738,16 @@
           </Textbox>
           <Image Name="CaseSignature">
             <Source>Database</Source>
-            <Value>=Replace(First(Fields!ai_leap_signature.Value, "DynamicsUsageFormCase"),"data:image/png;base64,","")</Value>
+            <Value>=Replace(First(Fields!ai_leap_signature.Value, "UsageFormCaseHospital"),"data:image/png;base64,","")</Value>
             <MIMEType>image/png</MIMEType>
             <Sizing>Fit</Sizing>
             <Top>5.22629in</Top>
             <Left>0.26864in</Left>
             <Height>1.10254in</Height>
             <Width>1.80052in</Width>
-            <ZIndex>19</ZIndex>
+            <ZIndex>17</ZIndex>
             <Visibility>
-              <Hidden>=IIF(Len(First(Fields!leap_signature.Value, "DynamicsUsageForm")) &lt;= 0, False, True)</Hidden>
+              <Hidden>=IIF(Len(First(Fields!leap_signature.Value, "UsageFormCaseHospital")) &lt;= 0, False, True)</Hidden>
             </Visibility>
             <ToolTip>Case Signature</ToolTip>
             <Style>
@@ -3187,7 +2763,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>=First(Fields!ai_leap_signaturecapturedate.Value, "DynamicsUsageFormCase")</Value>
+                    <Value>=First(Fields!ai_leap_signaturecapturedate.Value, "UsageFormCaseHospital")</Value>
                     <Style>
                       <FontSize>9pt</FontSize>
                       <FontWeight>Bold</FontWeight>
@@ -3203,9 +2779,9 @@
             <Left>8.03888in</Left>
             <Height>0.23506in</Height>
             <Width>1.97585in</Width>
-            <ZIndex>20</ZIndex>
+            <ZIndex>18</ZIndex>
             <Visibility>
-              <Hidden>=IIF(Len(First(Fields!leap_signature.Value, "DynamicsUsageForm")) &lt;= 0, False, True)</Hidden>
+              <Hidden>=IIF(Len(First(Fields!leap_signature.Value, "UsageFormCaseHospital")) &lt;= 0, False, True)</Hidden>
             </Visibility>
             <Style>
               <Border>
@@ -3219,16 +2795,16 @@
           </Textbox>
           <Image Name="SupplierLogo">
             <Source>Database</Source>
-            <Value>=First(Fields!aa_leap_companylogo.Value, "DynamicsUsageFormSupplier")</Value>
+            <Value>=First(Fields!aa_leap_companylogo.Value, "SupplierSalesRepSalesRepAgency")</Value>
             <MIMEType>image/png</MIMEType>
             <Sizing>FitProportional</Sizing>
             <Top>0.01035in</Top>
             <Left>0.04146in</Left>
             <Height>1.08334in</Height>
             <Width>1.73722in</Width>
-            <ZIndex>21</ZIndex>
+            <ZIndex>19</ZIndex>
             <Visibility>
-              <Hidden>=IIF((Len(First(Fields!leap_newsuppliername.Value, "DynamicsUsageForm")) &gt; 0) OR (Len(First(Fields!aa_leap_companylogo.Value, "DynamicsUsageFormSupplier")) &lt;= 0), True, False)</Hidden>
+              <Hidden>=IIF((Len(First(Fields!leap_newsuppliername.Value, "UsageFormCaseHospital")) &gt; 0) OR (Len(First(Fields!aa_leap_companylogo.Value, "SupplierSalesRepSalesRepAgency")) &lt;= 0), True, False)</Hidden>
             </Visibility>
             <ToolTip>Supplier Logo</ToolTip>
             <Style>
@@ -3239,16 +2815,16 @@
           </Image>
           <Image Name="UsageFormSignature">
             <Source>Database</Source>
-            <Value>=Replace(First(Fields!leap_signature.Value, "DynamicsUsageForm"), "data:image/png;base64,", "")</Value>
+            <Value>=Replace(First(Fields!leap_signature.Value, "UsageFormCaseHospital"), "data:image/png;base64,", "")</Value>
             <MIMEType>image/png</MIMEType>
             <Sizing>Fit</Sizing>
             <Top>5.22629in</Top>
             <Left>0.26864in</Left>
             <Height>1.10254in</Height>
             <Width>1.80052in</Width>
-            <ZIndex>22</ZIndex>
+            <ZIndex>20</ZIndex>
             <Visibility>
-              <Hidden>=IIF(Len(First(Fields!leap_signature.Value, "DynamicsUsageForm")) &lt;= 0, True, False)</Hidden>
+              <Hidden>=IIF(Len(First(Fields!leap_signature.Value, "UsageFormCaseHospital")) &lt;= 0, True, False)</Hidden>
             </Visibility>
             <ToolTip>Usage Form Signature</ToolTip>
             <Style>
@@ -3264,7 +2840,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>=First(Fields!leap_signeefullname.Value, "DynamicsUsageForm")</Value>
+                    <Value>=First(Fields!leap_signeefullname.Value, "UsageFormCaseHospital")</Value>
                     <Style>
                       <FontSize>9pt</FontSize>
                       <FontWeight>Bold</FontWeight>
@@ -3280,9 +2856,9 @@
             <Left>3.357in</Left>
             <Height>0.23506in</Height>
             <Width>4.42379in</Width>
-            <ZIndex>23</ZIndex>
+            <ZIndex>21</ZIndex>
             <Visibility>
-              <Hidden>=IIF(Len(First(Fields!leap_signature.Value, "DynamicsUsageForm")) &lt;= 0, True, False)</Hidden>
+              <Hidden>=IIF(Len(First(Fields!leap_signature.Value, "UsageFormCaseHospital")) &lt;= 0, True, False)</Hidden>
             </Visibility>
             <Style>
               <Border>
@@ -3301,7 +2877,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>=First(Fields!leap_signaturecapturedate.Value, "DynamicsUsageForm")</Value>
+                    <Value>=First(Fields!leap_signaturecapturedate.Value, "UsageFormCaseHospital")</Value>
                     <Style>
                       <FontSize>9pt</FontSize>
                       <FontWeight>Bold</FontWeight>
@@ -3317,9 +2893,9 @@
             <Left>8.03887in</Left>
             <Height>0.22523in</Height>
             <Width>1.97586in</Width>
-            <ZIndex>24</ZIndex>
+            <ZIndex>22</ZIndex>
             <Visibility>
-              <Hidden>=IIF(Len(First(Fields!leap_signature.Value, "DynamicsUsageForm")) &lt;= 0, True, False)</Hidden>
+              <Hidden>=IIF(Len(First(Fields!leap_signature.Value, "UsageFormCaseHospital")) &lt;= 0, True, False)</Hidden>
             </Visibility>
             <Style>
               <Border>
@@ -3331,137 +2907,6 @@
               <PaddingBottom>2pt</PaddingBottom>
             </Style>
           </Textbox>
-          <Tablix Name="Tablix23">
-            <TablixBody>
-              <TablixColumns>
-                <TablixColumn>
-                  <Width>2.43601in</Width>
-                </TablixColumn>
-                <TablixColumn>
-                  <Width>2.42309in</Width>
-                </TablixColumn>
-              </TablixColumns>
-              <TablixRows>
-                <TablixRow>
-                  <Height>0.34973in</Height>
-                  <TablixCells>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="Textbox15">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>Name</Value>
-                                  <Style>
-                                    <FontFamily>Arial</FontFamily>
-                                    <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>=Fields!ak_fullname.Value</Value>
-                                  <Style>
-                                    <FontSize>9pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>Textbox15</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Style>Solid</Style>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="Textbox16">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>Rep ID#</Value>
-                                  <Style>
-                                    <FontFamily>arial</FontFamily>
-                                    <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>=Fields!ak_employeeid.Value</Value>
-                                  <Style>
-                                    <FontSize>9pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>Textbox16</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Style>Solid</Style>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                  </TablixCells>
-                </TablixRow>
-              </TablixRows>
-            </TablixBody>
-            <TablixColumnHierarchy>
-              <TablixMembers>
-                <TablixMember />
-                <TablixMember />
-              </TablixMembers>
-            </TablixColumnHierarchy>
-            <TablixRowHierarchy>
-              <TablixMembers>
-                <TablixMember />
-              </TablixMembers>
-            </TablixRowHierarchy>
-            <DataSetName>DynamicsUsageFormOwningUser</DataSetName>
-            <Top>1.34965in</Top>
-            <Left>0.0623in</Left>
-            <Height>0.34973in</Height>
-            <Width>4.8591in</Width>
-            <ZIndex>25</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-            </Style>
-          </Tablix>
           <Textbox Name="aa_name">
             <CanGrow>true</CanGrow>
             <KeepTogether>true</KeepTogether>
@@ -3469,7 +2914,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>=IIF(Len(First(Fields!leap_newsuppliername.Value, "DynamicsUsageForm")) &gt; 0, First(Fields!leap_newsuppliername.Value, "DynamicsUsageForm"), First(Fields!aa_name.Value, "DynamicsUsageFormSupplier"))</Value>
+                    <Value>=IIF(Len(First(Fields!leap_newsuppliername.Value, "UsageFormCaseHospital")) &gt; 0, First(Fields!leap_newsuppliername.Value, "UsageFormCaseHospital"), First(Fields!aa_name.Value, "SupplierSalesRepSalesRepAgency"))</Value>
                     <Style>
                       <FontSize>20pt</FontSize>
                     </Style>
@@ -3485,9 +2930,9 @@
             <Left>0.04146in</Left>
             <Height>0.48959in</Height>
             <Width>3.00717in</Width>
-            <ZIndex>26</ZIndex>
+            <ZIndex>23</ZIndex>
             <Visibility>
-              <Hidden>=IIF((Len(First(Fields!leap_newsuppliername.Value, "DynamicsUsageForm")) &gt; 0) OR (Len(First(Fields!aa_leap_companylogo.Value, "DynamicsUsageFormSupplier")) &lt;= 0), False, True)</Hidden>
+              <Hidden>=IIF((Len(First(Fields!leap_newsuppliername.Value, "UsageFormCaseHospital")) &gt; 0) OR (Len(First(Fields!aa_leap_companylogo.Value, "SupplierSalesRepSalesRepAgency")) &lt;= 0), False, True)</Hidden>
             </Visibility>
             <Style>
               <Border>
@@ -3518,7 +2963,7 @@
                     <Style />
                   </TextRun>
                   <TextRun>
-                    <Value>=First(Fields!statuscode.Value, "DynamicsUsageForm")</Value>
+                    <Value>=First(Fields!statuscode.Value, "UsageFormCaseHospital")</Value>
                     <Style>
                       <FontWeight>Bold</FontWeight>
                     </Style>
@@ -3534,7 +2979,7 @@
             <Left>3.4601in</Left>
             <Height>0.25in</Height>
             <Width>3.66348in</Width>
-            <ZIndex>27</ZIndex>
+            <ZIndex>24</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -3546,20 +2991,116 @@
               <PaddingBottom>2pt</PaddingBottom>
             </Style>
           </Textbox>
-          <Tablix Name="Tablix24">
+          <Tablix Name="Tablix1">
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>2.43601in</Width>
+                  <Width>2.4431in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.44666in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
                 <TablixRow>
-                  <Height>0.35625in</Height>
+                  <Height>0.35417in</Height>
                   <TablixCells>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox193">
+                        <Textbox Name="Textbox9">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Name</Value>
+                                  <Style>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ak_fullname.Value</Value>
+                                  <Style>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox9</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox11">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Rep ID#</Value>
+                                  <Style>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ak_employeeid.Value</Value>
+                                  <Style>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox11</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.35352in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox18">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -3589,7 +3130,51 @@
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox187</rd:DefaultName>
+                          <rd:DefaultName>Textbox18</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox19">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Fax PO To</Value>
+                                  <Style>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!aa_leap_pofax.Value</Value>
+                                  <Style>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox19</rd:DefaultName>
                           <Style>
                             <Border>
                               <Style>Solid</Style>
@@ -3605,11 +3190,11 @@
                   </TablixCells>
                 </TablixRow>
                 <TablixRow>
-                  <Height>0.3664in</Height>
+                  <Height>0.35903in</Height>
                   <TablixCells>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox198">
+                        <Textbox Name="Textbox20">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -3639,7 +3224,7 @@
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox191</rd:DefaultName>
+                          <rd:DefaultName>Textbox20</rd:DefaultName>
                           <Style>
                             <Border>
                               <Style>Solid</Style>
@@ -3652,97 +3237,9 @@
                         </Textbox>
                       </CellContents>
                     </TablixCell>
-                  </TablixCells>
-                </TablixRow>
-              </TablixRows>
-            </TablixBody>
-            <TablixColumnHierarchy>
-              <TablixMembers>
-                <TablixMember />
-              </TablixMembers>
-            </TablixColumnHierarchy>
-            <TablixRowHierarchy>
-              <TablixMembers>
-                <TablixMember />
-                <TablixMember />
-              </TablixMembers>
-            </TablixRowHierarchy>
-            <DataSetName>DynamicsUsageFormOwningUserAgency</DataSetName>
-            <Top>1.70308in</Top>
-            <Left>0.06249in</Left>
-            <Height>0.72265in</Height>
-            <Width>2.43601in</Width>
-            <ZIndex>28</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-            </Style>
-          </Tablix>
-          <Tablix Name="Tablix26">
-            <TablixBody>
-              <TablixColumns>
-                <TablixColumn>
-                  <Width>2.42309in</Width>
-                </TablixColumn>
-              </TablixColumns>
-              <TablixRows>
-                <TablixRow>
-                  <Height>0.35995in</Height>
-                  <TablixCells>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox239">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>Fax PO To</Value>
-                                  <Style>
-                                    <FontFamily>Arial</FontFamily>
-                                    <FontSize>8pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>=Fields!aa_leap_pofax.Value</Value>
-                                  <Style>
-                                    <FontSize>9pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>Textbox238</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Style>Solid</Style>
-                            </Border>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                  </TablixCells>
-                </TablixRow>
-                <TablixRow>
-                  <Height>0.3664in</Height>
-                  <TablixCells>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="Textbox241">
+                        <Textbox Name="Textbox21">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -3751,7 +3248,6 @@
                                 <TextRun>
                                   <Value>Email PO To</Value>
                                   <Style>
-                                    <FontFamily>Arial</FontFamily>
                                     <FontSize>8pt</FontSize>
                                     <FontWeight>Bold</FontWeight>
                                   </Style>
@@ -3772,7 +3268,7 @@
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox240</rd:DefaultName>
+                          <rd:DefaultName>Textbox21</rd:DefaultName>
                           <Style>
                             <Border>
                               <Style>Solid</Style>
@@ -3792,20 +3288,339 @@
             <TablixColumnHierarchy>
               <TablixMembers>
                 <TablixMember />
+                <TablixMember />
               </TablixMembers>
             </TablixColumnHierarchy>
             <TablixRowHierarchy>
               <TablixMembers>
                 <TablixMember />
                 <TablixMember />
+                <TablixMember />
               </TablixMembers>
             </TablixRowHierarchy>
-            <DataSetName>DynamicsUsageFormSupplier</DataSetName>
-            <Top>1.69938in</Top>
-            <Left>2.4985in</Left>
-            <Height>0.72635in</Height>
-            <Width>2.42309in</Width>
-            <ZIndex>29</ZIndex>
+            <DataSetName>SupplierSalesRepSalesRepAgency</DataSetName>
+            <Top>1.37435in</Top>
+            <Left>0.0623in</Left>
+            <Height>1.06672in</Height>
+            <Width>4.88976in</Width>
+            <ZIndex>25</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Tablix>
+          <Tablix Name="Tablix2">
+            <TablixBody>
+              <TablixColumns>
+                <TablixColumn>
+                  <Width>2.349in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.46585in</Width>
+                </TablixColumn>
+              </TablixColumns>
+              <TablixRows>
+                <TablixRow>
+                  <Height>0.35352in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox23">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Account Name</Value>
+                                  <Style>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!aj_name.Value</Value>
+                                  <Style>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox23</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox25">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Hospital Account ID#</Value>
+                                  <Style>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!aj_leap_npi.Value</Value>
+                                  <Style>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox25</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.35417in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox29">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Billing Address</Value>
+                                  <Style>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!aj_address1_line1.Value + " " + Fields!aj_address1_line2.Value + " " + Fields!aj_address1_line3.Value + " " + Fields!aj_address1_city.Value + " " + Fields!aj_address1_stateorprovince.Value + " " + Fields!aj_address1_postalcode.Value</Value>
+                                  <Style>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox29</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox30">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Shipping Address</Value>
+                                  <Style>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!aj_address2_line1.Value + " " + Fields!aj_address2_line2.Value + " " + Fields!aj_address2_line3.Value + " " + Fields!aj_address2_city.Value + " " + Fields!aj_address2_stateorprovince.Value + " " + Fields!aj_address2_postalcode.Value</Value>
+                                  <Style>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox30</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.35903in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox31">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Purchase Order #</Value>
+                                  <Style>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!leap_purchaseordernumber.Value</Value>
+                                  <Style>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox31</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox32">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Leap Surgical Order #</Value>
+                                  <Style>
+                                    <FontSize>8pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!leap_usageformnumber.Value</Value>
+                                  <Style>
+                                    <FontSize>9pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox32</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+              </TablixRows>
+            </TablixBody>
+            <TablixColumnHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+              </TablixMembers>
+            </TablixColumnHierarchy>
+            <TablixRowHierarchy>
+              <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+              </TablixMembers>
+            </TablixRowHierarchy>
+            <DataSetName>UsageFormCaseHospital</DataSetName>
+            <Top>1.36859in</Top>
+            <Left>5.19989in</Left>
+            <Height>1.06672in</Height>
+            <Width>4.81485in</Width>
+            <ZIndex>26</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
