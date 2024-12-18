@@ -206,7 +206,7 @@
 	  &lt;attribute name="employeeid" /&gt;
 	  &lt;attribute name="leap_agency" /&gt;
 	  &lt;attribute name="fullname" /&gt;
-	  &lt;link-entity name="account" from="accountid" to="leap_agency" alias="az"&gt;
+	  &lt;link-entity name="account" from="accountid" to="leap_agency" link-type="outer" alias="az"&gt;
 	    &lt;attribute name="name" /&gt;
 		&lt;attribute name="address1_city" /&gt;
 		&lt;attribute name="address1_line1" /&gt;
@@ -1101,7 +1101,7 @@
                   <Width>1.24732in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>3.7432in</Width>
+                  <Width>3.72636in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>1.20819in</Width>
@@ -1720,9 +1720,9 @@
             </TablixRowHierarchy>
             <DataSetName>DynamicsUsageFormDetail</DataSetName>
             <Top>3.47509in</Top>
-            <Left>0.0623in</Left>
+            <Left>0.0533in</Left>
             <Height>0.44244in</Height>
-            <Width>10.06511in</Width>
+            <Width>10.04827in</Width>
             <ZIndex>6</ZIndex>
             <Style>
               <Border>
@@ -3099,7 +3099,7 @@
           </Border>
         </Style>
       </Body>
-      <Width>12.07167in</Width>
+      <Width>10.5in</Width>
       <Page>
         <PageHeight>8.5in</PageHeight>
         <PageWidth>11in</PageWidth>

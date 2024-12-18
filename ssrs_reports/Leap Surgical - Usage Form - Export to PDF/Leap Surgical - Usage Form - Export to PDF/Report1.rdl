@@ -223,7 +223,7 @@
 	  &lt;attribute name="employeeid" /&gt;
 	  &lt;attribute name="leap_agency" /&gt;
 	  &lt;attribute name="fullname" /&gt;
-	  &lt;link-entity name="account" from="accountid" to="leap_agency" alias="az"&gt;
+	  &lt;link-entity name="account" from="accountid" to="leap_agency" link-type="outer" alias="az"&gt;
 	    &lt;attribute name="name" /&gt;
 		&lt;attribute name="address1_city" /&gt;
 		&lt;attribute name="address1_line1" /&gt;
