@@ -105,20 +105,20 @@ function onLoadMainFormHandler(executionContext) {
     var existingSupplierToggleCtrl = formContext.getControl("leap_existingsupplier");
     var existingSupplierToggle = formContext.getAttribute("leap_existingsupplier");
 
-    if(newProductToggle.getValue() == 0) { // No
+    if(newProductToggle.getValue() == 1) { // YES
+        hideProductField(formContext);
+        showNewProductField(formContext);
+        // existingSupplierToggleCtrl.setVisible(true); // hide toggle for now
+    } else { // NO
         showProductField(formContext);
         hideNewProductField(formContext);
 
         showSupplierField(formContext);
         hideNewSupplierField(formContext);
         existingSupplierToggleCtrl.setVisible(false);
-    } else {
-        hideProductField(formContext);
-        showNewProductField(formContext);
-        // existingSupplierToggleCtrl.setVisible(true); // hide toggle for now
     }
 
-    if (existingSupplierToggle.getValue() == 0) { // No
+    if (existingSupplierToggle.getValue() == 0) { // NO
         hideProductField(formContext);
         showNewProductField(formContext);
 
@@ -126,7 +126,7 @@ function onLoadMainFormHandler(executionContext) {
  
         hideSupplierField(formContext);
         showNewSupplierField(formContext);
-    } else { // Yes
+    } else { // YES
         existingProductCtrl.setDisabled(false);
 
         showSupplierField(formContext);
