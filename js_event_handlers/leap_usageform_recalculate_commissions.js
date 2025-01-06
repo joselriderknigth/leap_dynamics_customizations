@@ -1,12 +1,12 @@
 const PROGRESS_MESSAGES = {
-    DELETE: "Deleting Old Usage Form Details",
-    CREATE: "Creating New Usage Form Details"
+    DELETE: "Deactivating Old Commissions",
+    CREATE: "Creating New Commissions"
 };
 
 const RESULT_MESSAGES = {
     SUCCESS: "Commissions regenerated successfully.",
-    MIXED: "Partial success regenerating commissions. Check logs for details.",
-    FAILURE: "Failed to regenerate commissions. Check logs for details."
+    MIXED: "Partial success regenerating commissions. Check console logs for details.",
+    FAILURE: "Failed to regenerate commissions. Check console logs for details."
 };
 
 class UsageFormInfo {
@@ -18,7 +18,104 @@ class UsageFormInfo {
     }
 }
 
-async function deleteUsageFormDetails(usageFormId) {
+const deactivateData = {
+    "statecode": 1,
+    "statuscode": 2
+}
+
+async function deactivateOldSupplierCommissions(usageFormDetailId) {
+    var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+        <entity name="leap_suppliercommission">
+        <attribute name="leap_suppliercommissionid" />
+        <attribute name="leap_usageformdetail" />
+        <filter type="and">
+            <condition attribute="leap_usageformdetail" operator="eq" value="${usageFormDetailId}"/>
+            <condition attribute="statecode" operator="eq" value="0" />
+        </filter>
+        </entity>
+    </fetch>`;
+    fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
+
+    const successes = [];
+    const errors = [];
+
+    try {
+        const supplierCommissions = await Xrm.WebApi.retrieveMultipleRecords("leap_suppliercommission", fetchXML);
+        if (supplierCommissions == null) {
+            throw new Error("Invalid operation result when attempting to fetch supplier commissions.");
+        } else if(supplierCommissions.entities?.length > 0) {
+            const promises = supplierCommissions.entities.map(async (supplierCommission) => {
+                try {
+                    const result = await Xrm.WebApi.updateRecord("leap_suppliercommission", supplierCommission.leap_suppliercommissionid, deactivateData);
+                    if (result == null) {
+                        throw Error(`Invalid operation result when attempting to deactivate supplier commission with id ${supplierCommission.leap_suppliercommissionid}.`);
+                    } else {
+                        successes.push(supplierCommission.leap_suppliercommissionid);
+                    }
+                } catch(error) {
+                    console.error(`Error updating supplier commission with id ${supplierCommission.leap_suppliercommissionid} to deactivate`);
+                    errors.push(supplierCommission.leap_suppliercommissionid);
+                }
+            });
+
+            await Promise.all(promises); // process deactivation in parallel
+
+            const result = {successes: successes, errors: errors};
+            console.log(result);
+            return result;
+        }
+    } catch {
+        throw new Error(`Error deactivating supplier commissions for usage form detail ${usageFormDetailId}: ${error.message}`);
+    }
+}
+
+async function deactivateOldSalesRepCommissions(usageFormDetailId) {
+    var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+        <entity name="leap_salesrepcommission">
+        <attribute name="leap_salesrepcommissionid" />
+        <attribute name="leap_usageformdetailid" />
+        <filter type="and">
+            <condition attribute="leap_usageformdetailid" operator="eq" value="${usageFormDetailId}"/>
+            <condition attribute="statecode" operator="eq" value="0" />
+        </filter>
+        </entity>
+    </fetch>`;
+    fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
+
+    const successes = [];
+    const errors = [];
+
+    try {
+        const salesRepCommissions = await Xrm.WebApi.retrieveMultipleRecords("leap_salesrepcommission", fetchXML);
+        if (salesRepCommissions == null) {
+            throw new Error("Invalid operation result when attempting to fetch sales rep commissions.");
+        } else if(salesRepCommissions.entities?.length > 0) {
+            const promises = salesRepCommissions.entities.map(async (salesRepCommission) => {
+                try {
+                    const result = await Xrm.WebApi.updateRecord("leap_salesrepcommission", salesRepCommission.leap_salesrepcommissionid, deactivateData);
+                    if (result == null) {
+                        throw Error(`Invalid operation result when attempting to deactivate sales rep commission with id ${salesRepCommission.leap_salesrepcommissionid}.`);
+                    } else {
+                        successes.push(salesRepCommission.leap_salesrepcommissionid);
+                    }
+                } catch(error) {
+                    console.error(`Error updating sales rep commission with id ${salesRepCommission.leap_salesrepcommissionid} to deactivate`);
+                    errors.push(salesRepCommission.leap_salesrepcommissionid);
+                }
+            });
+
+            await Promise.all(promises); // process deactivation in parallel
+
+            const result = {successes: successes, errors: errors};
+            console.log(result);
+            return result;
+        }
+    } catch {
+        throw new Error(`Error deactivating sales rep commissions for usage form detail ${usageFormDetailId}: ${error.message}`);
+    }
+}
+
+async function deactivateUsageFormDetails(usageFormId) {
     var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
         <entity name="leap_usageformdetail">
         <attribute name="leap_usageformdetailid" />
@@ -41,8 +138,17 @@ async function deleteUsageFormDetails(usageFormId) {
             for(const usageFormDetail of usageFormDetails.entities) {
                 const usageFormDetailId = usageFormDetail.leap_usageformdetailid;
                 try {
-                    await Xrm.WebApi.deleteRecord("leap_usageformdetail", usageFormDetailId);
-                    console.log("Deleted usage form detail with id: " + usageFormDetailId);
+                    await deactivateOldSupplierCommissions(usageFormDetailId);
+                    await deactivateOldSalesRepCommissions(usageFormDetailId);
+                    await Xrm.WebApi.updateRecord("leap_usageformdetail", usageFormDetailId, deactivateData)
+                        .then(result => {
+                            if(result == null) {
+                                throw new Error(`Invalid operation result when attempting to deactivate usage form detail with id ${usageFormDetailId}.`);
+                            } else {
+                                console.log("Deactivated usage form detail with id: " + usageFormDetailId);
+                            }
+                        });
+                    
                 } catch(error) {
                     errors.push({ id: usageFormDetailId, error: error.message });
                 }
@@ -50,7 +156,7 @@ async function deleteUsageFormDetails(usageFormId) {
 
             if (errors.length > 0) {
                 console.table(errors);
-                throw new Error("Some usage form details could not be deleted. Check logs for details.");
+                throw new Error("Some usage form details could not be deactivated. Check logs for details.");
             }
         }
     } catch(error) {
@@ -202,7 +308,7 @@ async function recreateUsageFormDetails(selectedControlSelectedItemIds) {
     for(const usageFormId of selectedControlSelectedItemIds) {
         try {
             Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.DELETE);
-            await deleteUsageFormDetails(usageFormId)
+            await deactivateUsageFormDetails(usageFormId)
             const usageFormInfo = await getUsageFormInfo(usageFormId);
             Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.CREATE);
             await createUsageFormDetails(usageFormInfo)
