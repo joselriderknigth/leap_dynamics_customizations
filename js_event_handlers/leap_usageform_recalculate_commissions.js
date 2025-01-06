@@ -196,6 +196,7 @@ function showResultsDialog(resultText) {
 
 /*  recreating usage form details will recalculate commissions */
 async function recreateUsageFormDetails(selectedControlSelectedItemIds) {
+    console.log(`Triggered event handler - Parameter: ${selectedControlSelectedItemIds}`);
     const successes = [];
     const errors = [];
     for(const usageFormId of selectedControlSelectedItemIds) {
