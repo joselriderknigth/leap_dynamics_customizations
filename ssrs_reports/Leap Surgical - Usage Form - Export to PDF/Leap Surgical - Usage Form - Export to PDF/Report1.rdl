@@ -28,7 +28,10 @@
     &lt;attribute name="createdon" /&gt;
     &lt;order attribute="leap_name" descending="false" /&gt;
     &lt;link-entity name="leap_usageformdetail" from="leap_usageform" to="leap_usageformid" link-type="inner" alias="ag"&gt;
-      &lt;attribute name="leap_product" /&gt;
+	  &lt;filter type="and"&gt;
+	    &lt;condition attribute="statecode" operator="eq" value="0"/&gt;
+	  &lt;/filter&gt;
+	  &lt;attribute name="leap_product" /&gt;
       &lt;attribute name="leap_catalognumber" /&gt;
       &lt;attribute name="leap_lotnumber" /&gt;
       &lt;attribute name="leap_serialnumber" /&gt;
@@ -170,6 +173,9 @@
   &lt;entity name="leap_usageform" enableprefiltering="1" prefilterparametername="CRM_FilteredUsageForm"&gt;
     &lt;order attribute="leap_name" descending="false" /&gt;
     &lt;link-entity name="leap_usageformdetail" from="leap_usageform" to="leap_usageformid" link-type="inner" alias="ad"&gt;
+	  &lt;filter type="and"&gt;
+	    &lt;condition attribute="statecode" operator="eq" value="0"/&gt;
+	  &lt;/filter&gt;
       &lt;link-entity name="product" from="productid" to="leap_product" link-type="inner" alias="ae"&gt;
         &lt;attribute name="producttypecode" /&gt;
       &lt;/link-entity&gt;
