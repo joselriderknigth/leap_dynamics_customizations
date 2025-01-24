@@ -166,7 +166,7 @@ async function deactivateUsageFormDetails(usageFormId) {
 }
 
 function getUsageFormInfo(usageFormId) {
-    return Xrm.WebApi.retrieveRecord("leap_usageform", usageFormId, "?$select=leap_newsuppliername&$expand=leap_Supplier($select=accountid),owninguser($select=systemuserid)")
+    return Xrm.WebApi.retrieveRecord("leap_usageform", usageFormId, "?$select=leap_newsuppliername,leap_purchaseordernumber,leap_surgerydate&$expand=leap_Supplier($select=accountid),owninguser($select=systemuserid)")
         .then(result => {
             if (result == null) {
                 throw Error("Invalid operation result when attempting to retrieve usage form information.");
@@ -181,6 +181,7 @@ function processCaseProduct(usageFormInfo, caseProduct, processAsIo) {
     const usageFormDetailData = {
         "leap_UsageForm@odata.bind": `/leap_usageforms(${usageFormInfo.id})`,
         "owninguser@odata.bind": `/systemusers(${usageFormInfo.ownerId})`,
+        "ownerid@odata.bind": `/systemusers(${usageFormInfo.ownerId})`,
         "leap_CaseProduct@odata.bind": `/leap_caseproducts(${caseProduct.leap_caseproductid})`,
         ...(caseProduct._leap_productid_value != null && {"leap_Product@odata.bind": `/products(${caseProduct._leap_productid_value})`}),
         ...(caseProduct._leap_supplier_value != null && {"leap_Supplier@odata.bind": `/accounts(${caseProduct._leap_supplier_value})`}),
@@ -192,12 +193,17 @@ function processCaseProduct(usageFormInfo, caseProduct, processAsIo) {
         "leap_unitpriceoverridereason": caseProduct.leap_unitpriceoverridereason,
         "leap_restock": caseProduct.leap_restock,
         "leap_producttype": caseProduct.leap_producttype,
-        "leap_catalognumber": caseProduct.leap_supplier != null ? caseProduct.leap_catalognumber : caseProduct.leap_newproductid,
+        ...(processAsIo && {"leap_discountpercent": caseProduct.leap_discountpercent}),
+        ...(processAsIo && {"leap_overrideprice": caseProduct.leap_overrideprice}),
+        ...(processAsIo && {"leap_overridepricereason": caseProduct.leap_overridepricereason}),
+        "leap_catalognumber": caseProduct._leap_productid_value != null ? caseProduct.leap_catalognumber : caseProduct.leap_newproductid,
         "leap_lotnumber": caseProduct.leap_lotnumber,
         "leap_serialnumber": caseProduct.leap_serialnumber,
         "leap_expirationdate": caseProduct.leap_expirationdate,
         "leap_unitprice": caseProduct.leap_unitprice,
-        "leap_extendedprice": caseProduct.leap_extendedprice
+        "leap_extendedprice": caseProduct.leap_caseextendedprice, //  caseProduct.leap_extendedprice is deprecated so use this one
+        "leap_casedate": usageFormInfo.leap_surgerydate,
+        "leap_purchaseordernumber": usageFormInfo.leap_purchaseordernumber
     }
 
     return Xrm.WebApi.createRecord("leap_usageformdetail", usageFormDetailData)
@@ -221,7 +227,6 @@ async function createUsageFormDetails(usageFormInfo) {
         var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="true">
             <entity name="leap_caseproduct">
             <attribute name="leap_caseproductid" />
-            <attribute name="leap_caseproductid"/>
             <attribute name="leap_supplier"/>
             <attribute name="leap_productid"/>
             <attribute name="leap_quantity"/>
@@ -232,7 +237,7 @@ async function createUsageFormDetails(usageFormInfo) {
             <attribute name="leap_overrideprice" />
             <attribute name="leap_overridepricereason" />
             <attribute name="leap_unitprice" />
-            <attribute name="leap_extendedprice" />
+            <attribute name="leap_caseextendedprice" />
             <attribute name="leap_producttype" />
             <attribute name="leap_catalognumber" />
             <attribute name="leap_lotnumber" />

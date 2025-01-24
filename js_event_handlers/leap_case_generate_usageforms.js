@@ -56,8 +56,8 @@ function getCaseProducts(caseId) {
         <attribute name="leap_restockaddressprimarycontact" />
         <attribute name="leap_ioquantity" />
         <attribute name="leap_discountpercent" />
-            <attribute name="leap_overrideprice" />
-            <attribute name="leap_overridepricereason" />
+        <attribute name="leap_overrideprice" />
+        <attribute name="leap_overridepricereason" />
         <attribute name="leap_unitprice" />
         <attribute name="leap_caseextendedprice" />
         <attribute name="leap_producttype" />
@@ -90,7 +90,7 @@ function getCaseProducts(caseId) {
 }
 
 function getCaseInfo(caseId) {
-    return Xrm.WebApi.retrieveRecord("leap_case", caseId, "?$select=leap_signature,leap_signaturecapturedate,leap_signeetitle,leap_signeefullname&$expand=leap_Hospital($select=accountid),owninguser($select=systemuserid),leap_Surgeon($select=contactid)")
+    return Xrm.WebApi.retrieveRecord("leap_case", caseId, "?$select=leap_signature,leap_signaturecapturedate,leap_signeetitle,leap_signeefullname,leap_casedate&$expand=leap_Hospital($select=accountid),owninguser($select=systemuserid),leap_Surgeon($select=contactid)")
         .then(result => {
             if (result == null) {
                 throw Error("Invalid operation result when attempting to retrieve case information.");
@@ -123,6 +123,7 @@ function createUsageForm(caseProduct, caseInfo) {
         ...(caseProduct._leap_supplier_value != null && {"leap_Supplier@odata.bind": `/accounts(${caseProduct._leap_supplier_value})`}),
         "leap_Surgeon@odata.bind": `/contacts(${caseInfo.leap_Surgeon.contactid})`,
         "owninguser@odata.bind": `/systemusers(${caseInfo.owninguser.systemuserid})`,
+        "ownerid@odata.bind": `/systemusers(${caseInfo.owninguser.systemuserid})`,
         "leap_newsuppliername": caseProduct.leap_newsuppliername,
         "leap_signature": caseInfo.leap_signature,
         "leap_signaturecapturedate": caseInfo.leap_signaturecapturedate,
@@ -132,7 +133,8 @@ function createUsageForm(caseProduct, caseInfo) {
         ...(restockInfo && {"leap_requireddate": restockInfo.requiredDate}),
         ...(restockInfo && {"leap_primarycontact": restockInfo.primaryContact}),
         "leap_instrumentcharge": 0.00,
-        "leap_shippingdelivery": 0.00
+        "leap_shippingdelivery": 0.00,
+        "leap_surgerydate": caseInfo.leap_casedate
     }
 
     return Xrm.WebApi.createRecord("leap_usageform", usageFormData)
@@ -152,6 +154,7 @@ function createUsageFormDetail(caseProduct, caseInfo, currentUsageForm, processA
     const usageFormDetailData = {
         "leap_UsageForm@odata.bind": `/leap_usageforms(${currentUsageForm})`,
         "owninguser@odata.bind": `/systemusers(${caseInfo.owninguser.systemuserid})`,
+        "ownerid@odata.bind": `/systemusers(${caseInfo.owninguser.systemuserid})`,
         "leap_CaseProduct@odata.bind": `/leap_caseproducts(${caseProduct.leap_caseproductid})`,
         ...(caseProduct._leap_productid_value != null && {"leap_Product@odata.bind": `/products(${caseProduct._leap_productid_value})`}),
         ...(caseProduct._leap_supplier_value != null && {"leap_Supplier@odata.bind": `/accounts(${caseProduct._leap_supplier_value})`}),
@@ -163,12 +166,16 @@ function createUsageFormDetail(caseProduct, caseInfo, currentUsageForm, processA
         "leap_unitpriceoverridereason": caseProduct.leap_unitpriceoverridereason,
         "leap_restock": caseProduct.leap_restock,
         "leap_producttype": caseProduct.leap_producttype,
-        "leap_catalognumber": caseProduct._leap_supplier_value != null ? caseProduct.leap_catalognumber : caseProduct.leap_newproductid,
+        ...(processAsIo && {"leap_discountpercent": caseProduct.leap_discountpercent}),
+        ...(processAsIo && {"leap_overrideprice": caseProduct.leap_overrideprice}),
+        ...(processAsIo && {"leap_overridepricereason": caseProduct.leap_overridepricereason}),
+        "leap_catalognumber": caseProduct._leap_productid_value != null ? caseProduct.leap_catalognumber : caseProduct.leap_newproductid,
         "leap_lotnumber": caseProduct.leap_lotnumber,
         "leap_serialnumber": caseProduct.leap_serialnumber,
         "leap_expirationdate": caseProduct.leap_expirationdate,
         "leap_unitprice": caseProduct.leap_unitprice,
-        "leap_extendedprice": caseProduct.leap_extendedprice
+        "leap_extendedprice": caseProduct.leap_caseextendedprice, //  caseProduct.leap_extendedprice is deprecated so use this one
+        "leap_casedate": caseInfo.leap_casedate
     }
 
     return Xrm.WebApi.createRecord("leap_usageformdetail", usageFormDetailData)
