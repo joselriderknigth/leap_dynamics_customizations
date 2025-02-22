@@ -1,5 +1,5 @@
 const rolesAllowedCaseProductEdit = ['System Administrator'];
-const caseStatusesWhereAllUsersEditAllowed = [1, 293360000];
+const caseStatusesWhereAllUsersEditAllowed = [1, 293360000, 293360007];
 const caseStatusesWhereElevatedUsersEditAllowed = [293360007];
 
 class CaseInfo {
@@ -39,24 +39,30 @@ function userRoleAllowsElevatedEdit(caseInfo) {
 }
 
 function caseStatusAllowsEdit(caseStatus) {
+    console.log("[Event Handler] statuses that allow edit " + caseStatusesWhereAllUsersEditAllowed + " current status: " + caseStatus);
     return caseStatusesWhereAllUsersEditAllowed.includes(caseStatus);
 }
 
 function isQuickCreate(formContext) {
-    return formContext.data?.entity?.getId() == null || formContext.data?.entity?.getId() == undefined;
+    let cpId = formContext.data?.entity?.getId();
+    console.log("[Event Handler] case product id: " + cpId + "and type: " + typeof cpId);
+    return cpId == null || cpId == undefined || cpId == "";
 }
 
 async function isEditAllowed(formContext) {
     if(isQuickCreate(formContext)) {
+        console.log('[Event Handler] triggering from quick create.');
         return true;
     }
 
     var caseId = formContext.getAttribute("leap_caseid")?.getValue()[0]?.id;
     if (caseId == null || caseId == undefined) {
+        console.log('[Event Handler] unable to find case id.');
         return false;
     } else {
         try {
             let caseInfo = await getCaseInfo(caseId);
+            console.log("[Event Handler] Got case info: " + JSON.stringify(caseInfo));
             // TODO: for now we only care about the status but once we add the changes to N52 'amR' we can uncomment this
             // return caseStatusAllowsEdit(caseInfo.status) || userRoleAllowsElevatedEdit(caseInfo);
             return caseStatusAllowsEdit(caseInfo.status);
@@ -171,7 +177,9 @@ function addNewProductToggleHandler(executionContext) {
             if (isAllowed == null) {
                 console.log('[Event Handler] unable to determine if edit is allowed.');
             } else if(isAllowed) {
+                console.log('[Event Handler] edit is allowed.');
                 if(newProductToggle.getValue() == 0) { // No
+                    console.log('[Event Handler] not a new product.');
                     existingProduct.setValue(true);
                     handleProductField(formContext, true);
                     handleNewProductField(formContext, false);
@@ -181,11 +189,14 @@ function addNewProductToggleHandler(executionContext) {
                     handleNewSupplierField(formContext, false);
                     // existingSupplierToggleCtrl.setVisible(false); // Hide toggle for now
                 } else {
+                    console.log('[Event Handler] new product.');
                     existingProduct.setValue(false);
                     handleProductField(formContext, false);
                     handleNewProductField(formContext, true);
                     // existingSupplierToggleCtrl.setVisible(true); // Hide toggle for now
                 }
+            } else {
+                console.log('[Event Handler] edit is not allowed.');
             }
         }).catch(function (error) {
             console.log(`[Event Handler] error trying to determine if edit is allowed. - ${error.message}`);
