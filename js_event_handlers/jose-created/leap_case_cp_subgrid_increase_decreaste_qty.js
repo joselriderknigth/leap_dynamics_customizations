@@ -26,10 +26,7 @@ function processSelectedItems(selectedControlselecteditemsId,bool1) {
                    updateFieldUsingWebApi(id,qty,unitp); 
              }          
                 
-            // Send the Web API request
-                  
-            const subgrid = Xrm.Page.ui.controls.get("subgridname"); //TODO: change name
-            subgrid.refresh();
+            //Xrm.Page.ui.refresh();  
          },
          function error(err) {
            console.error("Error retrieving the record:", err.message);
@@ -51,6 +48,8 @@ function updateFieldUsingWebApi(id, qty,unitp) {
     Xrm.WebApi.updateRecord(entityName, id, data).then(
         function success(result2) {
             console.log(`Record updated successfully. Record ID: ${result2.id}`);
+            const subgrid = Xrm.Page.ui.controls.get("CaseProducts");
+            subgrid .refresh();
         },
         function error(error) {
             console.error("Error updating the record:", error.message);
@@ -69,6 +68,8 @@ function updateFieldUsingWebApiIO(id, qty,unitp,ioqty,unitpoverpric) {
     Xrm.WebApi.updateRecord(entityName, id, data).then(
         function success(result2) {
             console.log(`Record updated successfully. Record ID: ${result2.id}`);
+              const subgrid = Xrm.Page.ui.controls.get("CaseProducts");
+            subgrid .refresh();
         },
         function error(error) {
             console.error("Error updating the record:", error.message);
@@ -85,7 +86,7 @@ function customruleenable1increase(PrimaryControl) {
      var formContext = PrimaryControl;
      var statuscase =  PrimaryControl.getAttribute("statuscode").getValue();
     console.log("statuscode value: ",statuscase);
-     if( statuscase !== 293360001 && statuscase  !== 293360002 && statuscase  !== 293360005 &&  statuscase  !== 293360004)
+     if( statuscase  !== 293360002 && statuscase  !== 293360005 &&  statuscase  !== 293360004)
          return true;
      else{ return false; }
    }catch(error){
@@ -93,5 +94,4 @@ function customruleenable1increase(PrimaryControl) {
    }
 
 }
-
 
