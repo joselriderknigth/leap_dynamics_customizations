@@ -34,13 +34,14 @@ function customruleenable1usgdoc(PrimaryControl) {
 
 
 function processSelectedItemssdoc(selectedControlselecteditemsId,bool1) {
-  //console.log("testdoc128..");
+  //console.log("testdoc1434..");
    //debugger;
     if (!selectedControlselecteditemsId || selectedControlselecteditemsId.length === 0) {
         alert("No items selected.");
         return;
     }
     let customParam = "";
+    let shouldStop = false;
     var jsonArray = [];
      const entityId = Xrm.Page.data.entity.getId().toString(); // Get the current record ID
       const entityName = Xrm.Page.data.entity.getEntityName(); // Get the entity name
@@ -48,16 +49,38 @@ function processSelectedItemssdoc(selectedControlselecteditemsId,bool1) {
         var cleanEntityId = entityId.replace(/[{}]/g, "");
               
     selectedControlselecteditemsId.forEach(async function (id, index, array) {
-
+        if (shouldStop) return;
         var qty=0;
         var unitp = 0.0;
         const entityNamesh = "sharepointdocument"; 
         var finalurl="";
-        //debugger;
         const getxdocsurls = await getxdocsUrl(entityId);
             for(const getxdocurl of getxdocsurls) {
                 if (id == getxdocurl.sharepointdocumentid) finalurl = getxdocurl.absoluteurl;
              }
+                   
+            if ((finalurl === null || finalurl === undefined || finalurl === "") && !shouldStop) {
+               //debugger;
+                alert("UF documents might still be regenerating. Please wait for all documents to finish. In the meantime you can manually refresh the list.");                                      
+                shouldStop = true;
+                if (index === selectedControlselecteditemsId.length - 1) {
+                    Xrm.Page.data.refresh(); 
+                    var tabControl = Xrm.Page.ui.tabs.get("tab_3");
+                    if (tabControl) {
+                        tabControl.setFocus();
+                    }
+                  return;
+                }
+            }
+            
+            if (shouldStop){ 
+                Xrm.Page.data.refresh(); 
+                var tabControl = Xrm.Page.ui.tabs.get("tab_3");
+                if (tabControl) {
+                    tabControl.setFocus();
+                }
+                return;
+             } 
 
              jsonArray.push({ "documentId": id , "absoluteUrl": finalurl });
 
@@ -98,7 +121,7 @@ function processSelectedItemssdoc(selectedControlselecteditemsId,bool1) {
                   });
 
              }
-     });
+     });    
  }
 
 function getCaseInfo(caseId) {
@@ -164,7 +187,6 @@ function getxCacheVars(varxcacheId) {
         if(result == null) {
             throw Error("Invalid operation result when attempting to retrieve case products for case.");
         }
-        console.log(result.entities[0].north52_valuesecured);
         return result.entities;
     }).catch(error => {
         throw Error(`Error retrieving case products for case with id ${varxcacheId}: ${error.message}`);
