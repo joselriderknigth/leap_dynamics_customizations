@@ -1,4 +1,4 @@
-const validStatuses = [1, 293360000, 293360007, ]; // planned, pending, pending close
+const validStatuses = [1, 293360000, 293360007, 293360001]; // planned, pending, pending close, pending po
 const pollingIntervalSeconds = 3;
 let prevFlagValue = null;
 
