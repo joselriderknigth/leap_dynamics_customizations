@@ -86,7 +86,7 @@ function customruleenable1increase(PrimaryControl) {
      var formContext = PrimaryControl;
      var statuscase =  PrimaryControl.getAttribute("statuscode").getValue();
     console.log("statuscode value: ",statuscase);
-     if( statuscase  !== 293360002 && statuscase  !== 293360005 &&  statuscase  !== 293360004)
+     if( /* statuscase !== 293360001 && */ statuscase  !== 293360002 && statuscase  !== 293360005 &&  statuscase  !== 293360004)
          return true;
      else{ return false; }
    }catch(error){
@@ -95,3 +95,10 @@ function customruleenable1increase(PrimaryControl) {
 
 }
 
+function disableFormSelector(){
+   Xrm.Page.ui.formSelector.items.forEach(
+      function(f){
+        f.setVisible(false);
+      }
+    );
+  }

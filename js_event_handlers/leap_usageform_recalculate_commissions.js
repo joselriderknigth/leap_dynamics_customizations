@@ -1,26 +1,74 @@
 const PROGRESS_MESSAGES = {
-    DELETE: "Deactivating Old Commissions",
-    CREATE: "Creating New Commissions"
+    DELETE: "Deactivating Old UFDs",
+    CREATE: "Creating New UFDs"
 };
 
 const RESULT_MESSAGES = {
-    SUCCESS: "Commissions regenerated successfully.",
-    MIXED: "Partial success regenerating commissions. Check console logs for details.",
-    FAILURE: "Failed to regenerate commissions. Check console logs for details."
+    SUCCESS: "UFDs regenerated successfully.",
+    MIXED: "Partial success regenerating UFDs. Check console logs for details.",
+    FAILURE: "Failed to regenerate UFDs. Check console logs for details."
 };
 
 class UsageFormInfo {
-    constructor(id, supplierId, supplierName, ownerId) {
+    constructor(id, supplierId, supplierName, ownerId, poNumber, caseDate) {
         this.id = id;
         this.supplierId = supplierId;
         this.supplierName = supplierName;
         this.ownerId = ownerId;
+        this.poNumber = poNumber;
+        this.caseDate = caseDate;
     }
 }
 
 const deactivateData = {
     "statecode": 1,
     "statuscode": 2
+}
+
+async function deactivateOldSalesAdjustments(usageFormDetailId) {
+    var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+        <entity name="leap_salesadjustment">
+        <attribute name="leap_salesadjustmentid" />
+        <attribute name="leap_usageformdetail" />
+        <filter type="and">
+            <condition attribute="leap_usageformdetail" operator="eq" value="${usageFormDetailId}"/>
+            <condition attribute="statecode" operator="eq" value="0" />
+        </filter>
+        </entity>
+    </fetch>`;
+    fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
+
+    const successes = [];
+    const errors = [];
+
+    try {
+        const salesAdjustments = await Xrm.WebApi.retrieveMultipleRecords("leap_salesadjustment", fetchXML);
+        if (salesAdjustments == null) {
+            throw new Error("Invalid operation result when attempting to fetch sales adjustments.");
+        } else if(salesAdjustments.entities?.length > 0) {
+            const promises = salesAdjustments.entities.map(async (salesAdjustment) => {
+                try {
+                    const result = await Xrm.WebApi.updateRecord("leap_salesadjustment", salesAdjustment.leap_salesadjustmentid, deactivateData);
+                    if (result == null) {
+                        throw Error(`Invalid operation result when attempting to deactivate sales adjustment with id ${salesAdjustment.leap_salesadjustmentid}.`);
+                    } else {
+                        successes.push(salesAdjustment.leap_salesadjustmentid);
+                    }
+                } catch(error) {
+                    console.error(`Error updating sales adjustment with id ${salesAdjustment.leap_salesadjustmentid} to deactivate`);
+                    errors.push(salesAdjustment.leap_salesadjustmentid);
+                }
+            });
+
+            await Promise.all(promises); // process deactivation in parallel
+
+            const result = {type: "Sales Adjustments", successes: successes, errors: errors};
+            console.log(result);
+            return result;
+        }
+    } catch {
+        throw new Error(`Error deactivating sales adjustments for usage form detail ${usageFormDetailId}: ${error.message}`);
+    }
 }
 
 async function deactivateOldSupplierCommissions(usageFormDetailId) {
@@ -60,7 +108,7 @@ async function deactivateOldSupplierCommissions(usageFormDetailId) {
 
             await Promise.all(promises); // process deactivation in parallel
 
-            const result = {successes: successes, errors: errors};
+            const result = {type: "Supplier Commissions", successes: successes, errors: errors};
             console.log(result);
             return result;
         }
@@ -106,7 +154,7 @@ async function deactivateOldSalesRepCommissions(usageFormDetailId) {
 
             await Promise.all(promises); // process deactivation in parallel
 
-            const result = {successes: successes, errors: errors};
+            const result = {type: "Sales Rep Commissions", successes: successes, errors: errors};
             console.log(result);
             return result;
         }
@@ -138,6 +186,7 @@ async function deactivateUsageFormDetails(usageFormId) {
             for(const usageFormDetail of usageFormDetails.entities) {
                 const usageFormDetailId = usageFormDetail.leap_usageformdetailid;
                 try {
+                    await deactivateOldSalesAdjustments(usageFormDetailId);
                     await deactivateOldSupplierCommissions(usageFormDetailId);
                     await deactivateOldSalesRepCommissions(usageFormDetailId);
                     await Xrm.WebApi.updateRecord("leap_usageformdetail", usageFormDetailId, deactivateData)
@@ -171,7 +220,7 @@ function getUsageFormInfo(usageFormId) {
             if (result == null) {
                 throw Error("Invalid operation result when attempting to retrieve usage form information.");
             }
-            return new UsageFormInfo(usageFormId, result.leap_Supplier.accountid, result.leap_newsuppliername, result.owninguser.systemuserid);
+            return new UsageFormInfo(result.leap_usageformid, result.leap_Supplier.accountid, result.leap_newsuppliername, result.owninguser.systemuserid, result.leap_purchaseordernumber, result.leap_surgerydate);
         }).catch(error => {
             throw Error(`Error retrieving usage form with with id ${usageFormId}: ${error.message}`);
         });
@@ -202,8 +251,7 @@ function processCaseProduct(usageFormInfo, caseProduct, processAsIo) {
         "leap_expirationdate": caseProduct.leap_expirationdate,
         "leap_unitprice": caseProduct.leap_unitprice,
         "leap_extendedprice": caseProduct.leap_caseextendedprice, //  caseProduct.leap_extendedprice is deprecated so use this one
-        "leap_casedate": usageFormInfo.leap_surgerydate,
-        "leap_purchaseordernumber": usageFormInfo.leap_purchaseordernumber
+        "leap_casedate": usageFormInfo.caseDate,
     }
 
     return Xrm.WebApi.createRecord("leap_usageformdetail", usageFormDetailData)
@@ -305,9 +353,9 @@ function showResultsDialog(resultText) {
 }
 
 
-/*  recreating usage form details will recalculate commissions */
+/* Shown with list of usage forms */
+/*  recreating usage form details will recalculate adjustments and commissions */
 async function recreateUsageFormDetails(selectedControlSelectedItemIds) {
-    console.log(`Triggered event handler - Parameter: ${selectedControlSelectedItemIds}`);
     const successes = [];
     const errors = [];
     for(const usageFormId of selectedControlSelectedItemIds) {
@@ -333,5 +381,27 @@ async function recreateUsageFormDetails(selectedControlSelectedItemIds) {
         showResultsDialog(RESULT_MESSAGES.FAILURE);
     } else {
         showResultsDialog(RESULT_MESSAGES.MIXED);
+    }
+}
+
+/* Shown on usage form form */
+/*  recreating usage form details will recalculate adjustments and commissions */
+async function recreateUsageFormDetailsSingle(usageFormId) {
+    let success = true;
+    try {
+        Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.DELETE);
+        await deactivateUsageFormDetails(usageFormId)
+        const usageFormInfo = await getUsageFormInfo(usageFormId);
+        Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.CREATE);
+        await createUsageFormDetails(usageFormInfo)
+    } catch(caughtError) {
+        success = false;
+    }
+
+    Xrm.Utility.closeProgressIndicator();
+    if(success) {
+        showResultsDialog(RESULT_MESSAGES.SUCCESS);
+    } else {
+        showResultsDialog(RESULT_MESSAGES.FAILURE);
     }
 }
