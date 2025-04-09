@@ -1,5 +1,6 @@
 const validStatuses = [1, 293360000, 293360007, 293360001]; // planned, pending, pending close, pending po
-const pollingIntervalSeconds = 3;
+const pollingIntervalSeconds = 2;
+const pollingSubIntervalSeconds = 3;
 let prevFlagValue = null;
 let ufDocCount = 0;
 
@@ -65,7 +66,7 @@ function pollFlagToRefreshButton(executionContext) {
 function pollFlagToRefreshSubgird(executionContext) {
     //debugger;
     let formContext = executionContext.getFormContext();
-    const intervalId = setInterval(pollFlagSubG, pollingIntervalSeconds * 1000, formContext);
+    const intervalId = setInterval(pollFlagSubG, pollingSubIntervalSeconds * 1000, formContext);
     console.log(`Created fetch with interval id: ${intervalId}`)
 }
 
@@ -124,13 +125,13 @@ async function pollFlagSubG(formContext) {
                 console.log(`Current flag value: ${currentFlagValue.length}. Previous flag value: ${ufDocCount}`);
                 if((currentFlagValue.length > 0) && (currentFlagValue.length != ufDocCount) ) {
 
-                    var mixedUFView = {
+                    cpSubgrid.refresh();
+                    /*var mixedUFView = {
                         entityType: 9501,
                         id: "0016F9F3-41CC-4276-9D11-04308D15858D",
                         name: "Document Associated Grid"
-                    };
-            
-                    cpViewSelector.setCurrentView(mixedUFView);
+                    };            
+                    cpViewSelector.setCurrentView(mixedUFView);*/
                 }
             } catch(error) {
                 console.error(error.message);

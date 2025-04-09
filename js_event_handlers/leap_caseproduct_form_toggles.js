@@ -1,5 +1,5 @@
 const rolesAllowedCaseProductEdit = ['System Administrator'];
-const caseStatusesWhereAllUsersEditAllowed = [1, 293360000, 293360007];
+const caseStatusesWhereAllUsersEditAllowed = [1, 293360000, 293360007, 293360001];
 const caseStatusesWhereElevatedUsersEditAllowed = [293360007];
 
 class CaseInfo {
@@ -111,18 +111,23 @@ function handleNewProductField(formContext, showField) {
     var newProductIdFieldCtrl = formContext.getControl("leap_newproductid");
     var newProductField = formContext.getAttribute("leap_newproductname");
     var newProductIdField = formContext.getAttribute("leap_newproductid");
+    var unitPriceOverrideReasonCtrl = formContext.getControl("leap_unitpriceoverridereasondrop");
+    var unitPriceOverrideReason = formContext.getAttribute("leap_unitpriceoverridereasondrop");
 
     newProductFieldCtrl.setVisible(showField);
     newProductIdFieldCtrl.setVisible(showField);
+    unitPriceOverrideReasonCtrl.setVisible(showField);
 
     if(showField) {
         newProductField.setRequiredLevel('required');
         newProductIdField.setRequiredLevel('required');
+        unitPriceOverrideReason.setValue(293360000);
     } else {
         newProductField.setValue(null);
         newProductIdField.setValue(null);
         newProductField.setRequiredLevel('none');
         newProductIdField.setRequiredLevel('none');
+        unitPriceOverrideReason.setValue(null);
     }
 }
 
