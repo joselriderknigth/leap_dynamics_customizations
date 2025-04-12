@@ -32,7 +32,9 @@ function fetchCaseFlag(caseId) {
 async function pollFlag(formContext) {
     const status = formContext.getAttribute("statuscode").getValue();
     if(validStatuses.includes(status)) {
-        const caseId = formContext.data?.entity?.getId();
+        const caseId = formContext && formContext.data && formContext.data.entity
+            ? formContext.data.entity.getId()
+            : null;
         if(caseId && caseId != "") {
             try {
                 console.log("Polling flag...");
@@ -53,21 +55,6 @@ async function pollFlag(formContext) {
     } else {
         console.log("Skipping fetch due to status");
     }
-}
-
-function pollFlagToRefreshButton(executionContext) {
-    let formContext = executionContext.getFormContext();
-    const intervalId = setInterval(pollFlag, pollingIntervalSeconds * 1000, formContext);
-    console.log(`Created fetch with interval id: ${intervalId}`)
-    // clearInterval(intervalId);
-}
-
-
-function pollFlagToRefreshSubgird(executionContext) {
-    //debugger;
-    let formContext = executionContext.getFormContext();
-    const intervalId = setInterval(pollFlagSubG, pollingSubIntervalSeconds * 1000, formContext);
-    console.log(`Created fetch with interval id: ${intervalId}`)
 }
 
 function getxdocsUrl(varxcacheId) {
@@ -109,15 +96,12 @@ async function pollFlagSubG(formContext) {
     if (cpSubgrid) {
       ufDocCount = cpSubgrid.getGrid().getRows().getLength();
     }
-    var cpViewSelector;
-    var tabControl = Xrm.Page.ui.tabs.get("tab_3");
-    if (tabControl) {
-        cpViewSelector = cpSubgrid.getViewSelector();
-    }  
      
     const status = formContext.getAttribute("statuscode").getValue();
     if(validStatuses.includes(status)) {
-        const caseId = formContext.data?.entity?.getId();
+        const caseId = formContext && formContext.data && formContext.data.entity
+            ? formContext.data.entity.getId()
+            : null;
         if(caseId && caseId != "") {
             try {
                 console.log("Polling flag...");
@@ -142,4 +126,18 @@ async function pollFlagSubG(formContext) {
     } else {
         console.log("Skipping fetch due to status");
     }
+}
+
+function pollFlagToRefreshButton(executionContext) {
+    let formContext = executionContext.getFormContext();
+    const intervalId = setInterval(pollFlag, pollingIntervalSeconds * 1000, formContext);
+    console.log(`Created fetch with interval id: ${intervalId}`)
+    // clearInterval(intervalId);
+}
+
+function pollFlagToRefreshSubgrid(executionContext) {
+    //debugger;
+    let formContext = executionContext.getFormContext();
+    const intervalId = setInterval(pollFlagSubG, pollingSubIntervalSeconds * 1000, formContext);
+    console.log(`Created fetch with interval id: ${intervalId}`)
 }
