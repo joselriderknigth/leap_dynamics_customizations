@@ -21,8 +21,7 @@ function validateFaxNumber(executionContext) {
 
 
 function customruleenable1usgdoc(PrimaryControl) {
-   //console.log("testdoc126..");
-   //debugger;
+   //console.log("testdoc126..");  
    try{
      var formContext = PrimaryControl;
      var caseid =  PrimaryControl.getAttribute("statuscode").getValue();
@@ -34,7 +33,7 @@ function customruleenable1usgdoc(PrimaryControl) {
 
 
 function processSelectedItemssdoc(selectedControlselecteditemsId,bool1) {
-  //console.log("testdoc1434..");
+  //console.log("testdoc334..");
    //debugger;
     if (!selectedControlselecteditemsId || selectedControlselecteditemsId.length === 0) {
         alert("No items selected.");
@@ -50,16 +49,21 @@ function processSelectedItemssdoc(selectedControlselecteditemsId,bool1) {
               
     selectedControlselecteditemsId.forEach(async function (id, index, array) {
         if (shouldStop) return;
+        let finalurl;
+        let fileName;
         var qty=0;
         var unitp = 0.0;
         const entityNamesh = "sharepointdocument"; 
-        var finalurl="";
+       
         const getxdocsurls = await getxdocsUrl(entityId);
             for(const getxdocurl of getxdocsurls) {
-                if (id == getxdocurl.sharepointdocumentid) finalurl = getxdocurl.absoluteurl;
+                if (id == getxdocurl.sharepointdocumentid) {
+                    finalurl = getxdocurl.absoluteurl;
+                    fileName = getxdocurl.fullname;
+                }
              }
                    
-            if ((finalurl === null || finalurl === undefined || finalurl === "") && !shouldStop) {
+            if ((finalurl === null || finalurl === undefined || finalurl === "" || fileName === null || fileName === undefined || fileName === "") && !shouldStop) {
                //debugger;
                 alert("UF documents might still be regenerating. Please wait for all documents to finish. In the meantime you can manually refresh the list.");                                      
                 shouldStop = true;
@@ -82,7 +86,7 @@ function processSelectedItemssdoc(selectedControlselecteditemsId,bool1) {
                 return;
              } 
 
-             jsonArray.push({ "documentId": id , "absoluteUrl": finalurl });
+             jsonArray.push({ "documentId": id , "absoluteUrl": finalurl, "name": fileName });
 
          if (index === selectedControlselecteditemsId.length - 1) {
                var formId = ""; // Replace with your actual formId
@@ -223,3 +227,9 @@ function getxdocsUrl(varxcacheId) {
         throw Error(`Error retrieving case products for case with id ${varxcacheId}: ${error.message}`);
     });
 }
+
+function onlyemailform(executionContext) {
+   Xrm.Page.ui.headerSection.setCommandBarVisible(false);
+   Xrm.Page.ui.headerSection.setTabNavigatorVisible(false);
+}
+
