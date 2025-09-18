@@ -241,6 +241,7 @@ function processCaseProduct(usageFormInfo, caseProduct, processAsIo) {
         "leap_unitpriceoverride": caseProduct.leap_unitpriceoverride,
         "leap_unitpriceoverridereason": caseProduct.leap_unitpriceoverridereason,
         "leap_restock": caseProduct.leap_restock,
+        "leap_hospitalowned": caseProduct.leap_hospitalowned,        
         "leap_producttype": caseProduct.leap_producttype,
         ...(processAsIo && {"leap_discountpercent": caseProduct.leap_discountpercent}),
         ...(processAsIo && {"leap_overrideprice": caseProduct.leap_overrideprice}),
@@ -280,6 +281,7 @@ async function createUsageFormDetails(usageFormInfo) {
             <attribute name="leap_quantity"/>
             <attribute name="leap_io"/>
             <attribute name="leap_restock"/>
+            <attribute name="leap_hospitalowned"/>            
             <attribute name="leap_ioquantity" />
             <attribute name="leap_discountpercent" />
             <attribute name="leap_overrideprice" />
@@ -366,6 +368,8 @@ async function recreateUsageFormDetails(selectedControlSelectedItemIds) {
             Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.CREATE);
             await createUsageFormDetails(usageFormInfo)
 
+            await resetUFBCPullStatus(usageFormId);
+
             successes.push({usageFormId: usageFormId, result: "Success"});
         } catch(caughtError) {
             errors.push({usageFormId: usageFormId, result: caughtError.message});
@@ -404,4 +408,19 @@ async function recreateUsageFormDetailsSingle(usageFormId) {
     } else {
         showResultsDialog(RESULT_MESSAGES.FAILURE);
     }
+}
+
+
+/* JIRA: LCEI-870 */
+function resetUFBCPullStatus(usageFormId) {
+    return Xrm.WebApi.updateRecord("leap_usageform", usageFormId, {
+        leap_bcpullstatus: 293360000,
+    })
+    .then(result => {
+        console.log(`BCPullStatus reset successfully. Record ID: ${result.id}`);
+        return true;
+    })
+    .catch(error => {
+        throw Error(`Error updating BCPullStatus: ${error.message}`);
+    });
 }
