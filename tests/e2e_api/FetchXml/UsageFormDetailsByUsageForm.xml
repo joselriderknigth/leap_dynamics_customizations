@@ -1,0 +1,26 @@
+<fetch version="1.0" mapping="logical" no-lock="false" distinct="true">
+  <entity name="leap_usageformdetail">
+    <attribute name="leap_name" />
+    <attribute name="statecode" />
+    <order attribute="leap_usageform" descending="false" />
+    <attribute name="leap_usageform" />
+    <attribute name="leap_unitprice" />
+    <attribute name="leap_stickers" />
+    <attribute name="leap_serialnumber" />
+    <attribute name="leap_restock" />
+    <attribute name="leap_qty" />
+    <attribute name="leap_lotnumber" />
+    <attribute name="leap_io" />
+    <attribute name="leap_extendedprice" />
+    <attribute name="leap_expirationdate" />
+    <attribute name="leap_catalognumber" />
+    <attribute name="leap_product" />
+    <attribute name="leap_usageformdetailid" />
+    <attribute name="leap_hospitalowned" />
+    <attribute name="leap_caseproduct" />
+    <filter type="and">
+      <condition attribute="statecode" operator="eq" value="0" />
+      <condition attribute="leap_usageform" operator="eq" value="{USAGE_FORM_ID}" />
+    </filter>
+  </entity>
+</fetch>
