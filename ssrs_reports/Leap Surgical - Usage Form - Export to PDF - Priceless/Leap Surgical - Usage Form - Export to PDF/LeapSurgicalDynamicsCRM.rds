@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RptDataSource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="LeapSurgicalDynamicsCRM">
+  <ConnectionProperties>
+    <Extension>MSCRMFETCH</Extension>
+    <ConnectString>https://leapdistributors.crm.dynamics.com</ConnectString>
+  </ConnectionProperties>
+  <DataSourceID>64050f13-c96a-4b4b-afc8-610b0e1cba40</DataSourceID>
+</RptDataSource>
