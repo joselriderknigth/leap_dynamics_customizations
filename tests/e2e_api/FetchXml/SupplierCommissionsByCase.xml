@@ -1,0 +1,50 @@
+<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+  <entity name="leap_suppliercommission">
+    <attribute name="leap_suppliercommissionid" />
+    <attribute name="leap_name" />
+    <attribute name="createdon" />
+    <attribute name="leap_usageformdetailtotal" />
+    <attribute name="leap_usageformdetail" />
+    <attribute name="leap_totalrebates" />
+    <attribute name="leap_totalgpos" />
+    <attribute name="leap_suppliercontractcommissionrule" />
+    <attribute name="leap_suppliercontract" />
+    <attribute name="leap_supplier" />
+    <attribute name="statuscode" />
+    <attribute name="leap_purchaseordernumber" />
+    <attribute name="leap_pricingtier" />
+    <attribute name="owningbusinessunit" />
+    <attribute name="ownerid" />
+    <attribute name="leap_leappaiddate" />
+    <attribute name="leap_distributorpaiddate" />
+    <attribute name="leap_commissiontype" />
+    <attribute name="leap_commissionratepercent" />
+    <attribute name="leap_commissionpayee" />
+    <attribute name="leap_commissionratemoney" />
+    <attribute name="leap_casesurgeon" />
+    <attribute name="leap_caseprocedure" />
+    <attribute name="leap_casepatientid" />
+    <attribute name="leap_casehospital" />
+    <attribute name="leap_casedatetime" />
+    <order attribute="leap_name" descending="false" />
+    <link-entity
+      name="leap_usageformdetail"
+      from="leap_usageformdetailid"
+      to="leap_usageformdetail"
+      link-type="inner"
+      alias="ac"
+    >
+      <link-entity
+        name="leap_usageform"
+        from="leap_usageformid"
+        to="leap_usageform"
+        link-type="inner"
+        alias="ad"
+      >
+        <filter type="and">
+          <condition attribute="leap_case" operator="eq" value="{CASE_ID}" />
+        </filter>
+      </link-entity>
+    </link-entity>
+  </entity>
+</fetch>

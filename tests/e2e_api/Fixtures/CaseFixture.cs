@@ -14,12 +14,26 @@ namespace E2E.Api.Tests.Fixtures
         private readonly CaseService _cases;
         private readonly List<Guid> _createdIds = new();
 
+        // For cleanup
+        private readonly UsageFormService _usageForms;
+        private readonly UsageFormDetailService _usageFormDetails;
+        private readonly SalesAdjustmentService _salesAdjustments;
+        private readonly SupplierCommissionService _supplierCommissions;
+        private readonly SalesRepCommissionService _repCommissions;
+
         public Guid CaseId { get; private set; }
 
         public CaseFixture(DataverseClient client, FixtureConfig config)
         {
             _config = config;
             _cases = new CaseService(client);
+
+            // For cleanup
+            _usageForms = new UsageFormService(client);
+            _usageFormDetails = new UsageFormDetailService(client);
+            _salesAdjustments = new SalesAdjustmentService(client);
+            _supplierCommissions = new SupplierCommissionService(client);
+            _repCommissions = new SalesRepCommissionService(client);
         }
 
         public async Task<Guid> SetupAsync(Guid hospitalId, Guid physicianId, Guid procedureId)
@@ -62,11 +76,17 @@ namespace E2E.Api.Tests.Fixtures
             while (true)
             {
                 var caseRecord = await _cases.GetAsync(caseId);
-                var isInProgress =
-                    caseRecord.TryGetProperty("leap_regeneratecase", out var prop)
-                    && prop.ValueKind == JsonValueKind.True;
+                var isCompleted =
+                    caseRecord.TryGetProperty("leap_regeneratecase", out var regenCaseFlag)
+                    && regenCaseFlag.ValueKind == JsonValueKind.False;
+                var isProcessed =
+                    caseRecord.TryGetProperty(
+                        "leap_allusageformscomplete",
+                        out var processingCompleteFlag
+                    )
+                    && processingCompleteFlag.ValueKind == JsonValueKind.True;
 
-                if (!isInProgress)
+                if (isCompleted && isProcessed)
                     return;
 
                 if (DateTime.UtcNow - start > timeout)
@@ -81,7 +101,14 @@ namespace E2E.Api.Tests.Fixtures
         public async Task CleanupAsync()
         {
             foreach (var id in _createdIds)
+            {
+                await _salesAdjustments.DeleteByCaseIdAsync(id);
+                await _supplierCommissions.DeleteByCaseIdAsync(id);
+                await _repCommissions.DeleteByCaseIdAsync(id);
+                await _usageFormDetails.DeleteByCaseIdAsync(id);
+                await _usageForms.DeleteByCaseIdAsync(id);
                 await _cases.DeleteAsync(id);
+            }
 
             _createdIds.Clear();
         }

@@ -22,5 +22,23 @@ namespace E2E.Api.Tests.Services
                 .Replace("{SUPPLIER_ID}", supplierId.ToString());
             return await Client.GetMultipleByFetchXmlAsync("leap_usageforms", fetchXml);
         }
+
+        public async Task<List<JsonElement>> GetByCaseAsync(Guid caseId)
+        {
+            var fetchXml = FetchXmlUtils
+                .LoadFetchXml("FetchXml/UsageFormsByCase.xml")
+                .Replace("{CASE_ID}", caseId.ToString());
+            return await Client.GetMultipleByFetchXmlAsync("leap_usageforms", fetchXml);
+        }
+
+        public async Task DeleteByCaseIdAsync(Guid caseId)
+        {
+            var usageForms = await GetByCaseAsync(caseId);
+            foreach (var form in usageForms)
+            {
+                var id = form.GetProperty("leap_usageformid").GetGuid();
+                await DeleteAsync(id);
+            }
+        }
     }
 }

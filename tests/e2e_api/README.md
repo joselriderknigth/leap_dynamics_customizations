@@ -49,11 +49,48 @@ You can build locally to check for errors with
 dotnet build e2e_api/E2E.Api.Tests.csproj
 ```
 
-You can run tests locally with
+You can run tests locally as follows:
+
+From the root directory
 
 ```bash
 dotnet test e2e_api/E2E.Api.Tests.csproj
 ```
+
+From the `e2e_api` directory
+
+```bash
+dotnet test
+```
+
+Run tests from single file
+
+```bash
+dotnet test --filter FullyQualifiedName~MyTestClass
+```
+
+Run a specific test
+
+```bash
+dotnet test --filter FullyQualifiedName~MyTestMethodName
+```
+
+Run tests for a specific environment
+
+MacOS
+
+```bash
+TEST_ENV=uat dotnet test
+```
+
+Windows
+
+```bash
+$env:TEST_ENV="uat"; dotnet test
+
+```
+
+Note that this example would look for a .env.uat file.
 
 ## Extending the Suite
 

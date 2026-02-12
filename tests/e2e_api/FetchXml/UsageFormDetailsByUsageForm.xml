@@ -18,6 +18,8 @@
     <attribute name="leap_usageformdetailid" />
     <attribute name="leap_hospitalowned" />
     <attribute name="leap_caseproduct" />
+    <attribute name="leap_anticipatedsuppliercommission" />
+    <attribute name="leap_anticipatedsalesrepcommission" />
     <filter type="and">
       <condition attribute="statecode" operator="eq" value="0" />
       <condition attribute="leap_usageform" operator="eq" value="{USAGE_FORM_ID}" />

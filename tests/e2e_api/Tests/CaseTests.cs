@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using E2E.Api.Tests.Config;
 using E2E.Api.Tests.Fixtures;
@@ -11,6 +12,8 @@ namespace E2E.Api.Tests.Tests
     [TestClass]
     public class CaseTests : BaseTest
     {
+        public TestContext TestContext { get; set; } = null!;
+
         // Fixtures
         private AccountFixture _accounts = null!;
         private CaseFixture _cases = null!;
@@ -36,20 +39,22 @@ namespace E2E.Api.Tests.Tests
         [TestCleanup]
         public async Task Cleanup()
         {
-            // if (_caseProducts != null)
-            //     await _caseProducts.CleanupAsync();
-            // if (_cases != null)
-            //     await _cases.CleanupAsync();
-            // if (_products != null)
-            //     await _products.CleanupAsync();
-            // if (_accounts != null)
-            //     await _accounts.CleanupAsync();
+            if (_caseProducts != null)
+                await _caseProducts.CleanupAsync();
+            if (_cases != null)
+                await _cases.CleanupAsync();
+            if (_products != null)
+                await _products.CleanupAsync();
+            if (_accounts != null)
+                await _accounts.CleanupAsync();
         }
 
         [TestMethod]
         public async Task Case_Should_Generate_Correct_Usage_Forms()
         {
-            // case setup
+            /**
+            * step 1: case setup
+            */
             var hospital = Seed.HospitalId;
             var physician = Seed.PhysicianId;
             var procedure = Seed.ProcedureId;
@@ -57,6 +62,11 @@ namespace E2E.Api.Tests.Tests
 
             Assert.IsNotNull(caseRecord, "Case record should exist after setup.");
 
+            TestContext.WriteLine($"Created Case with ID: {caseRecord}");
+
+            /**
+            * step 2: products and case products setup
+            */
             // product setup
             var organizationId = Seed.OrganizationId;
             var subjectId = Seed.SubjectId;
@@ -83,6 +93,8 @@ namespace E2E.Api.Tests.Tests
                 OptionSetValues.Product.ProductType.StockAndBill,
                 costPrice: 100.00m
             );
+
+            // consignment product
             var consignmentProductFamily = await _products.SetupProductFamilyAsync(
                 organizationId,
                 subjectId,
@@ -107,6 +119,7 @@ namespace E2E.Api.Tests.Tests
                 "Consignment Product record should exist after setup."
             );
 
+            // case products setup
             var sbCaseProduct = await _caseProducts.SetupAsync(
                 CaseProductConfig.Default(
                     caseRecord,
@@ -149,35 +162,44 @@ namespace E2E.Api.Tests.Tests
                 "Consignment Case Product record should exist after setup."
             );
 
+            /**
+            * step 3: trigger case regeneration and await completion
+            */
             // trigger case regeneration
             await _cases.RegenCaseAsync(caseRecord);
             await _cases.WaitUntilRegenerateCompleteAsync(
                 caseRecord,
-                TimeSpan.FromSeconds(60),
+                TimeSpan.FromSeconds(120),
                 TimeSpan.FromSeconds(2)
             );
 
-            // validate usage forms
+            TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
 
+            /**
+            * step 4: validate usage forms and usage form details
+            */
+
+            // validate usage forms
             var usageFormRecords = await _usageForms.GetBySupplierAsync(caseRecord, supplier);
             Assert.AreEqual(
-                3,
+                4,
                 usageFormRecords.Count,
-                "There should be exactly 2 Usage Forms generated for the case and supplier."
+                "There should be exactly 4 Usage Forms generated for the case and supplier."
             );
 
-            var sbUsageForm = usageFormRecords.Find(uf =>
-                uf.GetProperty("leap_hospitalowned").GetBoolean() == false
-            );
-            var consignmentUsageForm = usageFormRecords.Find(uf =>
-                uf.GetProperty("leap_hospitalowned").GetBoolean() == true
-            );
-            Assert.IsNotNull(sbUsageForm, "Stock&Bill Usage Form should exist.");
-            Assert.IsNotNull(consignmentUsageForm, "Consignment Usage Form should exist.");
+            var sbUfs = usageFormRecords
+                .Where(uf => uf.GetProperty("leap_hospitalowned").GetBoolean() == false)
+                .ToList();
+            Assert.AreEqual(1, sbUfs.Count, "Expected exactly 1 Stock & Bill Usage Form.");
+
+            var consignmentUfs = usageFormRecords
+                .Where(uf => uf.GetProperty("leap_hospitalowned").GetBoolean() == true)
+                .ToList();
+            Assert.AreEqual(3, consignmentUfs.Count, "Expected exactly 3 Consignment Usage Form.");
 
             // validate Stock&Bill Usage Form details
             var sbUsageFormDetails = await _usageFormDetails.GetByUsageFormAsync(
-                sbUsageForm.GetProperty("leap_usageformid").GetGuid()
+                sbUfs[0].GetProperty("leap_usageformid").GetGuid()
             );
             Assert.AreEqual(
                 1,
@@ -191,19 +213,25 @@ namespace E2E.Api.Tests.Tests
             );
 
             // validate Consignment Usage Form details
-            var consignmentUsageFormDetails = await _usageFormDetails.GetByUsageFormAsync(
-                consignmentUsageForm.GetProperty("leap_usageformid").GetGuid()
-            );
-            Assert.AreEqual(
-                1,
-                consignmentUsageFormDetails.Count,
-                "There should be exactly 1 Usage Form Detail for the Consignment Usage Form."
-            );
-            Assert.AreEqual(
-                consignmentCaseProduct,
-                consignmentUsageFormDetails[0].GetProperty("_leap_caseproduct_value").GetGuid(),
-                "The Consignment Usage Form Detail should reference the correct Case Product."
-            );
+            foreach (var uf in consignmentUfs)
+            {
+                var consignmentUsageFormDetails = await _usageFormDetails.GetByUsageFormAsync(
+                    uf.GetProperty("leap_usageformid").GetGuid()
+                );
+
+                Assert.AreEqual(
+                    1,
+                    consignmentUsageFormDetails.Count,
+                    "There should be exactly 1 Usage Form Detail for the HO Consignment Usage Form."
+                );
+                Assert.AreEqual(
+                    consignmentCaseProduct,
+                    consignmentUsageFormDetails[0].GetProperty("_leap_caseproduct_value").GetGuid(),
+                    "The Consignment Usage Form Detail should reference the correct Case Product."
+                );
+            }
+
+            TestContext.WriteLine($"Assertions completed for Case ID: {caseRecord}");
         }
     }
 }

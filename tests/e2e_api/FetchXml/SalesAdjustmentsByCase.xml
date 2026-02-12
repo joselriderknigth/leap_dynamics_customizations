@@ -1,0 +1,42 @@
+<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+  <entity name="leap_salesadjustment">
+    <attribute name="leap_salesadjustmentid" />
+    <attribute name="leap_name" />
+    <attribute name="createdon" />
+    <attribute name="leap_usageformdetail" />
+    <attribute name="leap_salestotal" />
+    <attribute name="leap_salesadjustmentrule" />
+    <attribute name="leap_purchaseorder" />
+    <attribute name="owningbusinessunit" />
+    <attribute name="ownerid" />
+    <attribute name="statuscode" />
+    <attribute name="leap_casesurgeon" />
+    <attribute name="leap_caseprocedure" />
+    <attribute name="leap_casepatientid" />
+    <attribute name="leap_casehospital" />
+    <attribute name="leap_casedate" />
+    <attribute name="leap_adjustmenttype" />
+    <attribute name="leap_adjustmentrate" />
+    <attribute name="leap_adjustmentamount" />
+    <order attribute="leap_name" descending="false" />
+    <link-entity
+      name="leap_usageformdetail"
+      from="leap_usageformdetailid"
+      to="leap_usageformdetail"
+      link-type="inner"
+      alias="aa"
+    >
+      <link-entity
+        name="leap_usageform"
+        from="leap_usageformid"
+        to="leap_usageform"
+        link-type="inner"
+        alias="ab"
+      >
+        <filter type="and">
+          <condition attribute="leap_case" operator="eq" value="{CASE_ID}" />
+        </filter>
+      </link-entity>
+    </link-entity>
+  </entity>
+</fetch>

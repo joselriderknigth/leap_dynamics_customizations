@@ -1,0 +1,11 @@
+<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+  <entity name="leap_usageform">
+    <attribute name="leap_usageformid" />
+    <attribute name="leap_name" />
+    <attribute name="createdon" />
+    <order attribute="leap_name" descending="false" />
+    <filter type="and">
+      <condition attribute="leap_case" operator="eq" value="{CASE_ID}" />
+    </filter>
+  </entity>
+</fetch>

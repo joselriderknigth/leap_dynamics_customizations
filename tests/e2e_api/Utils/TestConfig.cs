@@ -1,9 +1,8 @@
 using System;
 using System.IO;
-
-using Microsoft.Extensions.Configuration;
-
 using E2E.Api.Tests.Config;
+using Microsoft.Extensions.Configuration;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace E2E.Api.Tests.Utils
 {
@@ -17,11 +16,19 @@ namespace E2E.Api.Tests.Utils
 
         public static TestConfig Load()
         {
-            var envPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".env");
+            var testEnv = System.Environment.GetEnvironmentVariable("TEST_ENV") ?? "dev";
+
+            Console.WriteLine($"[TestConfig] Loading '{testEnv}' environment...");
+
+            var basePath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..");
+            var envFile = $".env.{testEnv}";
+            var envPath = Path.Combine(basePath, envFile);
             if (!File.Exists(envPath))
                 throw new FileNotFoundException($"Missing .env file at expected path: {envPath}");
 
             DotNetEnv.Env.Load(envPath);
+
+            Console.WriteLine($"[TestConfig] Loaded env file: {envFile}");
 
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true)
@@ -30,11 +37,11 @@ namespace E2E.Api.Tests.Utils
 
             return new TestConfig
             {
-                Auth  = AuthConfig.Load(configuration),
+                Auth = AuthConfig.Load(configuration),
                 Token = TokenConfig.Load(configuration),
                 Users = TestUserConfig.Load(configuration),
                 Environment = EnvironmentConfig.Load(configuration),
-                SeedData    = SeedDataConfig.Load(configuration)
+                SeedData = SeedDataConfig.Load(configuration),
             };
         }
     }
