@@ -2,36 +2,48 @@ const validStatuses = [1, 293360000, 293360007, 293360001]; // planned, pending,
 const pollingSubIntervalSeconds = 3;
 let ufDocCount = 0;
 
-function getxdocsUrl(varxcacheId) {
-    //debugger;
-    var fetchXML = `<fetch distinct="false" mapping="logical" returntotalrecordcount="true" page="1" count="10" no-lock="false">
-  <entity name="sharepointdocument">
-    <attribute name="documentid"/>
-    <attribute name="absoluteurl"/>
-    <attribute name="fullname"/>
-    <attribute name="relativelocation"/>
-    <attribute name="sharepointdocumentid"/>
-    <order attribute="relativelocation" descending="false"/>
-    <attribute name="modified"/>
-    <attribute name="sharepointmodifiedby"/>
-    <attribute name="sharepointcreatedon"/>
-    <link-entity name="leap_case" from="leap_caseid" to="regardingobjectid" alias="bb">
-      <filter type="and">
-        <condition attribute="leap_caseid" operator="eq" uitype="leap_case" value="${varxcacheId}" />
-      </filter>
-    </link-entity>
-  </entity>
-</fetch>`;
-    fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
 
-    return Xrm.WebApi.retrieveMultipleRecords("sharepointdocument", fetchXML).then(result => {
-        if(result == null) {
-            throw Error("Invalid operation result when attempting to retrieve case products for case.");
-        }
-        return result.entities;
-    }).catch(error => {
-        throw Error(`Error retrieving case products for case with id ${varxcacheId}: ${error.message}`);
-    });
+function pollCountToRefreshSubgrd(executionContext) {
+    //debugger;
+    let formContext = executionContext.getFormContext();
+    const intervalId = setInterval(pollFlagSubG, pollingSubIntervalSeconds * 1000, formContext);
+    console.log(`Created fetch with interval id: ${intervalId}`)
+}
+
+/* function getxdocsUrl(varxcacheId) {
+//     //debugger;
+//     var fetchXML = `<fetch distinct="false" mapping="logical" returntotalrecordcount="true" page="1" count="10" no-lock="false">
+//   <entity name="sharepointdocument">
+//     <attribute name="documentid"/>
+//     <attribute name="absoluteurl"/>
+//     <attribute name="fullname"/>
+//     <attribute name="relativelocation"/>
+//     <attribute name="sharepointdocumentid"/>
+//     <order attribute="relativelocation" descending="false"/>
+//     <attribute name="modified"/>
+//     <attribute name="sharepointmodifiedby"/>
+//     <attribute name="sharepointcreatedon"/>
+//     <link-entity name="leap_case" from="leap_caseid" to="regardingobjectid" alias="bb">
+//       <filter type="and">
+//         <condition attribute="leap_caseid" operator="eq" uitype="leap_case" value="${varxcacheId}" />
+//       </filter>
+//     </link-entity>
+//   </entity>
+// </fetch>`;
+//     fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
+
+//     return Xrm.WebApi.retrieveMultipleRecords("sharepointdocument", fetchXML).then(result => {
+//         if(result == null) {
+//             throw Error("Invalid operation result when attempting to retrieve case products for case.");
+//         }
+//         return result.entities;
+//     }).catch(error => {
+//         throw Error(`Error retrieving case products for case with id ${varxcacheId}: ${error.message}`);
+//     });
+// }   */
+
+function createArray(n) {
+    return Array.from({ length: n });
 }
 
 async function pollFlagSubG(formContext) {
@@ -56,7 +68,8 @@ async function pollFlagSubG(formContext) {
         if(caseId && caseId != "") {
             try {
                 console.log("Polling uf doc count...");
-                const currentFlagValue = await getxdocsUrl(caseId);
+                // const currentFlagValue = await getxdocsUrl(caseId);
+                const currentFlagValue = createArray(ufDocCount > 10 ? 0 : ufDocCount + 1);
                 console.log(`Current document count: ${currentFlagValue.length}. Previous document count: ${ufDocCount}`);
                 if((currentFlagValue.length > 0) && (currentFlagValue.length != ufDocCount) ) {
                     cpSubgrid.refresh();
@@ -70,11 +83,4 @@ async function pollFlagSubG(formContext) {
     } else {
         console.log("Skipping fetch due to status");
     }
-}
-
-function onLoadSubgridPoller(executionContext) {
-    //debugger;
-    let formContext = executionContext.getFormContext();
-    const intervalId = setInterval(pollFlagSubG, pollingSubIntervalSeconds * 1000, formContext);
-    console.log(`Created fetch with interval id: ${intervalId}`)
 }

@@ -198,7 +198,7 @@ function getxCacheVars(varxcacheId) {
 }
 
 function getxdocsUrl(varxcacheId) {
-    var fetchXML = `<fetch distinct="false" mapping="logical" returntotalrecordcount="true" page="1" count="10" no-lock="false">
+    var fetchXML = `<fetch distinct="false" mapping="logical" returntotalrecordcount="true" no-lock="false">
   <entity name="sharepointdocument">
     <attribute name="documentid"/>
     <attribute name="absoluteurl"/>
@@ -232,4 +232,3 @@ function onlyemailform(executionContext) {
    Xrm.Page.ui.headerSection.setCommandBarVisible(false);
    Xrm.Page.ui.headerSection.setTabNavigatorVisible(false);
 }
-

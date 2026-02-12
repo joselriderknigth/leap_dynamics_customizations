@@ -3,19 +3,31 @@ const PROGRESS_MESSAGES = {
     CREATE: "Creating New UFDs"
 };
 
+const PROGRESSRSC_MESSAGES = {
+    DELETE: "Deactivating Old SRCs",
+    CREATE: "Creating New SRCs"
+};
+
 const RESULT_MESSAGES = {
     SUCCESS: "UFDs regenerated successfully.",
     MIXED: "Partial success regenerating UFDs. Check console logs for details.",
     FAILURE: "Failed to regenerate UFDs. Check console logs for details."
 };
 
+const RESULTRSC_MESSAGES = {
+    SUCCESS: "SRCs regenerated successfully.",
+    MIXED: "Partial success regenerating SRCs. Check console logs for details.",
+    FAILURE: "Failed to regenerate SRCs. Check console logs for details."
+};
+
 class UsageFormInfo {
-    constructor(id, supplierId, supplierName, ownerId, poNumber, caseDate) {
+    constructor(id, supplierId, supplierName, ownerId, poNumber, howned, caseDate) {
         this.id = id;
         this.supplierId = supplierId;
         this.supplierName = supplierName;
         this.ownerId = ownerId;
         this.poNumber = poNumber;
+        this.howned = howned;
         this.caseDate = caseDate;
     }
 }
@@ -215,12 +227,12 @@ async function deactivateUsageFormDetails(usageFormId) {
 }
 
 function getUsageFormInfo(usageFormId) {
-    return Xrm.WebApi.retrieveRecord("leap_usageform", usageFormId, "?$select=leap_newsuppliername,leap_purchaseordernumber,leap_surgerydate&$expand=leap_Supplier($select=accountid),owninguser($select=systemuserid)")
+    return Xrm.WebApi.retrieveRecord("leap_usageform", usageFormId, "?$select=leap_newsuppliername,leap_purchaseordernumber,leap_hospitalowned,leap_surgerydate&$expand=leap_Supplier($select=accountid),owninguser($select=systemuserid)")
         .then(result => {
             if (result == null) {
                 throw Error("Invalid operation result when attempting to retrieve usage form information.");
             }
-            return new UsageFormInfo(result.leap_usageformid, result.leap_Supplier.accountid, result.leap_newsuppliername, result.owninguser.systemuserid, result.leap_purchaseordernumber, result.leap_surgerydate);
+            return new UsageFormInfo(result.leap_usageformid, result.leap_Supplier.accountid, result.leap_newsuppliername, result.owninguser.systemuserid, result.leap_purchaseordernumber, result.leap_hospitalowned, result.leap_surgerydate);
         }).catch(error => {
             throw Error(`Error retrieving usage form with with id ${usageFormId}: ${error.message}`);
         });
@@ -270,9 +282,16 @@ function processCaseProduct(usageFormInfo, caseProduct, processAsIo) {
 
 async function createUsageFormDetails(usageFormInfo) {
     try {
+         debugger;
         const supplierCondition = usageFormInfo.supplierId != null ?
             `<condition attribute="leap_supplier" operator="eq" value="${usageFormInfo.supplierId}"/>` :
             `<condition attribute="leap_newsuppliername" operator="eq" value="${usageFormInfo.supplierName}"/>`;
+        const hoCondition = usageFormInfo.howned == true ?
+             `<condition attribute="leap_hospitalowned" operator="eq" value="${usageFormInfo.howned}"/>` :
+             `<filter type="or">
+                 <condition attribute="leap_hospitalowned" operator="eq" value="0" />
+                 <condition attribute="leap_hospitalowned" operator="null" />
+              </filter>`;
         var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="true">
             <entity name="leap_caseproduct">
             <attribute name="leap_caseproductid" />
@@ -302,6 +321,7 @@ async function createUsageFormDetails(usageFormInfo) {
             <filter type="and">
                 <condition attribute="statecode" operator="eq" value="0" />
                 ${supplierCondition}
+                 ${hoCondition}
             </filter>
             <link-entity name="leap_case" from="leap_caseid" to="leap_caseid" link-type="inner" alias="aa">
                 <link-entity name="leap_usageform" from="leap_case" to="leap_caseid" link-type="inner" alias="ab">
@@ -368,7 +388,7 @@ async function recreateUsageFormDetails(selectedControlSelectedItemIds) {
             Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.CREATE);
             await createUsageFormDetails(usageFormInfo)
 
-            await resetUFBCPullStatus(usageFormId);
+          const usageFormUpda = await updateFieldWebApi(usageFormId);
 
             successes.push({usageFormId: usageFormId, result: "Success"});
         } catch(caughtError) {
@@ -410,17 +430,305 @@ async function recreateUsageFormDetailsSingle(usageFormId) {
     }
 }
 
+/* Shown on usage form form */
+/*  recreating usage form details will recalculate adjustments and commissions */
+async function recreateUsageFormDetailsSingle(usageFormId) {
+    let success = true;
+    const errors = [];
+    try {
+        Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.DELETE);
+        await deactivateUsageFormDetails(usageFormId)
+        const usageFormInfo = await getUsageFormInfo(usageFormId);
+        Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.CREATE);
+        await createUsageFormDetails(usageFormInfo)
+    } catch (caughtError) {
+        success = false;
+    }
 
-/* JIRA: LCEI-870 */
-function resetUFBCPullStatus(usageFormId) {
-    return Xrm.WebApi.updateRecord("leap_usageform", usageFormId, {
-        leap_bcpullstatus: 293360000,
-    })
-    .then(result => {
-        console.log(`BCPullStatus reset successfully. Record ID: ${result.id}`);
-        return true;
-    })
-    .catch(error => {
-        throw Error(`Error updating BCPullStatus: ${error.message}`);
+    Xrm.Utility.closeProgressIndicator();
+    if (success) {
+        showResultsDialog(RESULT_MESSAGES.SUCCESS);
+    } else {
+        showResultsDialog(RESULT_MESSAGES.FAILURE);
+    }
+}
+
+
+/*---------- ticket JIRA 908 ---------------*/
+/*  recreating will recalculate seles rep commissions */
+async function recreateSalesRepCommissionSingle(usageFormId) {
+    debugger;
+    let success = true;
+    const errors = [];
+    try {
+        Xrm.Utility.showProgressIndicator(PROGRESSRSC_MESSAGES.DELETE);
+        await deactivateSalesRepCommissions(usageFormId)
+        const usageFormInfo = await getUsageFormInfo(usageFormId);
+        debugger;
+        Xrm.Utility.showProgressIndicator(PROGRESSRSC_MESSAGES.CREATE);
+        await createSalesRepCommissions(usageFormInfo)
+
+    } catch (caughtError) {
+        debugger;
+        success = false;
+    }
+
+    Xrm.Utility.closeProgressIndicator();
+    debugger;
+    if (success) {
+        showResultsDialog(RESULTRSC_MESSAGES.SUCCESS);
+    } else {
+        showResultsDialog(RESULTRSC_MESSAGES.FAILURE);
+    }
+}
+
+async function deactivateSalesRepCommissions(usageFormId) {
+    var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+        <entity name="leap_usageformdetail">
+        <attribute name="leap_usageformdetailid" />
+        <attribute name="leap_name" />
+        <order attribute="leap_name" descending="false" />
+        <filter type="and">
+            <condition attribute="leap_usageform" operator="eq" value="${usageFormId}"/>
+            <condition attribute="statecode" operator="eq" value="0" />
+        </filter>
+        </entity>
+    </fetch>`;
+    fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
+    const errors = [];
+    try {
+        const usageFormDetails = await Xrm.WebApi.retrieveMultipleRecords("leap_usageformdetail", fetchXML);
+        if (usageFormDetails == null) {
+            throw new Error("Invalid operation result when attempting to retrieve usage form details.");
+        } else if (usageFormDetails.entities.length > 0) {
+           
+            for (const usageFormDetail of usageFormDetails.entities) {
+                const usageFormDetailId = usageFormDetail.leap_usageformdetailid;
+                try {
+                    await deactivateOldSalesRepCommissions(usageFormDetailId);
+
+                } catch (error) {
+                    errors.push({ id: usageFormDetailId, error: error.message });
+                }
+            }
+
+            if (errors.length > 0) {
+                console.table(errors);
+                throw new Error("Some sales rep commissions could not be deactivated. Check logs for details.");
+            }
+        }
+    } catch (error) {
+        // console.error(`Error retrieving or deleting usage form details for usage form ID ${usageFormId}: ${error.message}`);
+        throw error;
+    }
+}
+
+function hasValue(val) {
+    return val !== null && val !== undefined;
+}
+
+async function createSalesRepCommissions(usageFormInfo) {
+    const errors = [];
+    try {
+        debugger;
+        var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+  <entity name="leap_usageformdetail">
+    <attribute name="leap_usageformdetailid"/>
+    <attribute name="leap_name"/>
+    <attribute name="createdon"/>
+    <attribute name="leap_product"/>
+    <attribute name="leap_supplier"/>
+     <attribute name="leap_io"/>
+    <attribute name="leap_overrideprice"/>
+    <attribute name="leap_unitpriceoverride"/>
+    <attribute name="leap_unitprice"/>
+    <attribute name="leap_usageform"/>
+    <attribute name="leap_totalafteradjustments"/>
+    <filter type="and">
+      <condition attribute="leap_usageform" operator="eq" value="${usageFormInfo.id}"/>
+       <condition attribute="statecode" operator="eq" value="0" />
+    </filter>
+    <order attribute="leap_name" descending="false"/>
+    <!-- Product -->
+    <link-entity name="product" from="productid" to="leap_product" link-type="inner" alias="aa">
+      <attribute name="leap_manufacturer"/>
+       <attribute name="producttypecode" />
+      <attribute name="parentproductid"/>
+    </link-entity>
+    <!-- Usage Form -->
+    <link-entity name="leap_usageform" from="leap_usageformid" to="leap_usageform" link-type="inner" alias="ab">
+      <attribute name="leap_purchaseordernumber"/>
+      <attribute name="leap_surgeon"/>
+      <attribute name="leap_hospital"/>
+      <!-- Case -->
+      <link-entity name="leap_case" from="leap_caseid" to="leap_case" link-type="inner" alias="ac">
+        <attribute name="leap_casedate"/>
+      </link-entity>
+    </link-entity>
+     <!-- Supplier Commission -->
+    <link-entity
+        name="leap_suppliercommission"
+        from="leap_usageformdetail"
+        to="leap_usageformdetailid"
+        link-type="outer"
+        alias="sc">
+      <attribute name="leap_commissionratepercent"/>
+      <filter type="and">
+        <condition attribute="statecode" operator="eq" value="0"/>
+      </filter>
+    </link-entity>    
+  </entity>
+</fetch>`;
+
+        fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
+        debugger;
+        const flowUrl = await getSalesRepFlowUrl();
+
+        if (!flowUrl) {
+            throw new Error("Sales Rep Commission Flow URL is empty");
+        }
+        const usagefdetails = await Xrm.WebApi.retrieveMultipleRecords("leap_usageformdetail", fetchXML);
+        // Get field values
+        if (usagefdetails == null) {
+            throw new Error("Invalid operation result when attempting to retrieve UFDs.");
+        } else if (usagefdetails.entities.length == 0) {
+            throw new Error("Found 0 valid UFDs to generate sales rep commssions.");
+        } else {
+
+            usagefdetails.entities.forEach(function (record) {
+                const comissionrate_real = record["aa.producttypecode"] == 2 ? record["sc.leap_commissionratepercent"] : 0.0;
+
+                // checking real unit price
+                let realUnitPrice = record["leap_unitprice"];
+
+                if ((record["leap_io"] === 1 && hasValue(record["leap_overrideprice"])) ||
+                    hasValue(record["leap_unitpriceoverride"])
+                ) {
+                    realUnitPrice = hasValue(record["leap_overrideprice"])
+                        ? record["leap_overrideprice"]
+                        : record["leap_unitpriceoverride"];
+                }
+                // build payload                
+                debugger;
+                var payload = {
+                    criteria: {
+                        product: record["_leap_product_value"],
+                        productFamily: record["aa.parentproductid"],
+                        supplier: record["_leap_supplier_value"],
+                        manufacturer: record["aa.leap_manufacturer"],
+                        hospital: record["ab.leap_hospital"],
+                        physician: record["ab.leap_surgeon"],
+                        usageDate: record["ac.leap_casedate"]
+                    },
+                    unitPrice: realUnitPrice,
+                    totalAfterAdjustments: record["leap_totalafteradjustments"],
+                    supplierCommissionRate: comissionrate_real,
+                    poNumber: record["ab.leap_purchaseordernumber"],
+                    reference: {
+                        entityName: "leap_usageformdetail",
+                        entityId: record["leap_usageformdetailid"]
+                    }
+                };
+
+                // POST call
+                fetch(flowUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                })
+                    .then(response => {
+                        debugger;
+                        if (!response.ok) {
+                            throw new Error("HTTP error " + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        debugger;
+                        console.log("Workflow executed successfully", data);
+                    })
+                    .catch(error => {
+                        debugger;
+                        console.error("Workflow call failed:", error);
+                        errors.push({ usageFormDetailId: record["leap_usageformdetailid"], error: error.message })
+                    });
+            });
+        }
+    }
+
+    finally {
+        if (errors.length > 0) {
+            debugger;
+            console.table(errors);
+            throw new Error("Some Sales Rep Commissions could not be created. Check logs for details.");
+        }
+    }
+}
+
+let cachedFlowUrl = null;
+
+async function getSalesRepFlowUrl() {
+    if (!cachedFlowUrl) {
+        cachedFlowUrl = await getEnvironmentVariableValue("leap_salesrepcommissionurl");
+    }
+    return cachedFlowUrl;
+}
+
+function getEnvironmentVariableValue(schemaName) {
+    const fetchXml = `
+<fetch top="1">
+  <entity name="environmentvariabledefinition">
+    <attribute name="schemaname" />
+    <link-entity name="environmentvariablevalue"
+                 from="environmentvariabledefinitionid"
+                 to="environmentvariabledefinitionid"
+                 link-type="outer"
+                 alias="val">
+      <attribute name="value" />
+    </link-entity>
+    <filter>
+      <condition attribute="schemaname" operator="eq" value="${schemaName}" />
+    </filter>
+  </entity>
+</fetch>`;
+
+    return Xrm.WebApi.retrieveMultipleRecords(
+        "environmentvariabledefinition",
+        "?fetchXml=" + encodeURIComponent(fetchXml)
+    ).then(result => {
+        if (!result.entities.length) {
+            throw new Error(`Environment variable ${schemaName} not found`);
+        }
+
+        const record = result.entities[0];
+
+        // If no current value exists, fallback to defaultvalue
+        return record["val.value"] ?? record.defaultvalue;
     });
+}
+
+
+/* -------------------------------------------- */
+/* ticket JIRA 870 */
+function updateFieldWebApi(usageFormId) {
+    const entityName = "leap_usageform"; // Replace 'account' with your entity name
+
+    try {
+        // Define the payload
+        const data = {};
+        data["leap_bcpullstatus"] = 293360000;    
+        // Send the Web API request
+        Xrm.WebApi.updateRecord(entityName, usageFormId, data).then(
+            function success(result2) {
+                console.log(`Record updated successfully BCPullStatus. Record ID: ${result2.id}`);                
+            },
+            function error(error) {
+                console.error("Error updating the record: BCPullStatus", error.message);
+            }
+        );
+    } catch (caughtError) {
+        success = false;
+    }
 }

@@ -3,12 +3,13 @@ Case.InformationForm = Case.InformationForm || {};
 Case.InformationForm.Pollers = Case.InformationForm.Pollers || {};
 
 (function(ns) {
-    const validStatuses = [1, 293360000, 293360007, 293360001]; // planned, pending, pending close, pending po
+    const validStatuses = [1, 293360000, 293360007, 293360001,293360002,293360005]; // planned, pending, pending close, pending po, commission receivable, commission payable
     const pollingIntervalSeconds = 2;
     const pollingSubIntervalSeconds = 3;
     let prevPendingUFFlagValue = null;
     let prevNeedsAdminFlagValue = null;
     let prevCommsProcessedFlagValue = null;
+    let prevCaseRegenFlagValue = null;
     let ufDocCount = 0;
 
     function refreshWebResource(formContext) {
@@ -25,7 +26,7 @@ Case.InformationForm.Pollers = Case.InformationForm.Pollers || {};
     }
 
     function fetchCaseFlags(caseId) {
-        return Xrm.WebApi.retrieveRecord("leap_case", caseId, "?$select=leap_hasproductpendingusageform,leap_needsreset,leap_allusageformscomplete")
+        return Xrm.WebApi.retrieveRecord("leap_case", caseId, "?$select=leap_hasproductpendingusageform,leap_needsreset,leap_allusageformscomplete,leap_regeneratecase")
             .then(result => {
                 if (result == null) {
                     throw Error("Refresh Button Errror - Invalid operation result when attempting to fetch case flags.");
@@ -36,7 +37,8 @@ Case.InformationForm.Pollers = Case.InformationForm.Pollers || {};
             });
     }
 
-    async function pollFlag(formContext, ufSubgrid) {
+    async function pollFlag(formContext, ufSubgrid, ufSubgridHO) {
+       debugger;
         const status = formContext.getAttribute("statuscode").getValue();
         if(validStatuses.includes(status)) {
             const caseId = formContext && formContext.data && formContext.data.entity
@@ -48,9 +50,19 @@ Case.InformationForm.Pollers = Case.InformationForm.Pollers || {};
                     const hasRegenFlagFlipped = currentFlags.leap_hasproductpendingusageform !== prevPendingUFFlagValue;
                     const needsResetFlagFlipped = !currentFlags.leap_needsreset && (currentFlags.leap_needsreset!== prevNeedsAdminFlagValue);
                     const allCommsFlagFlipped = currentFlags.leap_allusageformscomplete !== prevCommsProcessedFlagValue;
+                    const caseRegenFlagFlipped = currentFlags.leap_regeneratecase && (currentFlags.leap_regeneratecase !== prevCaseRegenFlagValue);
 
-                    if(hasRegenFlagFlipped || needsResetFlagFlipped || allCommsFlagFlipped) {
-                        console.log(`Current flag values: Needs Regen (${currentFlags.leap_hasproductpendingusageform}), Needs Adming (${currentFlags.leap_needsreset}), Commissions Processed (${currentFlags.leap_allusageformscomplete}). Previous flag values: Needs Regen (${prevPendingUFFlagValue}), Needs Adming (${prevNeedsAdminFlagValue}), Commissions Processed (${prevCommsProcessedFlagValue})`);
+                    if(hasRegenFlagFlipped || needsResetFlagFlipped || allCommsFlagFlipped || caseRegenFlagFlipped) {
+                        console.log(`Current flag values:
+                            Needs Regen (${currentFlags.leap_hasproductpendingusageform}),
+                            Needs Adming (${currentFlags.leap_needsreset}),
+                            Commissions Processed (${currentFlags.leap_allusageformscomplete}),
+                            Case Regenerate (${currentFlags.leap_regeneratecase}). 
+                            Previous flag values:
+                            Needs Regen (${prevPendingUFFlagValue}),
+                            Needs Adming (${prevNeedsAdminFlagValue}),
+                            Commissions Processed (${prevCommsProcessedFlagValue}),
+                            Case Regenerate (${prevCaseRegenFlagValue})`);
 
                         const isMidProcessGlitch =
                             prevPendingUFFlagValue === true &&
@@ -62,19 +74,22 @@ Case.InformationForm.Pollers = Case.InformationForm.Pollers || {};
                         if (!isMidProcessGlitch && (
                             hasRegenFlagFlipped ||
                             needsResetFlagFlipped ||
-                            allCommsFlagFlipped
+                            allCommsFlagFlipped ||
+                            caseRegenFlagFlipped
                         )) {
                             refreshWebResource(formContext);
                         }
 
                         if (hasRegenFlagFlipped && !currentFlags.leap_hasproductpendingusageform) {
                             ufSubgrid.refresh();
+                            ufSubgridHO.refresh();
                             console.log("Refreshed UF subgrid");
                         }
 
                         prevPendingUFFlagValue = currentFlags.leap_hasproductpendingusageform;
                         prevNeedsAdminFlagValue = currentFlags.leap_needsreset;
                         prevCommsProcessedFlagValue = currentFlags.leap_allusageformscomplete;
+                        prevCaseRegenFlagValue = currentFlags.leap_regeneratecase;
                     }
                 } catch(error) {
                     console.error(error.message);
@@ -88,7 +103,7 @@ Case.InformationForm.Pollers = Case.InformationForm.Pollers || {};
     }
 
     function getxdocsUrl(varxcacheId) {
-        //debugger;
+        debugger;
         var fetchXML = `<fetch distinct="false" mapping="logical" returntotalrecordcount="true" page="1" count="10" no-lock="false">
     <entity name="sharepointdocument">
         <attribute name="documentid"/>
@@ -121,7 +136,7 @@ Case.InformationForm.Pollers = Case.InformationForm.Pollers || {};
 
 
     async function pollFlagSubG(formContext, cpSubgrid) {
-        //debugger;
+        debugger;
         const status = formContext.getAttribute("statuscode").getValue();
         if(validStatuses.includes(status)) {
             const caseId = formContext && formContext.data && formContext.data.entity
@@ -150,7 +165,8 @@ Case.InformationForm.Pollers = Case.InformationForm.Pollers || {};
     ns.pollFlagToRefreshButton = function (executionContext) {
         let formContext = executionContext.getFormContext();
         let ufSubgrid = formContext.getControl("usageForms");
-        const intervalId = setInterval(pollFlag, pollingIntervalSeconds * 1000, formContext, ufSubgrid);
+        let ufSubgridHO = formContext.getControl("HospitalOwned");
+        const intervalId = setInterval(pollFlag, pollingIntervalSeconds * 1000, formContext, ufSubgrid, ufSubgridHO);        
         console.log(`Flag poller has interval id: ${intervalId}`);
         console.log("Polling flag...");
     };

@@ -17,7 +17,7 @@ function checkPendingUsagePeriodically(executionContext) {
     caseId = caseId.replace("{", "").replace("}", "");
     debugger;
     
-    if (statusValue === 293360000 || statusValue === 293360007 ||  statusValue === 1 ) {
+    if (statusValue === 293360000 || statusValue === 293360007 || statusValue === 293360001 ||  statusValue === 1 ) {
        // Function that builds and executes the FetchXML query
        function fetchPendingUsage() {
           // Build the FetchXML query; adjust the entity name and attribute names as needed.
