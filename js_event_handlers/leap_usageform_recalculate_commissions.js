@@ -4,8 +4,8 @@ const PROGRESS_MESSAGES = {
 };
 
 const PROGRESSRSC_MESSAGES = {
-    DELETE: "Deactivating Old SRCs",
-    CREATE: "Creating New SRCs"
+    DELETE: "Deactivating Old SalesRep Commissions",
+    CREATE: "Creating New SalesRep Commissions"
 };
 
 const RESULT_MESSAGES = {
@@ -15,9 +15,9 @@ const RESULT_MESSAGES = {
 };
 
 const RESULTRSC_MESSAGES = {
-    SUCCESS: "SRCs regenerated successfully.",
-    MIXED: "Partial success regenerating SRCs. Check console logs for details.",
-    FAILURE: "Failed to regenerate SRCs. Check console logs for details."
+    SUCCESS: "SalesRep Commissions regenerated successfully.",
+    MIXED: "Partial success regenerating SalesRep Commissions. Check console logs for details.",
+    FAILURE: "Failed to regenerate SalesRep Commissions. Check console logs for details."
 };
 
 class UsageFormInfo {
@@ -408,27 +408,7 @@ async function recreateUsageFormDetails(selectedControlSelectedItemIds) {
     }
 }
 
-/* Shown on usage form form */
-/*  recreating usage form details will recalculate adjustments and commissions */
-async function recreateUsageFormDetailsSingle(usageFormId) {
-    let success = true;
-    try {
-        Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.DELETE);
-        await deactivateUsageFormDetails(usageFormId)
-        const usageFormInfo = await getUsageFormInfo(usageFormId);
-        Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.CREATE);
-        await createUsageFormDetails(usageFormInfo)
-    } catch(caughtError) {
-        success = false;
-    }
 
-    Xrm.Utility.closeProgressIndicator();
-    if(success) {
-        showResultsDialog(RESULT_MESSAGES.SUCCESS);
-    } else {
-        showResultsDialog(RESULT_MESSAGES.FAILURE);
-    }
-}
 
 /* Shown on usage form form */
 /*  recreating usage form details will recalculate adjustments and commissions */
@@ -453,6 +433,39 @@ async function recreateUsageFormDetailsSingle(usageFormId) {
     }
 }
 
+
+/*---------- ticket JIRA 972 ---------------*/
+async function recreateSalesRepCommissions(selectedControlSelectedItemIds) {
+    const successes = [];
+    const errors = [];
+    for (const usageFormId of selectedControlSelectedItemIds) {
+        try {
+
+            Xrm.Utility.showProgressIndicator(PROGRESSRSC_MESSAGES.DELETE);
+            await deactivateSalesRepCommissions(usageFormId)
+            const usageFormInfo = await getUsageFormInfo(usageFormId);
+
+            Xrm.Utility.showProgressIndicator(PROGRESSRSC_MESSAGES.CREATE);
+            await createSalesRepCommissions(usageFormInfo)
+
+            successes.push({ usageFormId: usageFormId, result: "Success" });
+        } catch (caughtError) {
+            errors.push({ usageFormId: usageFormId, result: caughtError.message });
+        }
+    }
+
+    Xrm.Utility.closeProgressIndicator();
+    console.table(successes.concat(errors));
+
+    if (successes.length == selectedControlSelectedItemIds.length) {
+        showResultsDialog(RESULTRSC_MESSAGES.SUCCESS);
+    } else if (errors.length == selectedControlSelectedItemIds.length) {
+        showResultsDialog(RESULTRSC_MESSAGES.FAILURE);
+    } else {
+        showResultsDialog(RESULTRSC_MESSAGES.MIXED);
+    }
+
+}
 
 /*---------- ticket JIRA 908 ---------------*/
 /*  recreating will recalculate seles rep commissions */
