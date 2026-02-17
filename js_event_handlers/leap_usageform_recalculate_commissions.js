@@ -542,88 +542,85 @@ function hasValue(val) {
 
 async function createSalesRepCommissions(usageFormInfo) {
     const errors = [];
-    try {
-        debugger;
-        var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
-  <entity name="leap_usageformdetail">
-    <attribute name="leap_usageformdetailid"/>
-    <attribute name="leap_name"/>
-    <attribute name="createdon"/>
-    <attribute name="leap_product"/>
-    <attribute name="leap_supplier"/>
-     <attribute name="leap_io"/>
-    <attribute name="leap_overrideprice"/>
-    <attribute name="leap_unitpriceoverride"/>
-    <attribute name="leap_unitprice"/>
-    <attribute name="leap_usageform"/>
-    <attribute name="leap_totalafteradjustments"/>
-    <filter type="and">
-      <condition attribute="leap_usageform" operator="eq" value="${usageFormInfo.id}"/>
-       <condition attribute="statecode" operator="eq" value="0" />
-    </filter>
-    <order attribute="leap_name" descending="false"/>
-    <!-- Product -->
-    <link-entity name="product" from="productid" to="leap_product" link-type="inner" alias="aa">
-      <attribute name="leap_manufacturer"/>
-       <attribute name="producttypecode" />
-      <attribute name="parentproductid"/>
-    </link-entity>
-    <!-- Usage Form -->
-    <link-entity name="leap_usageform" from="leap_usageformid" to="leap_usageform" link-type="inner" alias="ab">
-      <attribute name="leap_purchaseordernumber"/>
-      <attribute name="leap_surgeon"/>
-      <attribute name="leap_hospital"/>
-      <!-- Case -->
-      <link-entity name="leap_case" from="leap_caseid" to="leap_case" link-type="inner" alias="ac">
-        <attribute name="leap_casedate"/>
-      </link-entity>
-    </link-entity>
-     <!-- Supplier Commission -->
-    <link-entity
-        name="leap_suppliercommission"
-        from="leap_usageformdetail"
-        to="leap_usageformdetailid"
-        link-type="outer"
-        alias="sc">
-      <attribute name="leap_commissionratepercent"/>
-      <filter type="and">
-        <condition attribute="statecode" operator="eq" value="0"/>
-      </filter>
-    </link-entity>    
-  </entity>
-</fetch>`;
+    let fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+        <entity name="leap_usageformdetail">
+        <attribute name="leap_usageformdetailid"/>
+        <attribute name="leap_name"/>
+        <attribute name="createdon"/>
+        <attribute name="leap_product"/>
+        <attribute name="leap_supplier"/>
+            <attribute name="leap_io"/>
+        <attribute name="leap_overrideprice"/>
+        <attribute name="leap_unitpriceoverride"/>
+        <attribute name="leap_unitprice"/>
+        <attribute name="leap_usageform"/>
+        <attribute name="leap_totalafteradjustments"/>
+        <filter type="and">
+            <condition attribute="leap_usageform" operator="eq" value="${usageFormInfo.id}"/>
+            <condition attribute="statecode" operator="eq" value="0" />
+        </filter>
+        <order attribute="leap_name" descending="false"/>
+        <!-- Product -->
+        <link-entity name="product" from="productid" to="leap_product" link-type="inner" alias="aa">
+            <attribute name="leap_manufacturer"/>
+            <attribute name="producttypecode" />
+            <attribute name="parentproductid"/>
+        </link-entity>
+        <!-- Usage Form -->
+        <link-entity name="leap_usageform" from="leap_usageformid" to="leap_usageform" link-type="inner" alias="ab">
+            <attribute name="leap_purchaseordernumber"/>
+            <attribute name="leap_surgeon"/>
+            <attribute name="leap_hospital"/>
+            <!-- Case -->
+            <link-entity name="leap_case" from="leap_caseid" to="leap_case" link-type="inner" alias="ac">
+            <attribute name="leap_casedate"/>
+            </link-entity>
+        </link-entity>
+            <!-- Supplier Commission -->
+        <link-entity
+            name="leap_suppliercommission"
+            from="leap_usageformdetail"
+            to="leap_usageformdetailid"
+            link-type="outer"
+            alias="sc">
+            <attribute name="leap_commissionratepercent"/>
+            <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0"/>
+            </filter>
+        </link-entity>    
+        </entity>
+        </fetch>`;
 
-        fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
-        debugger;
-        const flowUrl = await getSalesRepFlowUrl();
+    fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
+    
+    const flowUrl = await getSalesRepFlowUrl();
+    if (!flowUrl) {
+        throw new Error("Sales Rep Commission Flow URL is empty");
+    }
 
-        if (!flowUrl) {
-            throw new Error("Sales Rep Commission Flow URL is empty");
-        }
-        const usagefdetails = await Xrm.WebApi.retrieveMultipleRecords("leap_usageformdetail", fetchXML);
-        // Get field values
-        if (usagefdetails == null) {
-            throw new Error("Invalid operation result when attempting to retrieve UFDs.");
-        } else if (usagefdetails.entities.length == 0) {
-            throw new Error("Found 0 valid UFDs to generate sales rep commssions.");
-        } else {
+    const usagefdetails = await Xrm.WebApi.retrieveMultipleRecords("leap_usageformdetail", fetchXML);
+    if (usagefdetails == null) {
+        throw new Error("Invalid operation result when attempting to retrieve UFDs.");
+    }
+    if (usagefdetails.entities.length == 0) {
+        throw new Error("Found 0 valid UFDs to generate sales rep commssions.");
+    } 
 
-            usagefdetails.entities.forEach(function (record) {
-                const comissionrate_real = record["aa.producttypecode"] == 2 ? record["sc.leap_commissionratepercent"] : 0.0;
+    // process each UFD in parallel
+    const promises = usagefdetails.entities.map(async (record) => {
+        try {
+            const comissionrate_real = record["aa.producttypecode"] == 2 ? record["sc.leap_commissionratepercent"] : 0.0;
 
-                // checking real unit price
-                let realUnitPrice = record["leap_unitprice"];
+            let realUnitPrice = record["leap_unitprice"];
+            if ((record["leap_io"] === 1 && hasValue(record["leap_overrideprice"])) ||
+                hasValue(record["leap_unitpriceoverride"])
+            ) {
+                realUnitPrice = hasValue(record["leap_overrideprice"])
+                    ? record["leap_overrideprice"]
+                    : record["leap_unitpriceoverride"];
+            }
 
-                if ((record["leap_io"] === 1 && hasValue(record["leap_overrideprice"])) ||
-                    hasValue(record["leap_unitpriceoverride"])
-                ) {
-                    realUnitPrice = hasValue(record["leap_overrideprice"])
-                        ? record["leap_overrideprice"]
-                        : record["leap_unitpriceoverride"];
-                }
-                // build payload                
-                debugger;
-                var payload = {
+            const payload = {
                     criteria: {
                         product: record["_leap_product_value"],
                         productFamily: record["aa.parentproductid"],
@@ -643,40 +640,32 @@ async function createSalesRepCommissions(usageFormInfo) {
                     }
                 };
 
-                // POST call
-                fetch(flowUrl, {
+                const response = await fetch(flowUrl, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify(payload)
-                })
-                    .then(response => {
-                        debugger;
-                        if (!response.ok) {
-                            throw new Error("HTTP error " + response.status);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        debugger;
-                        console.log("Workflow executed successfully", data);
-                    })
-                    .catch(error => {
-                        debugger;
-                        console.error("Workflow call failed:", error);
-                        errors.push({ usageFormDetailId: record["leap_usageformdetailid"], error: error.message })
-                    });
-            });
-        }
-    }
+                });
+                if (!response.ok) {
+                    throw new Error("HTTP error calling Sales Rep Commission Flow: " + response.status);
+                }
 
-    finally {
-        if (errors.length > 0) {
-            debugger;
-            console.table(errors);
-            throw new Error("Some Sales Rep Commissions could not be created. Check logs for details.");
+                const data = await response.json();
+                console.log("Workflow executed successfully", data);
+        } catch (error) {
+            console.error("Workflow call failed:", error);
+            errors.push({ usageFormDetailId: record["leap_usageformdetailid"], error: error.message });
         }
+
+
+    });
+
+    await Promise.all(promises); // await all calls to finish before proceeding
+
+    if (errors.length > 0) {
+        console.table(errors);
+        throw new Error("Some Sales Rep Commissions could not be created. Check logs for details.");
     }
 }
 
