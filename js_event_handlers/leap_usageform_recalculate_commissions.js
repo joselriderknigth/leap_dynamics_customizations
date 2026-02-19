@@ -4,8 +4,8 @@ const PROGRESS_MESSAGES = {
 };
 
 const PROGRESSRSC_MESSAGES = {
-    DELETE: "Deactivating Old SalesRep Commissions",
-    CREATE: "Creating New SalesRep Commissions"
+    DELETE: "Deactivating Old Sales Rep Commissions",
+    CREATE: "Creating New Sales Rep Commissions"
 };
 
 const RESULT_MESSAGES = {
@@ -15,9 +15,9 @@ const RESULT_MESSAGES = {
 };
 
 const RESULTRSC_MESSAGES = {
-    SUCCESS: "SalesRep Commissions regenerated successfully.",
-    MIXED: "Partial success regenerating SalesRep Commissions. Check console logs for details.",
-    FAILURE: "Failed to regenerate SalesRep Commissions. Check console logs for details."
+    SUCCESS: "Sales Rep Commissions regenerated successfully.",
+    MIXED: "Partial success regenerating Sales Rep Commissions. Check console logs for details.",
+    FAILURE: "Failed to regenerate Sales Rep Commissions. Check console logs for details."
 };
 
 class UsageFormInfo {
@@ -519,7 +519,7 @@ async function deactivateSalesRepCommissions(usageFormId) {
                 const usageFormDetailId = usageFormDetail.leap_usageformdetailid;
                 try {
                     await deactivateOldSalesRepCommissions(usageFormDetailId);
-
+                    await updateUsageFormDetailProcessedFlag(usageFormDetailId, false);
                 } catch (error) {
                     errors.push({ id: usageFormDetailId, error: error.message });
                 }
@@ -651,8 +651,7 @@ async function createSalesRepCommissions(usageFormInfo) {
                     throw new Error("HTTP error calling Sales Rep Commission Flow: " + response.status);
                 }
 
-                const data = await response.json();
-                console.log("Workflow executed successfully", data);
+                await updateUsageFormDetailProcessedFlag(record["leap_usageformdetailid"], true);
         } catch (error) {
             console.error("Workflow call failed:", error);
             errors.push({ usageFormDetailId: record["leap_usageformdetailid"], error: error.message });
@@ -732,5 +731,21 @@ function updateFieldWebApi(usageFormId) {
         );
     } catch (caughtError) {
         success = false;
+    }
+}
+
+async function updateUsageFormDetailProcessedFlag(usageFormDetailId, processed) {
+    const data = {
+        "leap_commissionsprocessed": processed
+    };
+
+    try {
+        const result = await Xrm.WebApi.updateRecord("leap_usageformdetail", usageFormDetailId, data);
+        if (result == null) {
+            throw new Error(`Invalid operation result when attempting to update processed flag for usage form detail with id ${usageFormDetailId}.`);
+        }
+        return result;
+    } catch (error) {
+        throw new Error(`Error updating processed flag for usage form detail ${usageFormDetailId}: ${error.message}`);
     }
 }
