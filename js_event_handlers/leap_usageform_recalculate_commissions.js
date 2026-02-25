@@ -175,6 +175,56 @@ async function deactivateOldSalesRepCommissions(usageFormDetailId) {
     }
 }
 
+async function deactivateOldUsageFormLogs(usageFormId) {
+    var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+        <entity name="leap_log">
+            <attribute name="leap_logid" />
+            <attribute name="leap_name" />
+            <attribute name="createdon" />
+            <order attribute="leap_name" descending="false" />
+            <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+            <condition attribute="leap_usageform" operator="eq" value="${usageFormId}" />
+            </filter>
+        </entity>
+        </fetch>`;
+    fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
+
+    const successes = [];
+    const errors = [];
+
+    try {
+        const logs = await Xrm.WebApi.retrieveMultipleRecords("leap_log", fetchXML);
+        if (logs == null) {
+            throw new Error("Invalid operation result when attempting to fetch usage form Logs.");
+        } else if(logs.entities?.length > 0) {
+            console.log("Deactivating logs for usage form with id: " + usageFormId);
+
+            const promises = logs.entities.map(async (log) => {
+                try {
+                    const result = await Xrm.WebApi.updateRecord("leap_log", log.leap_logid, deactivateData);
+                    if (result == null) {
+                        throw Error(`Invalid operation result when attempting to deactivate log with id ${log.leap_logid}.`);
+                    } else {
+                        successes.push(log.leap_logid);
+                    }
+                } catch(error) {
+                    console.error(`Error updating log with id ${log.leap_logid} to deactivate`);
+                    errors.push(log.leap_logid);
+                }
+            });
+
+            await Promise.all(promises); // wait until all logs are deactivated (in parallel)
+
+            const result = {type: "Log deactivation results", successes: successes, errors: errors};
+            console.log(result);
+            return result;
+        }
+    } catch(error) {
+        throw new Error(`Error deactivating logs for usage form ${usageFormId}: ${error.message}`);
+    }
+}
+
 async function deactivateUsageFormDetails(usageFormId) {
     var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
         <entity name="leap_usageformdetail">
@@ -443,6 +493,7 @@ async function recreateSalesRepCommissions(selectedControlSelectedItemIds) {
 
             Xrm.Utility.showProgressIndicator(PROGRESSRSC_MESSAGES.DELETE);
             await deactivateSalesRepCommissions(usageFormId)
+            await deactivateOldUsageFormLogs(usageFormId);
             const usageFormInfo = await getUsageFormInfo(usageFormId);
 
             Xrm.Utility.showProgressIndicator(PROGRESSRSC_MESSAGES.CREATE);
@@ -470,24 +521,21 @@ async function recreateSalesRepCommissions(selectedControlSelectedItemIds) {
 /*---------- ticket JIRA 908 ---------------*/
 /*  recreating will recalculate seles rep commissions */
 async function recreateSalesRepCommissionSingle(usageFormId) {
-    debugger;
     let success = true;
-    const errors = [];
     try {
         Xrm.Utility.showProgressIndicator(PROGRESSRSC_MESSAGES.DELETE);
         await deactivateSalesRepCommissions(usageFormId)
+        await deactivateOldUsageFormLogs(usageFormId);
         const usageFormInfo = await getUsageFormInfo(usageFormId);
-        debugger;
+
         Xrm.Utility.showProgressIndicator(PROGRESSRSC_MESSAGES.CREATE);
         await createSalesRepCommissions(usageFormInfo)
 
     } catch (caughtError) {
-        debugger;
         success = false;
     }
 
     Xrm.Utility.closeProgressIndicator();
-    debugger;
     if (success) {
         showResultsDialog(RESULTRSC_MESSAGES.SUCCESS);
     } else {
