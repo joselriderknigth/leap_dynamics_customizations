@@ -5,7 +5,7 @@ const PROGRESS_MESSAGES = {
 
 const PROGRESSRSC_MESSAGES = {
     DELETE: "Deactivating Old Sales Rep Commissions",
-    CREATE: "Creating New Sales Rep Commissions"
+    CREATE: "Initializing sales rep commission regeneration"
 };
 
 const RESULT_MESSAGES = {
@@ -18,6 +18,18 @@ const RESULTRSC_MESSAGES = {
     SUCCESS: "Sales Rep Commissions regenerated successfully.",
     MIXED: "Partial success regenerating Sales Rep Commissions. Check console logs for details.",
     FAILURE: "Failed to regenerate Sales Rep Commissions. Check console logs for details."
+};
+
+const JOB_TIMEOUT_SECONDS = 300; // 5 minutes
+const JOB_POLL_INTERVAL_SECONDS = 2; // 2 seconds
+
+const JOB_STATUS = {
+    PENDING: 293360001,
+    IN_PROGRESS: 293360002,
+    SUCCEEDED: 293360003,
+    FAILED: 293360004,
+    CANCELLED: 293360005,
+    RETRYING: 293360006
 };
 
 class UsageFormInfo {
@@ -490,16 +502,22 @@ async function recreateSalesRepCommissions(selectedControlSelectedItemIds) {
     const errors = [];
     for (const usageFormId of selectedControlSelectedItemIds) {
         try {
-
-            Xrm.Utility.showProgressIndicator(PROGRESSRSC_MESSAGES.DELETE);
-            await deactivateSalesRepCommissions(usageFormId)
-            await deactivateOldUsageFormLogs(usageFormId);
-            const usageFormInfo = await getUsageFormInfo(usageFormId);
-
             Xrm.Utility.showProgressIndicator(PROGRESSRSC_MESSAGES.CREATE);
-            await createSalesRepCommissions(usageFormInfo)
-
-            successes.push({ usageFormId: usageFormId, result: "Success" });
+            
+            // Create job record
+            const jobId = await createSalesRepCommissionRegenerationJob(usageFormId);
+            
+            // Call orchestration flow with jobId and usageFormId
+            callRegenerateSalesRepCommissionsOrchestratorFlow(jobId, usageFormId);
+            
+            // Wait for job to complete
+            const jobStatus = await waitForJobCompletion(jobId);
+            
+            if (jobStatus === JOB_STATUS.SUCCEEDED) {
+                successes.push({ usageFormId: usageFormId, jobId: jobId, result: "Success" });
+            } else {
+                errors.push({ usageFormId: usageFormId, jobId: jobId, result: `Job ended with status: ${getJobStatusName(jobStatus)}` });
+            }
         } catch (caughtError) {
             errors.push({ usageFormId: usageFormId, result: caughtError.message });
         }
@@ -515,24 +533,32 @@ async function recreateSalesRepCommissions(selectedControlSelectedItemIds) {
     } else {
         showResultsDialog(RESULTRSC_MESSAGES.MIXED);
     }
-
 }
 
 /*---------- ticket JIRA 908 ---------------*/
 /*  recreating will recalculate seles rep commissions */
 async function recreateSalesRepCommissionSingle(usageFormId) {
     let success = true;
+    let jobId = null;
     try {
-        Xrm.Utility.showProgressIndicator(PROGRESSRSC_MESSAGES.DELETE);
-        await deactivateSalesRepCommissions(usageFormId)
-        await deactivateOldUsageFormLogs(usageFormId);
-        const usageFormInfo = await getUsageFormInfo(usageFormId);
-
         Xrm.Utility.showProgressIndicator(PROGRESSRSC_MESSAGES.CREATE);
-        await createSalesRepCommissions(usageFormInfo)
-
+        
+        // Create job record
+        jobId = await createSalesRepCommissionRegenerationJob(usageFormId);
+        
+        // Call orchestration flow with jobId and usageFormId
+        callRegenerateSalesRepCommissionsOrchestratorFlow(jobId, usageFormId);
+        
+        // Wait for job to complete
+        const jobStatus = await waitForJobCompletion(jobId);
+        
+        if (jobStatus !== JOB_STATUS.SUCCEEDED) {
+            success = false;
+            console.error(`Job ${jobId} ended with status: ${getJobStatusName(jobStatus)}`);
+        }
     } catch (caughtError) {
         success = false;
+        console.error(`Error in recreateSalesRepCommissionSingle: ${caughtError.message}`);
     }
 
     Xrm.Utility.closeProgressIndicator();
@@ -543,186 +569,126 @@ async function recreateSalesRepCommissionSingle(usageFormId) {
     }
 }
 
-async function deactivateSalesRepCommissions(usageFormId) {
-    var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
-        <entity name="leap_usageformdetail">
-        <attribute name="leap_usageformdetailid" />
-        <attribute name="leap_name" />
-        <order attribute="leap_name" descending="false" />
-        <filter type="and">
-            <condition attribute="leap_usageform" operator="eq" value="${usageFormId}"/>
-            <condition attribute="statecode" operator="eq" value="0" />
-        </filter>
-        </entity>
-    </fetch>`;
-    fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
-    const errors = [];
+async function createSalesRepCommissionRegenerationJob(usageFormId) {
+    const jobData = {
+        "leap_UsageForm@odata.bind": `/leap_usageforms(${usageFormId})`,
+        "statuscode": JOB_STATUS.PENDING,
+        "leap_type": 293360007,
+        "leap_progressmessage":  `Initializing sales rep commission regeneration`,
+        "leap_name": `SalesRepCommission Job - ${usageFormId} - ${new Date().toISOString()}`
+    };
+
     try {
-        const usageFormDetails = await Xrm.WebApi.retrieveMultipleRecords("leap_usageformdetail", fetchXML);
-        if (usageFormDetails == null) {
-            throw new Error("Invalid operation result when attempting to retrieve usage form details.");
-        } else if (usageFormDetails.entities.length > 0) {
-           
-            for (const usageFormDetail of usageFormDetails.entities) {
-                const usageFormDetailId = usageFormDetail.leap_usageformdetailid;
-                try {
-                    await deactivateOldSalesRepCommissions(usageFormDetailId);
-                    await updateUsageFormDetailProcessedFlag(usageFormDetailId, false);
-                } catch (error) {
-                    errors.push({ id: usageFormDetailId, error: error.message });
-                }
+        const result = await Xrm.WebApi.createRecord("leap_job", jobData);
+        if (result == null) {
+            throw new Error("Invalid operation result when attempting to create sales rep commission job.");
+        }
+        console.log(`Created sales rep commission job with id: ${result.id}`);
+        return result.id;
+    } catch (error) {
+        throw new Error(`Error creating sales rep commission job for usage form ${usageFormId}: ${error.message}`);
+    }
+}
+
+async function callRegenerateSalesRepCommissionsOrchestratorFlow(jobId, usageFormId) {
+    const flowUrl = await getSalesRepCommissionOrchestrationFlowUrl();
+    if (!flowUrl) {
+        throw new Error("Sales Rep Commission Orchestration Flow URL is empty");
+    }
+
+    const payload = {
+        jobId: jobId,
+        usageFormId: usageFormId,
+        pollingConfig: {
+            intervalSeconds: JOB_POLL_INTERVAL_SECONDS
+        }
+    };
+
+    fetch(flowUrl, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    }).then(response => {
+        if (response.ok) {
+            console.log(`Orchestration flow called successfully for job ${jobId}`);
+        } else {
+            console.error(`Failed to call orchestration flow for job ${jobId}: HTTP ${response.status}`);
+        }
+    }).catch(error => {
+        console.error(`Error calling orchestration flow for job ${jobId}: ${error.message}`);
+    });
+}
+
+async function waitForJobCompletion(jobId) {
+    const startTime = Date.now();
+    const terminalStatuses = [JOB_STATUS.SUCCEEDED, JOB_STATUS.FAILED, JOB_STATUS.CANCELLED];
+
+    while (true) {
+        const elapsedTime = Date.now() - startTime;
+        if (elapsedTime > JOB_TIMEOUT_SECONDS * 1000) {
+            throw new Error(`Job ${jobId} did not complete within ${JOB_TIMEOUT_SECONDS} seconds`);
+        }
+
+        try {
+            const job = await Xrm.WebApi.retrieveRecord("leap_job", jobId, "?$select=statuscode,leap_progressmessage");
+            if (job == null) {
+                throw new Error(`Invalid operation result when attempting to retrieve job ${jobId}`);
             }
 
-            if (errors.length > 0) {
-                console.table(errors);
-                throw new Error("Some sales rep commissions could not be deactivated. Check logs for details.");
+            const currentStatus = job.statuscode;
+            const progressMessage = job.leap_progressmessage || "Processing...";
+            console.log(`Job ${jobId} status: ${getJobStatusName(currentStatus)}, progress: ${progressMessage}`);
+            Xrm.Utility.showProgressIndicator(progressMessage);
+
+            if (terminalStatuses.includes(currentStatus)) {
+                return currentStatus;
             }
+
+            // Wait before polling again
+            await sleep(JOB_POLL_INTERVAL_SECONDS * 1000);
+        } catch (error) {
+            throw new Error(`Error polling job status for ${jobId}: ${error.message}`);
         }
-    } catch (error) {
-        // console.error(`Error retrieving or deleting usage form details for usage form ID ${usageFormId}: ${error.message}`);
-        throw error;
     }
+}
+
+function sleep(milliseconds) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+function getJobStatusName(status) {
+    const statusMap = {
+        [JOB_STATUS.PENDING]: "Pending",
+        [JOB_STATUS.IN_PROGRESS]: "In Progress",
+        [JOB_STATUS.SUCCEEDED]: "Succeeded",
+        [JOB_STATUS.FAILED]: "Failed",
+        [JOB_STATUS.CANCELLED]: "Cancelled",
+        [JOB_STATUS.RETRYING]: "Retrying"
+    };
+    return statusMap[status] || "Unknown";
 }
 
 function hasValue(val) {
     return val !== null && val !== undefined;
 }
 
-async function createSalesRepCommissions(usageFormInfo) {
-    const errors = [];
-    let fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
-        <entity name="leap_usageformdetail">
-        <attribute name="leap_usageformdetailid"/>
-        <attribute name="leap_name"/>
-        <attribute name="createdon"/>
-        <attribute name="leap_product"/>
-        <attribute name="leap_supplier"/>
-            <attribute name="leap_io"/>
-        <attribute name="leap_overrideprice"/>
-        <attribute name="leap_unitpriceoverride"/>
-        <attribute name="leap_unitprice"/>
-        <attribute name="leap_usageform"/>
-        <attribute name="leap_totalafteradjustments"/>
-        <filter type="and">
-            <condition attribute="leap_usageform" operator="eq" value="${usageFormInfo.id}"/>
-            <condition attribute="statecode" operator="eq" value="0" />
-        </filter>
-        <order attribute="leap_name" descending="false"/>
-        <!-- Product -->
-        <link-entity name="product" from="productid" to="leap_product" link-type="inner" alias="aa">
-            <attribute name="leap_manufacturer"/>
-            <attribute name="producttypecode" />
-            <attribute name="parentproductid"/>
-        </link-entity>
-        <!-- Usage Form -->
-        <link-entity name="leap_usageform" from="leap_usageformid" to="leap_usageform" link-type="inner" alias="ab">
-            <attribute name="leap_purchaseordernumber"/>
-            <attribute name="leap_surgeon"/>
-            <attribute name="leap_hospital"/>
-            <!-- Case -->
-            <link-entity name="leap_case" from="leap_caseid" to="leap_case" link-type="inner" alias="ac">
-            <attribute name="leap_casedate"/>
-            </link-entity>
-        </link-entity>
-            <!-- Supplier Commission -->
-        <link-entity
-            name="leap_suppliercommission"
-            from="leap_usageformdetail"
-            to="leap_usageformdetailid"
-            link-type="outer"
-            alias="sc">
-            <attribute name="leap_commissionratepercent"/>
-            <filter type="and">
-            <condition attribute="statecode" operator="eq" value="0"/>
-            </filter>
-        </link-entity>    
-        </entity>
-        </fetch>`;
-
-    fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
-    
-    const flowUrl = await getSalesRepFlowUrl();
-    if (!flowUrl) {
-        throw new Error("Sales Rep Commission Flow URL is empty");
-    }
-
-    const usagefdetails = await Xrm.WebApi.retrieveMultipleRecords("leap_usageformdetail", fetchXML);
-    if (usagefdetails == null) {
-        throw new Error("Invalid operation result when attempting to retrieve UFDs.");
-    }
-    if (usagefdetails.entities.length == 0) {
-        throw new Error("Found 0 valid UFDs to generate sales rep commssions.");
-    } 
-
-    // process each UFD in parallel
-    const promises = usagefdetails.entities.map(async (record) => {
-        try {
-            const comissionrate_real = record["aa.producttypecode"] == 2 ? record["sc.leap_commissionratepercent"] : 0.0;
-
-            let realUnitPrice = record["leap_unitprice"];
-            if ((record["leap_io"] === 1 && hasValue(record["leap_overrideprice"])) ||
-                hasValue(record["leap_unitpriceoverride"])
-            ) {
-                realUnitPrice = hasValue(record["leap_overrideprice"])
-                    ? record["leap_overrideprice"]
-                    : record["leap_unitpriceoverride"];
-            }
-
-            const payload = {
-                    criteria: {
-                        product: record["_leap_product_value"],
-                        productFamily: record["aa.parentproductid"],
-                        supplier: record["_leap_supplier_value"],
-                        manufacturer: record["aa.leap_manufacturer"],
-                        hospital: record["ab.leap_hospital"],
-                        physician: record["ab.leap_surgeon"],
-                        usageDate: record["ac.leap_casedate"]
-                    },
-                    unitPrice: realUnitPrice,
-                    totalAfterAdjustments: record["leap_totalafteradjustments"],
-                    supplierCommissionRate: comissionrate_real,
-                    poNumber: record["ab.leap_purchaseordernumber"],
-                    reference: {
-                        entityName: "leap_usageformdetail",
-                        entityId: record["leap_usageformdetailid"]
-                    }
-                };
-
-                const response = await fetch(flowUrl, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) {
-                    throw new Error("HTTP error calling Sales Rep Commission Flow: " + response.status);
-                }
-
-                await updateUsageFormDetailProcessedFlag(record["leap_usageformdetailid"], true);
-        } catch (error) {
-            console.error("Workflow call failed:", error);
-            errors.push({ usageFormDetailId: record["leap_usageformdetailid"], error: error.message });
-        }
-
-
-    });
-
-    await Promise.all(promises); // await all calls to finish before proceeding
-
-    if (errors.length > 0) {
-        console.table(errors);
-        throw new Error("Some Sales Rep Commissions could not be created. Check logs for details.");
-    }
-}
-
 let cachedFlowUrl = null;
+let cachedOrchestrationFlowUrl = null;
 
 async function getSalesRepFlowUrl() {
     if (!cachedFlowUrl) {
         cachedFlowUrl = await getEnvironmentVariableValue("leap_salesrepcommissionurl");
     }
     return cachedFlowUrl;
+}
+
+async function getSalesRepCommissionOrchestrationFlowUrl() {
+    if (!cachedOrchestrationFlowUrl) {
+        cachedOrchestrationFlowUrl = await getEnvironmentVariableValue("leap_EV_ASYNC_UF_REGEN_REP_COMMISSION_FLOW_URL");
+    }
+    return cachedOrchestrationFlowUrl;
 }
 
 function getEnvironmentVariableValue(schemaName) {
@@ -797,3 +763,4 @@ async function updateUsageFormDetailProcessedFlag(usageFormDetailId, processed) 
         throw new Error(`Error updating processed flag for usage form detail ${usageFormDetailId}: ${error.message}`);
     }
 }
+
