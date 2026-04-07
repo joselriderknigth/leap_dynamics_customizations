@@ -12,6 +12,7 @@ public class SeedDataConfig
     public Guid SubjectId { get; init; }
     public Guid UnitGroupId { get; init; }
     public Guid UnitId { get; init; }
+    public Guid TeamId { get; init; }
 
     public static SeedDataConfig Load(IConfiguration config) =>
         new()
@@ -39,6 +40,9 @@ public class SeedDataConfig
             ),
             UnitId = Guid.Parse(
                 config["DEFAULT_UNIT_ID"] ?? throw new Exception("Missing DEFAULT_UNIT_ID")
+            ),
+            TeamId = Guid.Parse(
+                config["DEFAULT_TEAM_ID"] ?? throw new Exception("Missing DEFAULT_TEAM_ID")
             ),
         };
 }

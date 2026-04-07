@@ -5,37 +5,40 @@ namespace E2E.Api.Tests.Config
     public record SalesRepContractConfig
     {
         // Required fields
+        public required int ContractType { get; init; }
         public required int StatusCode { get; init; }
-        public required string Name { get; init; }
-        public required Guid SalesRepId { get; init; }
-        public required Guid EntityId { get; init; }
-        public required DateTime EffectiveStartDate { get; init; }
+        public required decimal MaxCommissionRate { get; init; }
+        public required decimal MinCommissionRate { get; init; }
+        public required DateTime StartDate { get; init; }
         public required Guid OwnerId { get; init; }
 
         // Optional fields
-        public DateTime? EffectiveEndDate { get; init; }
-        public Guid? CommissionPayeeId { get; init; }
-        public string? SalesCategory { get; init; }
-        public decimal? CommissionSplit { get; init; }
-        public bool? AllPhysicians { get; init; }
-        public bool? AllHospitals { get; init; }
+        public string? ContractNumber { get; init; }
+        public string? Name { get; init; }
+        public int? RepRole { get; init; }
+        public bool? Salaried { get; init; }
+        public DateTime? EndDate { get; init; }
+        public Guid? ExternalRepId { get; init; }
+        public Guid? DistributorId { get; init; }
+        public Guid? ExternalAgentId { get; init; }
+        public Guid? SalesRepId { get; init; }
 
         public static SalesRepContractConfig Default(
-            string name,
-            Guid salesRepId,
-            Guid entityId,
-            DateTime effectiveStartDate,
-            Guid ownerId,
-            int statusCode = 1
+            int contractType,
+            int statusCode,
+            decimal minCommissionRate,
+            decimal maxCommissionRate,
+            DateTime startDate,
+            Guid ownerId
         )
         {
             return new SalesRepContractConfig
             {
+                ContractType = contractType,
                 StatusCode = statusCode,
-                Name = name,
-                SalesRepId = salesRepId,
-                EntityId = entityId,
-                EffectiveStartDate = effectiveStartDate,
+                MinCommissionRate = minCommissionRate,
+                MaxCommissionRate = maxCommissionRate,
+                StartDate = startDate,
                 OwnerId = ownerId,
             };
         }

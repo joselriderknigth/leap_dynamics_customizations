@@ -36,20 +36,31 @@ namespace E2E.Api.Tests.Fixtures
             _repCommissions = new SalesRepCommissionService(client);
         }
 
-        public async Task<Guid> SetupAsync(Guid hospitalId, Guid physicianId, Guid procedureId)
+        public async Task<Guid> SetupAsync(
+            Guid hospitalId,
+            Guid physicianId,
+            Guid procedureId,
+            string? patientId = null,
+            DateTime? caseStartTime = null
+        )
         {
             var casePayload = new Dictionary<string, object>
             {
                 ["leap_Hospital@odata.bind"] = $"/accounts({hospitalId})",
                 ["leap_Surgeon@odata.bind"] = $"/contacts({physicianId})",
                 ["leap_Procedure@odata.bind"] = $"/leap_procedures({procedureId})",
-                ["leap_casestarttime"] = DateTime.UtcNow.ToString("o"),
+                ["leap_casestarttime"] =
+                    caseStartTime?.ToString("o") ?? DateTime.UtcNow.ToString("o"),
                 ["leap_SalesPerson@odata.bind"] = $"/systemusers({_config.OwnerUserId})",
                 ["ownerid@odata.bind"] = $"/systemusers({_config.OwnerUserId})",
                 ["leap_notes"] = _config.CorrelationId,
                 ["statecode"] = _config.DefaultStateCode,
                 ["statuscode"] = _config.DefaultStatusCode,
             };
+
+            if (!string.IsNullOrEmpty(patientId))
+                casePayload["leap_patientid"] = patientId;
+
             var id = await _cases.CreateAsync(casePayload);
             _createdIds.Add(id);
             return id;

@@ -47,6 +47,39 @@ namespace E2E.Api.Tests.Fixtures
             return id;
         }
 
+        public async Task<Guid> SetupManufacturerAsync(int? SalesCategory = null)
+        {
+            var manufacturerPayload = new Dictionary<string, object>
+            {
+                ["name"] = $"Test Manufacturer {_config.CorrelationId}",
+                ["ownerid@odata.bind"] = $"/systemusers({_config.OwnerUserId})",
+                ["statecode"] = 0,
+            };
+
+            if (SalesCategory.HasValue)
+            {
+                manufacturerPayload["new_salescategory"] = SalesCategory.Value;
+            }
+
+            var id = await _accounts.CreateAsync(manufacturerPayload);
+            _createdIds.Add(id);
+            return id;
+        }
+
+        public async Task<Guid> SetupDistributorAsync()
+        {
+            var distributorPayload = new Dictionary<string, object>
+            {
+                ["name"] = $"Test Distributor {_config.CorrelationId}",
+                ["ownerid@odata.bind"] = $"/systemusers({_config.OwnerUserId})",
+                ["statecode"] = 0,
+            };
+
+            var id = await _accounts.CreateAsync(distributorPayload);
+            _createdIds.Add(id);
+            return id;
+        }
+
         public async Task CleanupAsync()
         {
             foreach (var id in _createdIds)

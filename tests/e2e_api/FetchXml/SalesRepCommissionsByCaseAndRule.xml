@@ -1,0 +1,58 @@
+<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+  <entity name="leap_salesrepcommission">
+    <attribute name="leap_salesrepcommissionid" />
+    <attribute name="leap_name" />
+    <attribute name="createdon" />
+    <attribute name="leap_usageformdetailtotal" />
+    <attribute name="leap_usageformdetailid" />
+    <attribute name="leap_totalrebates" />
+    <attribute name="leap_totalgpos" />
+    <attribute name="leap_suppliercommission" />
+    <attribute name="statuscode" />
+    <attribute name="leap_salesrepcontract" />
+    <attribute name="leap_salesrepcommissionruleid" />
+    <attribute name="leap_salesrepid" />
+    <attribute name="leap_purchaseordernumber" />
+    <attribute name="owningbusinessunit" />
+    <attribute name="ownerid" />
+    <attribute name="leap_leappaiddate" />
+    <attribute name="leap_externalsalesrepid" />
+    <attribute name="leap_externalagent" />
+    <attribute name="leap_distributorpaiddate" />
+    <attribute name="leap_distributorid" />
+    <attribute name="leap_deductions" />
+    <attribute name="leap_costmargin" />
+    <attribute name="leap_commissiontype" />
+    <attribute name="leap_commissionratepercent" />
+    <attribute name="leap_commissionratemoney" />
+    <attribute name="leap_casesurgeon" />
+    <attribute name="leap_caseprocedure" />
+    <attribute name="leap_casepatientid" />
+    <attribute name="leap_casehospital" />
+    <attribute name="leap_casedatetime" />
+    <attribute name="leap_salescategory" />
+    <order attribute="leap_name" descending="false" />
+    <filter type="and">
+      <condition attribute="leap_salesrepcommissionruleid" operator="eq" value="{RULE_ID}" />
+    </filter>
+    <link-entity
+      name="leap_usageformdetail"
+      from="leap_usageformdetailid"
+      to="leap_usageformdetailid"
+      link-type="inner"
+      alias="ae"
+    >
+      <link-entity
+        name="leap_usageform"
+        from="leap_usageformid"
+        to="leap_usageform"
+        link-type="inner"
+        alias="af"
+      >
+        <filter type="and">
+          <condition attribute="leap_case" operator="eq" value="{CASE_ID}" />
+        </filter>
+      </link-entity>
+    </link-entity>
+  </entity>
+</fetch>

@@ -30,6 +30,7 @@
     <attribute name="leap_casepatientid" />
     <attribute name="leap_casehospital" />
     <attribute name="leap_casedatetime" />
+    <attribute name="leap_salescategory" />
     <order attribute="leap_name" descending="false" />
     <link-entity
       name="leap_usageformdetail"

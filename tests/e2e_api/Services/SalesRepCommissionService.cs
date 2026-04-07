@@ -22,6 +22,15 @@ namespace E2E.Api.Tests.Services
             return await Client.GetMultipleByFetchXmlAsync("leap_salesrepcommissions", fetchXml);
         }
 
+        public async Task<List<JsonElement>> GetByCaseAndRuleAsync(Guid caseId, Guid ruleId)
+        {
+            var fetchXml = FetchXmlUtils
+                .LoadFetchXml("FetchXml/SalesRepCommissionsByCaseAndRule.xml")
+                .Replace("{CASE_ID}", caseId.ToString())
+                .Replace("{RULE_ID}", ruleId.ToString());
+            return await Client.GetMultipleByFetchXmlAsync("leap_salesrepcommissions", fetchXml);
+        }
+
         public async Task DeleteByCaseIdAsync(Guid caseId)
         {
             var commissions = await GetByCaseAsync(caseId);

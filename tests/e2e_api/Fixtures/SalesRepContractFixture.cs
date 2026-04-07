@@ -23,34 +23,40 @@ namespace E2E.Api.Tests.Fixtures
         {
             var payload = new Dictionary<string, object>
             {
-                ["statuscode"] = cfg.StatusCode,
-                ["leap_name"] = cfg.Name,
-                ["leap_SalesRep@odata.bind"] = $"/systemusers({cfg.SalesRepId})",
-                ["leap_Entity@odata.bind"] = $"/accounts({cfg.EntityId})",
-                ["leap_effectivestartdate"] = cfg.EffectiveStartDate.ToString("yyyy-MM-dd"),
+                ["statecode"] = cfg.StatusCode,
+                ["leap_contracttype"] = cfg.ContractType,
+                ["leap_maxcommissionrate"] = cfg.MaxCommissionRate,
+                ["leap_mincommissionrate"] = cfg.MinCommissionRate,
+                ["leap_startdate"] = cfg.StartDate.ToString("yyyy-MM-dd"),
                 ["ownerid@odata.bind"] = $"/systemusers({cfg.OwnerId})",
             };
 
-            if (cfg.EffectiveEndDate.HasValue)
-                payload["leap_effectiveenddate"] = cfg.EffectiveEndDate.Value.ToString(
-                    "yyyy-MM-dd"
-                );
+            if (cfg.ContractNumber != null)
+                payload["leap_contractnumber"] = cfg.ContractNumber;
 
-            if (cfg.CommissionPayeeId.HasValue)
-                payload["leap_CommissionPayee@odata.bind"] =
-                    $"/accounts({cfg.CommissionPayeeId.Value})";
+            if (cfg.Name != null)
+                payload["leap_name"] = cfg.Name;
 
-            if (cfg.SalesCategory != null)
-                payload["leap_salescategory"] = cfg.SalesCategory;
+            if (cfg.RepRole.HasValue)
+                payload["leap_reprole"] = cfg.RepRole.Value;
 
-            if (cfg.CommissionSplit.HasValue)
-                payload["leap_commissionsplit"] = cfg.CommissionSplit.Value;
+            if (cfg.Salaried.HasValue)
+                payload["leap_salaried"] = cfg.Salaried.Value;
 
-            if (cfg.AllPhysicians.HasValue)
-                payload["leap_allphysicians"] = cfg.AllPhysicians.Value;
+            if (cfg.EndDate.HasValue)
+                payload["leap_enddate"] = cfg.EndDate.Value.ToString("yyyy-MM-dd");
 
-            if (cfg.AllHospitals.HasValue)
-                payload["leap_allhospitals"] = cfg.AllHospitals.Value;
+            if (cfg.ExternalRepId.HasValue)
+                payload["leap_ContactId@odata.bind"] = $"/contacts({cfg.ExternalRepId.Value})";
+
+            if (cfg.DistributorId.HasValue)
+                payload["leap_DistributorId@odata.bind"] = $"/accounts({cfg.DistributorId.Value})";
+
+            if (cfg.ExternalAgentId.HasValue)
+                payload["leap_ExternalAgent@odata.bind"] = $"/systemusers({cfg.ExternalAgentId.Value})";
+
+            if (cfg.SalesRepId.HasValue)
+                payload["leap_SalesRepId@odata.bind"] = $"/systemusers({cfg.SalesRepId.Value})";
 
             var id = await _salesRepContracts.CreateAsync(payload);
             _createdIds.Add(id);

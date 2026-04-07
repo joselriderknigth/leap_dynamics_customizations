@@ -115,7 +115,7 @@ namespace E2E.Api.Tests.Tests
                 ) with
                 {
                     Quantity = 2,
-                    ProductType = OptionSetValues.CaseProductConfig.ProductType.StockAndBill,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.StockAndBill,
                     IsHospitalOwned = true,
                     UnitPrice = 150.00m,
                 }
@@ -250,7 +250,7 @@ namespace E2E.Api.Tests.Tests
                 ) with
                 {
                     Quantity = 2,
-                    ProductType = OptionSetValues.CaseProductConfig.ProductType.Consignment,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
                     IsHospitalOwned = true,
                     UnitPrice = 150.00m,
                 }
@@ -387,7 +387,7 @@ namespace E2E.Api.Tests.Tests
                 ) with
                 {
                     Quantity = 2,
-                    ProductType = OptionSetValues.CaseProductConfig.ProductType.Consignment,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
                     IsHospitalOwned = true,
                     UnitPrice = 150.00m,
                 }
@@ -532,7 +532,7 @@ namespace E2E.Api.Tests.Tests
                 ) with
                 {
                     Quantity = 2,
-                    ProductType = OptionSetValues.CaseProductConfig.ProductType.Consignment,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
                     IsHospitalOwned = true,
                     UnitPrice = 150.00m,
                 }

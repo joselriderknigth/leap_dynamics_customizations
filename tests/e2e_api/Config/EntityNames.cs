@@ -23,5 +23,8 @@ namespace E2E.Api.Tests.Config
 
         public const string SalesAdjustmentRule = "leap_salesadjustmentrule";
         public const string SalesAdjustment = "leap_salesadjustment";
+
+        public const string SystemUser = "systemuser";
+        public const string Team = "team";
     }
 }
