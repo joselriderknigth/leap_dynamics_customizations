@@ -5,7 +5,7 @@ const PROGRESS_MESSAGES = {
 
 const PROGRESSRSC_MESSAGES = {
     DELETE: "Deactivating Old Sales Rep Commissions",
-    CREATE: "Initializing sales rep commission regeneration"
+    CREATE: "Initializing Sales Rep Commission Regeneration"
 };
 
 const RESULT_MESSAGES = {
@@ -16,8 +16,8 @@ const RESULT_MESSAGES = {
 
 const RESULTRSC_MESSAGES = {
     SUCCESS: "Sales Rep Commissions regenerated successfully.",
-    MIXED: "Partial success regenerating Sales Rep Commissions. Check console logs for details.",
-    FAILURE: "Failed to regenerate Sales Rep Commissions. Check console logs for details."
+    MIXED: "Partial success regenerating Sales Rep Commissions. Check Jobs & Logs for details.",
+    FAILURE: "Failed to regenerate Sales Rep Commissions. Check Jobs & Logs for details."
 };
 
 const JOB_TIMEOUT_SECONDS = 300; // 5 minutes
@@ -41,6 +41,15 @@ class UsageFormInfo {
         this.poNumber = poNumber;
         this.howned = howned;
         this.caseDate = caseDate;
+    }
+}
+
+class UsageFormDetailInfo {
+    constructor(id, caseProductId, isIo, isHospitalOwned) {
+        this.id = id;
+        this.caseProductId = caseProductId;
+        this.isIo = isIo;
+        this.isHospitalOwned = isHospitalOwned;
     }
 }
 
@@ -237,27 +246,12 @@ async function deactivateOldUsageFormLogs(usageFormId) {
     }
 }
 
-async function deactivateUsageFormDetails(usageFormId) {
-    var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
-        <entity name="leap_usageformdetail">
-        <attribute name="leap_usageformdetailid" />
-        <attribute name="leap_name" />
-        <order attribute="leap_name" descending="false" />
-        <filter type="and">
-            <condition attribute="leap_usageform" operator="eq" value="${usageFormId}"/>
-            <condition attribute="statecode" operator="eq" value="0" />
-        </filter>
-        </entity>
-    </fetch>`;
-    fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
+async function deactivateUsageFormDetails(usageFormDetails) {
 
     try {
-        const usageFormDetails = await Xrm.WebApi.retrieveMultipleRecords("leap_usageformdetail", fetchXML);
-        if (usageFormDetails == null) {
-            throw new Error("Invalid operation result when attempting to retrieve usage form details.");
-        } else if(usageFormDetails.entities.length > 0) {
+        if(usageFormDetails.length > 0) {
             const errors = [];
-            for(const usageFormDetail of usageFormDetails.entities) {
+            for(const usageFormDetail of usageFormDetails) {
                 const usageFormDetailId = usageFormDetail.leap_usageformdetailid;
                 try {
                     await deactivateOldSalesAdjustments(usageFormDetailId);
@@ -297,6 +291,82 @@ function getUsageFormInfo(usageFormId) {
             return new UsageFormInfo(result.leap_usageformid, result.leap_Supplier.accountid, result.leap_newsuppliername, result.owninguser.systemuserid, result.leap_purchaseordernumber, result.leap_hospitalowned, result.leap_surgerydate);
         }).catch(error => {
             throw Error(`Error retrieving usage form with with id ${usageFormId}: ${error.message}`);
+        });
+}
+
+
+async function getUsageFormDetails(usageFormId) {
+    var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+        <entity name="leap_usageformdetail">
+        <attribute name="leap_usageformdetailid" />
+        <attribute name="leap_name" />
+        <attribute name="leap_io" />
+        <attribute name="leap_hospitalowned" />
+        <attribute name="leap_caseproduct" />
+        <order attribute="leap_name" descending="false" />
+        <filter type="and">
+            <condition attribute="leap_usageform" operator="eq" value="${usageFormId}"/>
+            <condition attribute="statecode" operator="eq" value="0" />
+        </filter>
+        </entity>
+    </fetch>`;
+    fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
+
+    try {
+        const usageFormDetails = await Xrm.WebApi.retrieveMultipleRecords("leap_usageformdetail", fetchXML);
+        if (usageFormDetails == null) {
+            throw new Error("Invalid operation result when attempting to retrieve usage form details.");
+        }
+
+        return usageFormDetails.entities;
+    } catch(error) {
+        throw new Error(`Error retrieving usage form details for usage form ID ${usageFormId}: ${error.message}`);
+    }
+}
+
+function processHospitalOwnedCaseProduct(usageFormInfo, caseProduct, processAsIo) {
+    const extendedPrice = processAsIo ?
+        caseProduct.leap_overrideprice ?? caseProduct.leap_unitpriceoverride ?? caseProduct.leap_unitprice :
+        caseProduct.leap_unitpriceoverride ?? caseProduct.leap_unitprice;
+
+    const usageFormDetailData = {
+        "leap_UsageForm@odata.bind": `/leap_usageforms(${usageFormInfo.id})`,
+        "owninguser@odata.bind": `/systemusers(${usageFormInfo.ownerId})`,
+        "ownerid@odata.bind": `/systemusers(${usageFormInfo.ownerId})`,
+        "leap_CaseProduct@odata.bind": `/leap_caseproducts(${caseProduct.leap_caseproductid})`,
+        ...(caseProduct._leap_productid_value != null && {"leap_Product@odata.bind": `/products(${caseProduct._leap_productid_value})`}),
+        ...(caseProduct._leap_supplier_value != null && {"leap_Supplier@odata.bind": `/accounts(${caseProduct._leap_supplier_value})`}),
+        "leap_newproductname": caseProduct.leap_newproductname,
+        "leap_newsuppliername": caseProduct.leap_newsuppliername,
+        "leap_qty": 1,
+        "leap_io": processAsIo,
+        "leap_unitpriceoverride": caseProduct.leap_unitpriceoverride,
+        "leap_unitpriceoverridereason": caseProduct.leap_unitpriceoverridereason,
+        "leap_restock": caseProduct.leap_restock,
+        "leap_hospitalowned": true,        
+        "leap_producttype": caseProduct.leap_producttype,
+        ...(processAsIo && {"leap_discountpercent": caseProduct.leap_discountpercent}),
+        ...(processAsIo && {"leap_overrideprice": caseProduct.leap_overrideprice}),
+        ...(processAsIo && {"leap_overridepricereason": caseProduct.leap_overridepricereason}),
+        "leap_catalognumber": caseProduct._leap_productid_value != null ? caseProduct.leap_catalognumber : caseProduct.leap_newproductid,
+        "leap_lotnumber": caseProduct.leap_lotnumber,
+        "leap_serialnumber": caseProduct.leap_serialnumber,
+        "leap_expirationdate": caseProduct.leap_expirationdate,
+        "leap_unitprice": caseProduct.leap_unitprice,
+        "leap_extendedprice": extendedPrice,
+        "leap_casedate": usageFormInfo.caseDate,
+    }
+
+    return Xrm.WebApi.createRecord("leap_usageformdetail", usageFormDetailData)
+        .then(result => {
+            if (result == null) {
+                throw new Error("Invalid operation result when attempting to create hospital owned UFD");
+            } else {
+                console.log(`Created hospital owned UFD with id: ${result.id}`);
+                return result;
+            }
+        }).catch(error => {
+            throw error;
         });
 }
 
@@ -342,60 +412,70 @@ function processCaseProduct(usageFormInfo, caseProduct, processAsIo) {
         });
 }
 
-async function createUsageFormDetails(usageFormInfo) {
+async function createHospitalOwnedUsageFormDetails(usageFormInfo, prevUsageFormDetailInfo) {
     try {
-         debugger;
-        const supplierCondition = usageFormInfo.supplierId != null ?
-            `<condition attribute="leap_supplier" operator="eq" value="${usageFormInfo.supplierId}"/>` :
-            `<condition attribute="leap_newsuppliername" operator="eq" value="${usageFormInfo.supplierName}"/>`;
-        const hoCondition = usageFormInfo.howned == true ?
-             `<condition attribute="leap_hospitalowned" operator="eq" value="${usageFormInfo.howned}"/>` :
-             `<filter type="or">
-                 <condition attribute="leap_hospitalowned" operator="eq" value="0" />
-                 <condition attribute="leap_hospitalowned" operator="null" />
-              </filter>`;
-        var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="true">
-            <entity name="leap_caseproduct">
-            <attribute name="leap_caseproductid" />
-            <attribute name="leap_supplier"/>
-            <attribute name="leap_productid"/>
-            <attribute name="leap_quantity"/>
-            <attribute name="leap_io"/>
-            <attribute name="leap_restock"/>
-            <attribute name="leap_hospitalowned"/>            
-            <attribute name="leap_ioquantity" />
-            <attribute name="leap_discountpercent" />
-            <attribute name="leap_overrideprice" />
-            <attribute name="leap_overridepricereason" />
-            <attribute name="leap_unitprice" />
-            <attribute name="leap_caseextendedprice" />
-            <attribute name="leap_producttype" />
-            <attribute name="leap_catalognumber" />
-            <attribute name="leap_lotnumber" />
-            <attribute name="leap_serialnumber" />
-            <attribute name="leap_expirationdate" />
-            <attribute name="leap_unitpriceoverride" />
-            <attribute name="leap_newsuppliername" />
-            <attribute name="leap_newproductname" />
-            <attribute name="leap_newproductid" />
-            <attribute name="leap_unitpriceoverridereason" />
-            <order attribute="leap_name" descending="false" />
-            <filter type="and">
-                <condition attribute="statecode" operator="eq" value="0" />
-                ${supplierCondition}
-                 ${hoCondition}
-            </filter>
-            <link-entity name="leap_case" from="leap_caseid" to="leap_caseid" link-type="inner" alias="aa">
-                <link-entity name="leap_usageform" from="leap_case" to="leap_caseid" link-type="inner" alias="ab">
-                <filter type="and">
-                    <condition attribute="leap_usageformid" operator="eq" value="${usageFormInfo.id}"/>
-                </filter>
-                </link-entity>
-            </link-entity>
-            </entity>
-        </fetch>`;
-        fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
+        const caseProduct = await Xrm.WebApi.retrieveRecord("leap_caseproduct", prevUsageFormDetailInfo.caseProductId);
+        if(caseProduct == null) {
+            throw new Error(`Invalid operation result when attempting to retrieve case product with id: ${prevUsageFormDetailInfo.caseProductId}.`);
+        } else {
+            await processHospitalOwnedCaseProduct(usageFormInfo, caseProduct, prevUsageFormDetailInfo.isIo);
+        }
+    } catch (error) {
+        throw new Error(`Error creating hospital owned UFD for case product with id: ${prevUsageFormDetailInfo.caseProductId}: ${error.message}`);
+    }
+}
 
+async function createUsageFormDetails(usageFormInfo) {
+    const supplierCondition = usageFormInfo.supplierId != null ?
+        `<condition attribute="leap_supplier" operator="eq" value="${usageFormInfo.supplierId}"/>` :
+        `<condition attribute="leap_newsuppliername" operator="eq" value="${usageFormInfo.supplierName}"/>`;
+
+    var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="true">
+        <entity name="leap_caseproduct">
+        <attribute name="leap_caseproductid" />
+        <attribute name="leap_supplier"/>
+        <attribute name="leap_productid"/>
+        <attribute name="leap_quantity"/>
+        <attribute name="leap_io"/>
+        <attribute name="leap_restock"/>
+        <attribute name="leap_hospitalowned"/>            
+        <attribute name="leap_ioquantity" />
+        <attribute name="leap_discountpercent" />
+        <attribute name="leap_overrideprice" />
+        <attribute name="leap_overridepricereason" />
+        <attribute name="leap_unitprice" />
+        <attribute name="leap_caseextendedprice" />
+        <attribute name="leap_producttype" />
+        <attribute name="leap_catalognumber" />
+        <attribute name="leap_lotnumber" />
+        <attribute name="leap_serialnumber" />
+        <attribute name="leap_expirationdate" />
+        <attribute name="leap_unitpriceoverride" />
+        <attribute name="leap_newsuppliername" />
+        <attribute name="leap_newproductname" />
+        <attribute name="leap_newproductid" />
+        <attribute name="leap_unitpriceoverridereason" />
+        <order attribute="leap_name" descending="false" />
+        <filter type="and">
+            <condition attribute="statecode" operator="eq" value="0" />
+            ${supplierCondition}
+            <filter type="or">
+                <condition attribute="leap_hospitalowned" operator="eq" value="0" />
+                <condition attribute="leap_hospitalowned" operator="null" />
+            </filter>
+        </filter>
+        <link-entity name="leap_case" from="leap_caseid" to="leap_caseid" link-type="inner" alias="aa">
+            <link-entity name="leap_usageform" from="leap_case" to="leap_caseid" link-type="inner" alias="ab">
+            <filter type="and">
+                <condition attribute="leap_usageformid" operator="eq" value="${usageFormInfo.id}"/>
+            </filter>
+            </link-entity>
+        </link-entity>
+        </entity>
+    </fetch>`;
+    fetchXML = "?fetchXml=" + encodeURIComponent(fetchXML);
+
+    try {
         const caseProducts = await Xrm.WebApi.retrieveMultipleRecords("leap_caseproduct", fetchXML);
         if(caseProducts == null) {
             throw new Error("Invalid operation result when attempting to retrieve case products.");
@@ -444,13 +524,28 @@ async function recreateUsageFormDetails(selectedControlSelectedItemIds) {
     const errors = [];
     for(const usageFormId of selectedControlSelectedItemIds) {
         try {
-            Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.DELETE);
-            await deactivateUsageFormDetails(usageFormId)
             const usageFormInfo = await getUsageFormInfo(usageFormId);
-            Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.CREATE);
-            await createUsageFormDetails(usageFormInfo)
+            const usageFormDetails = await getUsageFormDetails(usageFormId);
 
-          const usageFormUpda = await updateFieldWebApi(usageFormId);
+            Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.DELETE);
+            await deactivateUsageFormDetails(usageFormDetails);
+
+            const isHospitalOwned = usageFormInfo.howned ?? false;
+            const prevHOUsageFormDetail = isHospitalOwned && new UsageFormDetailInfo(
+                usageFormDetails[0].leap_usageformdetailid,
+                usageFormDetails[0]._leap_caseproduct_value,
+                usageFormDetails[0].leap_io ?? false,
+                usageFormDetails[0].leap_hospitalowned ?? false
+            )
+
+            Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.CREATE);
+            if(isHospitalOwned) {
+                await createHospitalOwnedUsageFormDetails(usageFormInfo, prevHOUsageFormDetail);
+            } else {
+                await createUsageFormDetails(usageFormInfo);
+            }
+
+            await resetUsageFormBCPullStatus(usageFormId);
 
             successes.push({usageFormId: usageFormId, result: "Success"});
         } catch(caughtError) {
@@ -478,11 +573,29 @@ async function recreateUsageFormDetailsSingle(usageFormId) {
     let success = true;
     const errors = [];
     try {
-        Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.DELETE);
-        await deactivateUsageFormDetails(usageFormId)
         const usageFormInfo = await getUsageFormInfo(usageFormId);
+        const usageFormDetails = await getUsageFormDetails(usageFormId);
+        
+        Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.DELETE);
+        await deactivateUsageFormDetails(usageFormDetails);
+
+        const isHospitalOwned = usageFormInfo.howned ?? false;
+        const prevHOUsageFormDetail = isHospitalOwned && new UsageFormDetailInfo(
+            usageFormDetails[0].leap_usageformdetailid,
+            usageFormDetails[0]._leap_caseproduct_value,
+            usageFormDetails[0].leap_io ?? false,
+            usageFormDetails[0].leap_hospitalowned ?? false
+        )
+        
         Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.CREATE);
-        await createUsageFormDetails(usageFormInfo)
+
+        if(isHospitalOwned) {
+            await createHospitalOwnedUsageFormDetails(usageFormInfo, prevHOUsageFormDetail);
+        } else {
+            await createUsageFormDetails(usageFormInfo);
+        }
+
+        await resetUsageFormBCPullStatus(usageFormId);
     } catch (caughtError) {
         success = false;
     }
@@ -501,15 +614,17 @@ async function recreateSalesRepCommissions(selectedControlSelectedItemIds) {
     const successes = [];
     const errors = [];
     for (const usageFormId of selectedControlSelectedItemIds) {
+        const cleanUsageFormId = sanitizeId(usageFormId);
+        
         try {
             Xrm.Utility.showProgressIndicator(PROGRESSRSC_MESSAGES.CREATE);
             
             // Create job record
-            const jobId = await createSalesRepCommissionRegenerationJob(usageFormId);
+            const jobId = await createSalesRepCommissionRegenerationJob(cleanUsageFormId);
             
             // Call orchestration flow with jobId and usageFormId
-            callRegenerateSalesRepCommissionsOrchestratorFlow(jobId, usageFormId);
-            
+            callRegenerateSalesRepCommissionsOrchestratorFlow(jobId, cleanUsageFormId);
+
             // Wait for job to complete
             const jobStatus = await waitForJobCompletion(jobId);
             
@@ -538,16 +653,17 @@ async function recreateSalesRepCommissions(selectedControlSelectedItemIds) {
 /*---------- ticket JIRA 908 ---------------*/
 /*  recreating will recalculate seles rep commissions */
 async function recreateSalesRepCommissionSingle(usageFormId) {
+    const cleanUsageFormId = sanitizeId(usageFormId);
     let success = true;
     let jobId = null;
     try {
         Xrm.Utility.showProgressIndicator(PROGRESSRSC_MESSAGES.CREATE);
         
         // Create job record
-        jobId = await createSalesRepCommissionRegenerationJob(usageFormId);
+        jobId = await createSalesRepCommissionRegenerationJob(cleanUsageFormId);
         
         // Call orchestration flow with jobId and usageFormId
-        callRegenerateSalesRepCommissionsOrchestratorFlow(jobId, usageFormId);
+        callRegenerateSalesRepCommissionsOrchestratorFlow(jobId, cleanUsageFormId);
         
         // Wait for job to complete
         const jobStatus = await waitForJobCompletion(jobId);
@@ -574,8 +690,8 @@ async function createSalesRepCommissionRegenerationJob(usageFormId) {
         "leap_UsageForm@odata.bind": `/leap_usageforms(${usageFormId})`,
         "statuscode": JOB_STATUS.PENDING,
         "leap_type": 293360007,
-        "leap_progressmessage":  `Initializing sales rep commission regeneration`,
-        "leap_name": `SalesRepCommission Job - ${usageFormId} - ${new Date().toISOString()}`
+        "leap_progressmessage":  PROGRESSRSC_MESSAGES.CREATE,
+        "leap_name": `Job - Sales Rep Commission - ${new Date().toISOString()}`
     };
 
     try {
@@ -658,6 +774,10 @@ function sleep(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
+function sanitizeId(id) {
+    return typeof id === "string" ? id.replace(/[{}]/g, "") : id;
+}
+
 function getJobStatusName(status) {
     const statusMap = {
         [JOB_STATUS.PENDING]: "Pending",
@@ -727,24 +847,23 @@ function getEnvironmentVariableValue(schemaName) {
 
 /* -------------------------------------------- */
 /* ticket JIRA 870 */
-function updateFieldWebApi(usageFormId) {
-    const entityName = "leap_usageform"; // Replace 'account' with your entity name
+async function resetUsageFormBCPullStatus(usageFormId) {
+    const entityName = "leap_usageform";
 
     try {
-        // Define the payload
         const data = {};
-        data["leap_bcpullstatus"] = 293360000;    
-        // Send the Web API request
-        Xrm.WebApi.updateRecord(entityName, usageFormId, data).then(
-            function success(result2) {
-                console.log(`Record updated successfully BCPullStatus. Record ID: ${result2.id}`);                
-            },
-            function error(error) {
-                console.error("Error updating the record: BCPullStatus", error.message);
-            }
-        );
+        data["leap_bcpullstatus"] = 293360000; // Needs Loading 
+        
+        await Xrm.WebApi.updateRecord(entityName, usageFormId, data)
+            .then(result => {
+                if(result == null) {
+                    throw new Error(`Invalid operation result when resetting BCPullStatus for usage form with id ${usageFormId}.`);
+                } else {
+                    console.log(`BCPullStatus reset successfully for Usage Form with ID ${usageFormId}.`);
+                }
+            });
     } catch (caughtError) {
-        success = false;
+        console.error(`Error resetting BCPullStatus for Usage Form with ID ${usageFormId}: ${caughtError.message}`);
     }
 }
 
