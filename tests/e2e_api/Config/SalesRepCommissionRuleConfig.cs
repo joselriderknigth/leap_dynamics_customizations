@@ -18,6 +18,7 @@ namespace E2E.Api.Tests.Config
         public int? SalesCategory { get; init; }
         public string? Name { get; init; }
         public bool? RequiredSalesRepMatch { get; init; }
+        public bool? BlockVPstandardCommission { get; init; }
         public decimal? OverrideRate { get; init; }
         public DateTime? EndDate { get; init; }
         public Guid? HospitalId { get; init; }
@@ -73,6 +74,7 @@ namespace E2E.Api.Tests.Config
         public int? SalesCategory { get; init; }
         public string? Name { get; init; }
         public bool? RequiredSalesRepMatch { get; init; }
+        public bool? BlockVPstandardCommission { get; init; }
         public decimal? OverrideRate { get; init; }
         public DateTime? EndDate { get; init; }
         public Guid? HospitalId { get; init; }

@@ -410,3 +410,4 @@ FodyWeavers.xsd
 
 # Env variables
 *.env
+tests/E2E.sln
