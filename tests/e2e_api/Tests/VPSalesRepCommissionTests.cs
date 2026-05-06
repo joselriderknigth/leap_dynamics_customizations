@@ -1985,13 +1985,14 @@ namespace E2E.Api.Tests.Tests
                     minCommissionRate: 5m,
                     maxCommissionRate: 10m,
                     startDate: contractStartDate,
-                    ownerId: Config.OwnerUserId
+                    ownerId: Seed.TeamId
                 ) with
                 {
                     Name = $"Distributor Contract {Config.CorrelationId}",
                     EndDate = contractEndDate,
                     DistributorId = distributorId,
                     RepRole = OptionSetValues.SalesRepContract.RepRole.VP,
+                    IsOwnedByTeam = true,
                 }
             );
 

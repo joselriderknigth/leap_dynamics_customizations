@@ -23,6 +23,9 @@ namespace E2E.Api.Tests.Config
         public Guid? ExternalAgentId { get; init; }
         public Guid? SalesRepId { get; init; }
 
+        // Custom config options
+        public bool? IsOwnedByTeam { get; init; }
+
         public static SalesRepContractConfig Default(
             int contractType,
             int statusCode,

@@ -31,6 +31,11 @@ namespace E2E.Api.Tests.Fixtures
                 ["ownerid@odata.bind"] = $"/systemusers({cfg.OwnerId})",
             };
 
+            if (cfg.IsOwnedByTeam.HasValue && cfg.IsOwnedByTeam.Value)
+            {
+                payload["ownerid@odata.bind"] = $"/teams({cfg.OwnerId})";
+            }
+
             if (cfg.ContractNumber != null)
                 payload["leap_contractnumber"] = cfg.ContractNumber;
 
