@@ -13,6 +13,8 @@ namespace E2E.Api.Tests.Config
         public const string UnitGroup = "uomschedule";
         public const string Unit = "uom";
         public const string Procedure = "leap_procedure";
+        public const string Job = "leap_job";
+
         public const string SalesRepContract = "leap_salesrepcontract";
         public const string SalesRepCommissionRule = "leap_salesrepcontractrule";
         public const string SalesRepCommission = "leap_salesrepcommission";

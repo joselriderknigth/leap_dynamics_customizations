@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using E2E.Api.Tests.Config;
@@ -12,6 +13,7 @@ namespace E2E.Api.Tests.Fixtures
     {
         private readonly FixtureConfig _config;
         private readonly CaseService _cases;
+        private readonly JobService _jobs;
         private readonly List<Guid> _createdIds = new();
 
         // For cleanup
@@ -27,6 +29,7 @@ namespace E2E.Api.Tests.Fixtures
         {
             _config = config;
             _cases = new CaseService(client);
+            _jobs = new JobService(client);
 
             // For cleanup
             _usageForms = new UsageFormService(client);
@@ -84,7 +87,9 @@ namespace E2E.Api.Tests.Fixtures
 
             var start = DateTime.UtcNow;
 
-            while (true)
+            // Step 1: Wait for regenerate flag to complete and usage forms to be processed
+            bool usageFormsComplete = false;
+            while (!usageFormsComplete)
             {
                 var caseRecord = await _cases.GetAsync(caseId);
                 var isCompleted =
@@ -98,11 +103,96 @@ namespace E2E.Api.Tests.Fixtures
                     && processingCompleteFlag.ValueKind == JsonValueKind.True;
 
                 if (isCompleted && isProcessed)
-                    return;
+                {
+                    usageFormsComplete = true;
+                    break;
+                }
 
                 if (DateTime.UtcNow - start > timeout)
                     throw new TimeoutException(
                         $"Case {caseId} did not finish regeneration within {timeout.Value.TotalSeconds}s"
+                    );
+
+                await Task.Delay(pollInterval.Value);
+            }
+
+            // Step 2: Get all Usage Form Details for this case
+            var usageFormDetails = await _usageFormDetails.GetByCaseAsync(caseId);
+            var usageFormDetailIds = usageFormDetails
+                .Where(d => d.TryGetProperty("leap_usageformdetailid", out var id))
+                .Select(d => Guid.Parse(d.GetProperty("leap_usageformdetailid").GetString()!))
+                .ToList();
+
+            if (!usageFormDetailIds.Any())
+            {
+                throw new InvalidOperationException(
+                    $"No Usage Form Details found for case {caseId} after regeneration"
+                );
+            }
+
+            // Step 3: Wait for all jobs to be created (1 per usage form detail)
+            List<JsonElement> managerJobs;
+            while (true)
+            {
+                managerJobs = await _jobs.GetJobsByUsageFormDetailsAndTypeAsync(
+                    usageFormDetailIds,
+                    OptionSetValues.Job.Type.ManagerCommissionGeneration
+                );
+
+                // TODO: consider new products which won't have a SRep commission job
+                if (managerJobs.Count == usageFormDetailIds.Count)
+                    break;
+
+                if (DateTime.UtcNow - start > timeout)
+                    throw new TimeoutException(
+                        $"Expected {usageFormDetailIds.Count} Manager Standard commission jobs for case {caseId}, but {managerJobs.Count} were created within {timeout.Value.TotalSeconds}s"
+                    );
+
+                await Task.Delay(pollInterval.Value);
+            }
+
+            // Step 4: Wait for all jobs to complete (succeeded or failed)
+            while (true)
+            {
+                managerJobs = await _jobs.GetJobsByUsageFormDetailsAndTypeAsync(
+                    usageFormDetailIds,
+                    OptionSetValues.Job.Type.ManagerCommissionGeneration
+                );
+
+                var allCompleted = true;
+                foreach (var job in managerJobs)
+                {
+                    if (job.TryGetProperty("statuscode", out var statusCode))
+                    {
+                        var status = statusCode.GetInt32();
+
+                        if (status == OptionSetValues.Job.Status.Failed)
+                        {
+                            var jobId = job.TryGetProperty("leap_jobid", out var id)
+                                ? id.GetString()
+                                : "unknown";
+                            throw new InvalidOperationException(
+                                $"Manager Standard commission job {jobId} for case {caseId} failed"
+                            );
+                        }
+
+                        if (status != OptionSetValues.Job.Status.Succeeded)
+                        {
+                            allCompleted = false;
+                        }
+                    }
+                    else
+                    {
+                        allCompleted = false;
+                    }
+                }
+
+                if (allCompleted)
+                    return;
+
+                if (DateTime.UtcNow - start > timeout)
+                    throw new TimeoutException(
+                        $"Not all Manager Standard commission jobs for case {caseId} completed within {timeout.Value.TotalSeconds}s"
                     );
 
                 await Task.Delay(pollInterval.Value);

@@ -283,8 +283,8 @@ namespace E2E.Api.Tests.Tests
 
             await _cases.WaitUntilRegenerateCompleteAsync(
                 caseRecord,
-                TimeSpan.FromSeconds(120),
-                TimeSpan.FromSeconds(2)
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
             );
 
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
@@ -572,8 +572,8 @@ namespace E2E.Api.Tests.Tests
 
             await _cases.WaitUntilRegenerateCompleteAsync(
                 caseRecord,
-                TimeSpan.FromSeconds(120),
-                TimeSpan.FromSeconds(2)
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
             );
 
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
@@ -871,8 +871,8 @@ namespace E2E.Api.Tests.Tests
 
             await _cases.WaitUntilRegenerateCompleteAsync(
                 caseRecord,
-                TimeSpan.FromSeconds(120),
-                TimeSpan.FromSeconds(2)
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
             );
 
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
@@ -1067,8 +1067,8 @@ namespace E2E.Api.Tests.Tests
 
             await _cases.WaitUntilRegenerateCompleteAsync(
                 caseRecord,
-                TimeSpan.FromSeconds(120),
-                TimeSpan.FromSeconds(2)
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
             );
 
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
@@ -1365,8 +1365,8 @@ namespace E2E.Api.Tests.Tests
 
             await _cases.WaitUntilRegenerateCompleteAsync(
                 caseRecord,
-                TimeSpan.FromSeconds(120),
-                TimeSpan.FromSeconds(2)
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
             );
 
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
@@ -1724,8 +1724,8 @@ namespace E2E.Api.Tests.Tests
 
             await _cases.WaitUntilRegenerateCompleteAsync(
                 caseRecord,
-                TimeSpan.FromSeconds(120),
-                TimeSpan.FromSeconds(2)
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
             );
 
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
@@ -1940,8 +1940,8 @@ namespace E2E.Api.Tests.Tests
 
             await _cases.WaitUntilRegenerateCompleteAsync(
                 caseRecord,
-                TimeSpan.FromSeconds(120),
-                TimeSpan.FromSeconds(2)
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
             );
 
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
@@ -2242,8 +2242,8 @@ namespace E2E.Api.Tests.Tests
 
             await _cases.WaitUntilRegenerateCompleteAsync(
                 caseRecord,
-                TimeSpan.FromSeconds(120),
-                TimeSpan.FromSeconds(2)
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
             );
 
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
@@ -2643,8 +2643,8 @@ namespace E2E.Api.Tests.Tests
 
             await _cases.WaitUntilRegenerateCompleteAsync(
                 caseRecord,
-                TimeSpan.FromSeconds(120),
-                TimeSpan.FromSeconds(2)
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
             );
 
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
@@ -2931,8 +2931,8 @@ namespace E2E.Api.Tests.Tests
 
             await _cases.WaitUntilRegenerateCompleteAsync(
                 caseRecord,
-                TimeSpan.FromSeconds(120),
-                TimeSpan.FromSeconds(2)
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
             );
 
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
@@ -3263,8 +3263,8 @@ namespace E2E.Api.Tests.Tests
 
             await _cases.WaitUntilRegenerateCompleteAsync(
                 caseRecord,
-                TimeSpan.FromSeconds(120),
-                TimeSpan.FromSeconds(2)
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
             );
 
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
@@ -3477,7 +3477,7 @@ namespace E2E.Api.Tests.Tests
 
             // Trigger case regeneration
             await _cases.RegenCaseAsync(caseRecord);
-            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(120), TimeSpan.FromSeconds(2));
+            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(5));
 
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
 
@@ -3575,7 +3575,7 @@ namespace E2E.Api.Tests.Tests
 
             // Trigger case regeneration
             await _cases.RegenCaseAsync(caseRecord);
-            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(120), TimeSpan.FromSeconds(2));
+            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(5));
 
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
 
@@ -3673,7 +3673,7 @@ namespace E2E.Api.Tests.Tests
 
             // Trigger case regeneration
             await _cases.RegenCaseAsync(caseRecord);
-            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(120), TimeSpan.FromSeconds(2));
+            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(5));
 
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
 
@@ -3837,7 +3837,7 @@ namespace E2E.Api.Tests.Tests
 
             // Trigger case regeneration
             await _cases.RegenCaseAsync(caseRecord);
-            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(120), TimeSpan.FromSeconds(2));
+            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(5));
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
 
             // Validate Standard commission was created
@@ -3994,7 +3994,7 @@ namespace E2E.Api.Tests.Tests
 
             // Trigger case regeneration
             await _cases.RegenCaseAsync(caseRecord);
-            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(120), TimeSpan.FromSeconds(2));
+            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(5));
             TestContext.WriteLine($"Case regeneration completed for Case ID: {caseRecord}");
 
             // Validate Standard commission did not create because the rule did not match

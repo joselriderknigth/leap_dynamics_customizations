@@ -113,5 +113,19 @@ namespace E2E.Api.Tests.Config
                 public const int Woundcare = 100000002;
             }
         }
+
+        public static class Job
+        {
+            public static class Type
+            {
+                public const int ManagerCommissionGeneration = 293360006;
+            }
+
+            public static class Status
+            {
+                public const int Succeeded = 293360003;
+                public const int Failed = 293360004;
+            }
+        }
     }
 }
