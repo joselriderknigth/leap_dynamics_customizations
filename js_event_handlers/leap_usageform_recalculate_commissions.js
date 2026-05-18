@@ -33,7 +33,7 @@ const JOB_STATUS = {
 };
 
 class UsageFormInfo {
-    constructor(id, supplierId, supplierName, ownerId, poNumber, howned, caseDate) {
+    constructor(id, supplierId, supplierName, ownerId, poNumber, howned, caseDate, productDescription, totalProductQty) {
         this.id = id;
         this.supplierId = supplierId;
         this.supplierName = supplierName;
@@ -41,6 +41,8 @@ class UsageFormInfo {
         this.poNumber = poNumber;
         this.howned = howned;
         this.caseDate = caseDate;
+        this.productDescription = productDescription;
+        this.totalProductQty = totalProductQty;
     }
 }
 
@@ -283,12 +285,12 @@ async function deactivateUsageFormDetails(usageFormDetails) {
 }
 
 function getUsageFormInfo(usageFormId) {
-    return Xrm.WebApi.retrieveRecord("leap_usageform", usageFormId, "?$select=leap_newsuppliername,leap_purchaseordernumber,leap_hospitalowned,leap_surgerydate&$expand=leap_Supplier($select=accountid),owninguser($select=systemuserid)")
+    return Xrm.WebApi.retrieveRecord("leap_usageform", usageFormId, "?$select=leap_newsuppliername,leap_purchaseordernumber,leap_hospitalowned,leap_surgerydate,leap_ProductDescription,leap_totalproductqty&$expand=leap_Supplier($select=accountid),owninguser($select=systemuserid)")
         .then(result => {
             if (result == null) {
                 throw Error("Invalid operation result when attempting to retrieve usage form information.");
             }
-            return new UsageFormInfo(result.leap_usageformid, result.leap_Supplier.accountid, result.leap_newsuppliername, result.owninguser.systemuserid, result.leap_purchaseordernumber, result.leap_hospitalowned, result.leap_surgerydate);
+            return new UsageFormInfo(result.leap_usageformid, result.leap_Supplier.accountid, result.leap_newsuppliername, result.owninguser.systemuserid, result.leap_purchaseordernumber, result.leap_hospitalowned, result.leap_surgerydate, result.leap_ProductDescription, result.leap_totalproductqty);
         }).catch(error => {
             throw Error(`Error retrieving usage form with with id ${usageFormId}: ${error.message}`);
         });
@@ -426,9 +428,16 @@ async function createHospitalOwnedUsageFormDetails(usageFormInfo, prevUsageFormD
 }
 
 async function createUsageFormDetails(usageFormInfo) {
+    debugger;
     const supplierCondition = usageFormInfo.supplierId != null ?
         `<condition attribute="leap_supplier" operator="eq" value="${usageFormInfo.supplierId}"/>` :
         `<condition attribute="leap_newsuppliername" operator="eq" value="${usageFormInfo.supplierName}"/>`;
+    const hoCondition = usageFormInfo.howned == true ?
+        `<condition attribute="leap_hospitalowned" operator="eq" value="${usageFormInfo.howned}"/>` :
+        `<filter type="or">
+            <condition attribute="leap_hospitalowned" operator="eq" value="0" />
+            <condition attribute="leap_hospitalowned" operator="null" />
+        </filter>`;
 
     var fetchXML = `<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="true">
         <entity name="leap_caseproduct">
@@ -459,10 +468,7 @@ async function createUsageFormDetails(usageFormInfo) {
         <filter type="and">
             <condition attribute="statecode" operator="eq" value="0" />
             ${supplierCondition}
-            <filter type="or">
-                <condition attribute="leap_hospitalowned" operator="eq" value="0" />
-                <condition attribute="leap_hospitalowned" operator="null" />
-            </filter>
+            ${hoCondition}
         </filter>
         <link-entity name="leap_case" from="leap_caseid" to="leap_caseid" link-type="inner" alias="aa">
             <link-entity name="leap_usageform" from="leap_case" to="leap_caseid" link-type="inner" alias="ab">
@@ -538,8 +544,13 @@ async function recreateUsageFormDetails(selectedControlSelectedItemIds) {
                 usageFormDetails[0].leap_hospitalowned ?? false
             )
 
+            // legacy hospital owned usage forms have null product info, newer ones have it populated
+            const isLegacyHospitalOwned = isHospitalOwned &&
+                usageFormInfo.productDescription == null &&
+                usageFormInfo.totalProductQty == null;
+
             Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.CREATE);
-            if(isHospitalOwned) {
+            if(isHospitalOwned && !isLegacyHospitalOwned) {
                 await createHospitalOwnedUsageFormDetails(usageFormInfo, prevHOUsageFormDetail);
             } else {
                 await createUsageFormDetails(usageFormInfo);
@@ -573,6 +584,7 @@ async function recreateUsageFormDetailsSingle(usageFormId) {
     let success = true;
     const errors = [];
     try {
+        debugger;
         const usageFormInfo = await getUsageFormInfo(usageFormId);
         const usageFormDetails = await getUsageFormDetails(usageFormId);
         
@@ -580,16 +592,23 @@ async function recreateUsageFormDetailsSingle(usageFormId) {
         await deactivateUsageFormDetails(usageFormDetails);
 
         const isHospitalOwned = usageFormInfo.howned ?? false;
-        const prevHOUsageFormDetail = isHospitalOwned && new UsageFormDetailInfo(
+
+        // legacy hospital owned usage forms have null product info, newer ones have it populated
+        const isLegacyHospitalOwned = isHospitalOwned &&
+            usageFormInfo.productDescription == null &&
+            usageFormInfo.totalProductQty == null;
+
+        const prevHOUsageFormDetail = (isHospitalOwned && !isLegacyHospitalOwned && usageFormDetails.length > 0) ?
+         new UsageFormDetailInfo(
             usageFormDetails[0].leap_usageformdetailid,
             usageFormDetails[0]._leap_caseproduct_value,
             usageFormDetails[0].leap_io ?? false,
             usageFormDetails[0].leap_hospitalowned ?? false
-        )
+        ) : null;
         
         Xrm.Utility.showProgressIndicator(PROGRESS_MESSAGES.CREATE);
 
-        if(isHospitalOwned) {
+        if(isHospitalOwned && !isLegacyHospitalOwned) {
             await createHospitalOwnedUsageFormDetails(usageFormInfo, prevHOUsageFormDetail);
         } else {
             await createUsageFormDetails(usageFormInfo);
