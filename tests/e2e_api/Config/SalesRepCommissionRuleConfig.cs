@@ -23,6 +23,7 @@ namespace E2E.Api.Tests.Config
         public DateTime? EndDate { get; init; }
         public Guid? HospitalId { get; init; }
         public Guid? BusinessUnitId { get; init; }
+        public Guid? OwningBusinessUnitId { get; init; }
         public Guid? DistributorId { get; init; }
         public Guid? ExternalAgentId { get; init; }
         public Guid? ExternalRepId { get; init; }
@@ -79,6 +80,7 @@ namespace E2E.Api.Tests.Config
         public DateTime? EndDate { get; init; }
         public Guid? HospitalId { get; init; }
         public Guid? BusinessUnitId { get; init; }
+        public Guid? OwningBusinessUnitId { get; init; }
         public Guid? DistributorId { get; init; }
         public Guid? ExternalAgentId { get; init; }
         public Guid? ExternalRepId { get; init; }

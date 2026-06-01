@@ -2,6 +2,8 @@
   <entity name="leap_usageformdetail">
     <attribute name="leap_name" />
     <attribute name="statecode" />
+    <attribute name="ownerid" />
+    <attribute name="owningbusinessunit" />
     <order attribute="leap_usageform" descending="false" />
     <attribute name="leap_usageform" />
     <attribute name="leap_unitprice" />

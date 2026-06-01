@@ -331,5 +331,58 @@ namespace E2E.Api.Tests.Tests
         {
             return (rate / 100m) * baseAmount;
         }
+
+        /// <summary>
+        /// Validates RequiredSalesRepMatch logic by comparing OwnerId or OwningBusinessUnitId
+        /// between SalesRepCommissionRule and UsageFormDetail.
+        /// When RequiredSalesRepMatch is true, at least one of these must match:
+        /// - Rule's OwnerId matches UsageFormDetail's OwnerId, OR
+        /// - Rule's OwningBusinessUnitId matches UsageFormDetail's OwningBusinessUnitId
+        /// </summary>
+        protected void ValidateRequiredSalesRepMatch(
+            JsonElement rule,
+            JsonElement usageFormDetail,
+            bool shouldMatch,
+            TestContext? testContext = null
+        )
+        {
+            // Extract Rule's OwnerId and OwningBusinessUnitId
+            rule.TryGetProperty("_ownerid_value", out var ruleOwnerId);
+            rule.TryGetProperty("_owningbusinessunit_value", out var ruleOwningBusinessUnit);
+
+            // Extract UsageFormDetail's OwnerId and OwningBusinessUnitId
+            usageFormDetail.TryGetProperty("_ownerid_value", out var detailOwnerId);
+            usageFormDetail.TryGetProperty("_owningbusinessunit_value", out var detailOwningBusinessUnit);
+
+            var ruleOwnerIdGuid = ruleOwnerId.GetGuid();
+            var ruleOwnerBusinessUnitGuid = ruleOwningBusinessUnit.GetGuid();
+            var detailOwnerIdGuid = detailOwnerId.GetGuid();
+            var detailOwnerBusinessUnitGuid = detailOwningBusinessUnit.GetGuid();
+
+            // Check if OwnerId matches
+            var ownerIdMatches = ruleOwnerIdGuid == detailOwnerIdGuid;
+
+            // Check if OwningBusinessUnitId matches
+            var owningBusinessUnitMatches = ruleOwnerBusinessUnitGuid == detailOwnerBusinessUnitGuid;
+
+            if (shouldMatch)
+            {
+                Assert.IsTrue(
+                    ownerIdMatches || owningBusinessUnitMatches,
+                    $"RequiredSalesRepMatch should be satisfied. Rule OwnerId: {ruleOwnerIdGuid}, Detail OwnerId: {detailOwnerIdGuid}, " +
+                    $"Rule OwningBusinessUnit: {ruleOwnerBusinessUnitGuid}, Detail OwningBusinessUnit: {detailOwnerBusinessUnitGuid}"
+                );
+                testContext?.WriteLine($"✓ RequiredSalesRepMatch validation passed: OwnerId match={ownerIdMatches}, OwningBusinessUnitId match={owningBusinessUnitMatches}");
+            }
+            else
+            {
+                Assert.IsFalse(
+                    ownerIdMatches || owningBusinessUnitMatches,
+                    $"RequiredSalesRepMatch should NOT be satisfied. Rule OwnerId: {ruleOwnerIdGuid}, Detail OwnerId: {detailOwnerIdGuid}, " +
+                    $"Rule OwningBusinessUnit: {ruleOwnerBusinessUnitGuid}, Detail OwningBusinessUnit: {detailOwnerBusinessUnitGuid}"
+                );
+                testContext?.WriteLine($"✓ RequiredSalesRepMatch validation correctly rejected: OwnerId match={ownerIdMatches}, OwningBusinessUnitId match={owningBusinessUnitMatches}");
+            }
+        }
     }
 }

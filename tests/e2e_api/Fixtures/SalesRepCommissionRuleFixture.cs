@@ -61,6 +61,9 @@ namespace E2E.Api.Tests.Fixtures
             if (cfg.BusinessUnitId.HasValue)
                 payload["leap_BusinessUnit@odata.bind"] = $"/businessunits({cfg.BusinessUnitId.Value})";
 
+            if (cfg.OwningBusinessUnitId.HasValue)
+                payload["owningbusinessunit@odata.bind"] = $"/businessunits({cfg.OwningBusinessUnitId.Value})";
+
             if (cfg.DistributorId.HasValue)
                 payload["leap_DistributorId@odata.bind"] = $"/accounts({cfg.DistributorId.Value})";
 
@@ -148,6 +151,9 @@ namespace E2E.Api.Tests.Fixtures
 
             if (cfg.BusinessUnitId.HasValue)
                 payload["leap_BusinessUnit@odata.bind"] = $"/businessunits({cfg.BusinessUnitId.Value})";
+
+            if (cfg.OwningBusinessUnitId.HasValue)
+                payload["owningbusinessunit@odata.bind"] = $"/businessunits({cfg.OwningBusinessUnitId.Value})";
 
             if (cfg.DistributorId.HasValue)
                 payload["leap_DistributorId@odata.bind"] = $"/accounts({cfg.DistributorId.Value})";

@@ -3,6 +3,8 @@
     <attribute name="leap_usageformdetailid" />
     <attribute name="leap_name" />
     <attribute name="createdon" />
+    <attribute name="ownerid" />
+    <attribute name="owningbusinessunit" />
     <attribute name="leap_usageform" />
     <attribute name="leap_unitprice" />
     <attribute name="leap_stickers" />

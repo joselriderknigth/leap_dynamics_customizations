@@ -65,7 +65,34 @@ namespace E2E.Api.Tests.Tests
 
             TestContext.WriteLine($"Cleanup completed for test with Correlation ID: {Config.CorrelationId}");
         }
+        
+        /// <summary>
+        /// Safely extracts the commission amount from the SalesRepCommission JsonElement.
+        /// Adjust field names here if your schema differs.
+        /// </summary>
+        private static decimal GetCommissionAmount(System.Text.Json.JsonElement commission)
+        {
+            // Common Dataverse patterns: leap_commissionamount or leap_commissionamount_base
+            if (commission.TryGetProperty("leap_commissionamount", out var amountProp) &&
+                amountProp.ValueKind != System.Text.Json.JsonValueKind.Null)
+            {
+                return amountProp.GetDecimal();
+            }
 
+            if (commission.TryGetProperty("leap_commissionamount_base", out var amountBaseProp) &&
+                amountBaseProp.ValueKind != System.Text.Json.JsonValueKind.Null)
+            {
+                return amountBaseProp.GetDecimal();
+            }
+
+            // If your implementation stores amount differently, add it here:
+            // e.g. "leap_amount", "leap_commission", etc.
+
+            throw new AssertFailedException(
+                "Commission amount field not found. Expected 'leap_commissionamount' or 'leap_commissionamount_base'."
+            );
+        }
+        
         [TestMethod]
         public async Task VPStandardCommissionHappyPath()
         {
@@ -2043,6 +2070,209 @@ namespace E2E.Api.Tests.Tests
             );
 
             TestContext.WriteLine($"✓ Validated commission payee is distributor.");
+        }
+    
+        [TestMethod]
+        public async Task VPStandardCommission_PrerequisiteCommissionExistsAndPositive_VPStandardGenerated_AmountGreaterThanZero()
+        {
+            /**
+            * Scenario:
+            * - Generate a non-VP commission first (Standalone/Override/Standard).
+            * - Assert prerequisite commission amount > 0.
+            * - Then create VP Standard rule and regen again.
+            *
+            * Expected:
+            * - VP Standard commission is generated ONLY AFTER prerequisite commission exists and > 0
+            * - VP Standard commission amount > 0
+            */
+
+            // ---------------------------
+            // Step 1: Case setup
+            // ---------------------------
+            var hospital = Seed.HospitalId;
+            var physician = Seed.PhysicianId;
+            var procedure = Seed.ProcedureId;
+            var patientId = $"PAT-{Guid.NewGuid()}";
+            var caseDateTime = DateTime.UtcNow;
+
+            var caseRecord = await _cases.SetupAsync(hospital, physician, procedure, patientId, caseDateTime);
+
+            Assert.IsNotNull(caseRecord, "Case record should exist after setup.");
+            TestContext.WriteLine($"Created Case with ID: {caseRecord}");
+
+            // ---------------------------
+            // Step 2: Product + Case Product setup
+            // ---------------------------
+            var salesCategory = OptionSetValues.Account.SalesCategory.Woundcare;
+
+            var manufacturer = await _accounts.SetupManufacturerAsync(salesCategory);
+            Assert.IsNotNull(manufacturer, "Manufacturer account should be created.");
+
+            var productFamily = await _products.SetupProductFamilyAsync(
+                Seed.OrganizationId,
+                Seed.SubjectId,
+                Seed.UnitGroupId,
+                Seed.UnitId,
+                manufacturer,
+                OptionSetValues.Product.ProductType.StockAndBill
+            );
+
+            var productCostPrice = 100.00m;   // ensures healthy margin with unit price 200
+            var product = await _products.SetupProductAsync(
+                Seed.OrganizationId,
+                Seed.SubjectId,
+                Seed.UnitGroupId,
+                Seed.UnitId,
+                manufacturer,
+                productFamily,
+                OptionSetValues.Product.ProductType.StockAndBill,
+                costPrice: productCostPrice
+            );
+
+            Assert.IsNotNull(product, "Product record should exist after setup.");
+
+            var cpUnitPrice = 200.00m;
+            var cpQuantity = 1;
+
+            var caseProduct = await _caseProducts.SetupAsync(
+                CaseProductConfig.Default(caseRecord, hospital, manufacturer, manufacturer, productFamily, product) with
+                {
+                    Quantity = cpQuantity,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.StockAndBill,
+                    IsHospitalOwned = false,
+                    UnitPrice = cpUnitPrice,
+                }
+            );
+
+            Assert.IsNotNull(caseProduct, "Case Product record should exist after setup.");
+            TestContext.WriteLine($"Created Product and Case Product for Case ID: {caseRecord}");
+
+            // ---------------------------
+            // Step 3: Create VP Contract (needed for VP Standard later)
+            // ---------------------------
+            var contractStartDate = DateTime.UtcNow.Date;
+            var contractEndDate = contractStartDate.AddYears(1);
+
+            var repMinRate = 5m;
+            var repMaxRate = 10m;
+
+            var salesRepContractId = await _salesRepContracts.SetupAsync(
+                SalesRepContractConfig.Default(
+                    contractType: OptionSetValues.SalesRepContract.ContractType.SalesRep,
+                    statusCode: Config.DefaultStatusCode,
+                    minCommissionRate: repMinRate,
+                    maxCommissionRate: repMaxRate,
+                    startDate: contractStartDate,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    Name = $"VP Rep Contract {Config.CorrelationId}",
+                    EndDate = contractEndDate,
+                    SalesRepId = Config.OwnerUserId,
+                    RepRole = OptionSetValues.SalesRepContract.RepRole.VP,
+                }
+            );
+
+            Assert.IsNotNull(salesRepContractId, "Sales Rep Contract should be created.");
+
+            // ==========================================================
+            // Phase A: Generate prerequisite commission (Standalone here)
+            // ==========================================================
+
+            // ---------------------------
+            // Step 4: Create prerequisite rule (Standalone or Override or Standard)
+            // ---------------------------
+            // Use Standalone as prerequisite because you already have working coverage for it.
+            var prerequisiteRuleId = await _salesRepCommissionRules.SetupAsync(
+                SalesRepCommissionRuleConfig.Default(
+                    commissionRuleType: OptionSetValues.SalesRepCommissionRule.CommissionType.Standalone,
+                    statusCode: Config.DefaultStatusCode,
+                    commissionSplit: 100m,
+                    startDate: contractStartDate,
+                    ownerId: Config.OwnerUserId,
+                    salesRepContractId: salesRepContractId
+                ) with
+                {
+                    Name = $"Prereq Standalone Rule {Config.CorrelationId}",
+                    EndDate = contractEndDate,
+                    HospitalId = hospital,
+                    OverrideRate = 3.0m, // ensures > 0
+                    SalesRepId = Config.OwnerUserId,
+                }
+            );
+
+            Assert.IsNotNull(prerequisiteRuleId, "Prerequisite commission rule should be created.");
+
+            // ---------------------------
+            // Step 5: Regen #1 -> must generate prerequisite commission
+            // ---------------------------
+            await _cases.RegenCaseAsync(caseRecord);
+            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(5));
+            TestContext.WriteLine($"Regen #1 completed for Case ID: {caseRecord}");
+
+            var prereqCommissions = await _salesRepCommissions.GetByCaseAndRuleAsync(caseRecord, prerequisiteRuleId);
+            Assert.AreEqual(1, prereqCommissions.Count, "Exactly 1 prerequisite commission should be created.");
+
+            var prereqCommission = prereqCommissions.First();
+            var prereqAmount = GetCommissionAmount(prereqCommission);
+
+            Assert.IsTrue(prereqAmount > 0m,
+                $"Prerequisite commission amount must be > 0 to allow VP Standard. Actual: {prereqAmount}");
+
+            TestContext.WriteLine($"✓ Prerequisite commission exists and amount > 0 ({prereqAmount}).");
+
+            // ==========================================================
+            // Phase B: Now VP Standard should be allowed
+            // ==========================================================
+
+            // ---------------------------
+            // Step 6: Create VP Standard rule AFTER prerequisite is confirmed
+            // ---------------------------
+            var vpStandardRuleId = await _salesRepCommissionRules.SetupAsync(
+                SalesRepCommissionRuleConfig.Default(
+                    commissionRuleType: OptionSetValues.SalesRepCommissionRule.CommissionType.VPStandard,
+                    statusCode: Config.DefaultStatusCode,
+                    commissionSplit: 100m,
+                    startDate: contractStartDate,
+                    ownerId: Config.OwnerUserId,
+                    salesRepContractId: salesRepContractId
+                ) with
+                {
+                    Name = $"VP Standard Rule {Config.CorrelationId}",
+                    EndDate = contractEndDate,
+                    SalesCategory = salesCategory,
+                    SalesRepId = Config.OwnerUserId,
+                }
+            );
+
+            Assert.IsNotNull(vpStandardRuleId, "VP Standard rule should be created.");
+
+            // ---------------------------
+            // Step 7: Regen #2 -> VP Standard commission should now be generated
+            // ---------------------------
+            await _cases.RegenCaseAsync(caseRecord);
+            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(5));
+            TestContext.WriteLine($"Regen #2 completed for Case ID: {caseRecord}");
+
+            var vpStandardCommissions = await _salesRepCommissions.GetByCaseAndRuleAsync(caseRecord, vpStandardRuleId);
+            Assert.AreEqual(1, vpStandardCommissions.Count,
+                "Exactly 1 VP Standard commission should be created when prerequisite commission > 0 exists.");
+
+            var vpCommission = vpStandardCommissions.First();
+
+            // Assert type is VPStandard (defensive)
+            vpCommission.TryGetProperty("leap_commissiontype", out var vpTypeProp);
+            Assert.AreEqual(
+                OptionSetValues.SalesRepCommissionRule.CommissionType.VPStandard,
+                vpTypeProp.GetInt32(),
+                "Commission type should be VP Standard."
+            );
+
+            var vpAmount = GetCommissionAmount(vpCommission);
+            Assert.IsTrue(vpAmount > 0m,
+                $"VP Standard commission amount should be > 0. Actual: {vpAmount}");
+
+            TestContext.WriteLine($"✓ VP Standard commission generated and amount > 0 ({vpAmount}).");
         }
     }
 }
