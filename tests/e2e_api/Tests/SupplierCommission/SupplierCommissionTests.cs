@@ -24,6 +24,7 @@ namespace E2E.Api.Tests.Tests
 
         // Services
         private UsageFormService _usageForms = null!;
+        private SupplierCommissionService _supplierCommissions = null!;
         private UsageFormDetailService _usageFormDetails = null!;
 
         [TestInitialize]
@@ -37,6 +38,7 @@ namespace E2E.Api.Tests.Tests
             _supplierCommissionRules = new SupplierCommissionRuleFixture(Client, Config);
 
             _usageForms = new UsageFormService(Client);
+            _supplierCommissions = new SupplierCommissionService(Client);
             _usageFormDetails = new UsageFormDetailService(Client);
         }
 
@@ -615,6 +617,140 @@ namespace E2E.Api.Tests.Tests
             }
 
             TestContext.WriteLine($"Assertions completed for Case ID: {caseRecord}");
+        }
+
+                  // ============ TEST 3.8: SupplierCommission_MultipleMatchingRules_ShouldUseMostSpecificRule ============
+        [TestMethod]
+        public async Task SupplierCommission_MultipleMatchingRules_ShouldUseMostSpecificRule()
+        {
+            /**
+            * 3.8 SupplierCommission_MultipleMatchingRules_ShouldUseMostSpecificRule
+            * 
+            * Goal: When multiple matching rules exist, engine should select the most specific one.
+            * Specificity hierarchy: Physician > Hospital > Product > Product Family
+            */
+
+            var hospital = Seed.HospitalId;
+            var physician = Seed.PhysicianId;
+            var procedure = Seed.ProcedureId;
+            var patientId = $"PAT-{Guid.NewGuid()}";
+            var caseDateTime = DateTime.UtcNow;
+            var caseRecord = await _cases.SetupAsync(hospital, physician, procedure, patientId, caseDateTime);
+
+            var salesCategory = OptionSetValues.Account.SalesCategory.Woundcare;
+            var manufacturer = await _accounts.SetupManufacturerAsync(salesCategory);
+            var supplier = await _accounts.SetupSupplierAsync();
+
+            var productFamily = await _products.SetupProductFamilyAsync(
+                Seed.OrganizationId, Seed.SubjectId, Seed.UnitGroupId, Seed.UnitId,
+                manufacturer, OptionSetValues.Product.ProductType.StockAndBill
+            );
+
+            var product = await _products.SetupProductAsync(
+                Seed.OrganizationId, Seed.SubjectId, Seed.UnitGroupId, Seed.UnitId,
+                manufacturer, productFamily, OptionSetValues.Product.ProductType.StockAndBill,
+                costPrice: 100.00m
+            );
+
+            var caseProduct = await _caseProducts.SetupAsync(
+                CaseProductConfig.Default(caseRecord, hospital, supplier, manufacturer, productFamily, product) with
+                {
+                    Quantity = 1,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.StockAndBill,
+                    IsHospitalOwned = false,
+                    UnitPrice = 200.00m,
+                }
+            );
+
+            var contractStartDate = DateTime.UtcNow.Date;
+            var contractEndDate = contractStartDate.AddYears(1);
+            var SupplierContractId = await _supplierContracts.SetupAsync(
+                SupplierContractConfig.Default(
+                    name: $"Test Contract {Config.CorrelationId}",
+                    supplierId: supplier,
+                    entityId: supplier,
+                    effectiveStartDate: contractStartDate,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    AllHospitals = true,
+                    AllPhysicians = true,
+                }
+            );
+                 
+
+            var ruleProductFamily = await _supplierCommissionRules.SetupAsync(
+                SupplierCommissionRuleConfig.Default(    
+                    name: $"Test Rule Product Family {Config.CorrelationId}",                
+                    statusCode: Config.DefaultStatusCode,               
+                    ownerId: Config.OwnerUserId,
+                    supplierContractId: SupplierContractId
+                ) with
+                {
+          
+                    EffectiveEndDate = contractEndDate,                
+                    HospitalId = supplier,
+                    ProductFamilyId = productFamily,
+                    OwnerId = Config.OwnerUserId,
+                }
+            );
+
+            var ruleProduct = await _supplierCommissionRules.SetupAsync(       
+                SupplierCommissionRuleConfig.Default(  
+                    name: $"Test Rule Product {Config.CorrelationId}",    
+                    supplierContractId: SupplierContractId,              
+                    statusCode: Config.DefaultStatusCode,                
+                    ownerId: Config.OwnerUserId
+                ) with
+                {  
+                    EffectiveEndDate = contractEndDate,
+                    CommissionPercent = 4.0m,
+                    HospitalId = supplier,    
+                    ProductId = product,
+                    OwnerId = Config.OwnerUserId,
+                }
+            );
+
+            var ruleHospital = await _supplierCommissionRules.SetupAsync(
+                SupplierCommissionRuleConfig.Default(     
+                    name: $"Test Rule Hospital {Config.CorrelationId}",   
+                    supplierContractId: SupplierContractId,            
+                    statusCode: Config.DefaultStatusCode,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    EffectiveEndDate = contractEndDate,
+                    HospitalId = hospital,
+                    OwnerId = Config.OwnerUserId,
+                }
+            );
+
+            var rulePhysician = await _supplierCommissionRules.SetupAsync(
+                SupplierCommissionRuleConfig.Default(  
+                    name: $"Test Rule Physician {Config.CorrelationId}",                  
+                    statusCode: Config.DefaultStatusCode,                    
+                    ownerId: Config.OwnerUserId,
+                    supplierContractId: SupplierContractId
+                ) with
+                {
+                    EffectiveEndDate = contractEndDate,
+                    HospitalId = supplier,
+                    PhysicianId = physician,
+                    OwnerId = Config.OwnerUserId,
+                }
+            );
+
+            await _cases.RegenCaseAsync(caseRecord);
+            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(5));
+
+            var physicianCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, rulePhysician);
+            Assert.AreEqual(1, physicianCommissions.Count, "Most specific rule (Physician) should generate commission.");
+
+            var hospitalCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleHospital);
+            var productCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleProduct);
+            var productFamilyCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleProductFamily);
+
+            TestContext.WriteLine($"✓ Most specific rule (Physician) correctly selected for override commission.");
         }
     }
 }

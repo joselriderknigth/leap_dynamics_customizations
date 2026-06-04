@@ -1,0 +1,43 @@
+<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+  <entity name="leap_suppliercommission">
+    <attribute name="leap_suppliercommissionid" />
+    <attribute name="leap_name" />
+    <attribute name="createdon" />
+    <attribute name="leap_usageformdetail" />
+    <attribute name="leap_totalrebates" />
+    <attribute name="leap_totalgpos" />
+    <attribute name="leap_suppliercontractcommissionrule" />
+    <attribute name="leap_suppliercontract" />
+    <attribute name="leap_supplier" />
+    <attribute name="statuscode" />
+    <attribute name="statecode" />
+    <attribute name="leap_purchaseordernumber" />
+    <attribute name="leap_pricingtier" />
+    <attribute name="owningbusinessunit" />
+    <attribute name="ownerid" />
+    <attribute name="leap_importedproductusage" />
+    <attribute name="exchangerate" />
+    <attribute name="leap_distributorpaiddate" />
+    <attribute name="leap_commissiontype" />
+    <attribute name="leap_commissionratepercent" />
+    <attribute name="leap_commissionpayee" />
+    <attribute name="leap_commissionratemoney" />
+    <attribute name="leap_casesurgeon" />
+    <attribute name="leap_casepatientid" />
+    <attribute name="leap_casehospital" />
+    <attribute name="leap_casedatetime" />
+    <attribute name="new_bcufdetailid" />
+    <order attribute="leap_name" descending="false" />
+    <filter type="and">
+      <condition attribute="statecode" operator="eq" value="0" />
+      <condition attribute="leap_suppliercontractcommissionrule" operator="eq" value="{RULE_ID}" />
+    </filter>
+    <link-entity name="leap_usageformdetail" from="leap_usageformdetailid" to="leap_usageformdetail" link-type="inner" alias="aa">
+      <link-entity name="leap_usageform" from="leap_usageformid" to="leap_usageform" link-type="inner" alias="ab">
+        <filter type="and">
+          <condition attribute="leap_case" operator="eq" value="{CASE_ID}" />
+        </filter>
+      </link-entity>
+    </link-entity>
+  </entity>
+</fetch>
