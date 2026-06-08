@@ -25,6 +25,9 @@ namespace E2E.Api.Tests.Config
         public decimal? CommissionPercent { get; init; }
         public decimal? CommissionAmount { get; init; }
 
+        // Optional pricing tier filter
+        public string? PricingTier { get; init; }
+
         // Optional hospital owned
         public bool? HospitalOwnedOverride { get; init; }
 
@@ -66,6 +69,7 @@ namespace E2E.Api.Tests.Config
         public decimal? CommissionPercent { get; init; }
         public decimal? CommissionAmount { get; init; }
 
+        
         // Optional hospital owned with explicit null support
         public Optional<bool> HospitalOwnedOverride { get; init; }
     }

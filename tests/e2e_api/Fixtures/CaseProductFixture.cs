@@ -51,6 +51,7 @@ namespace E2E.Api.Tests.Fixtures
 
             if (cfg.IsRestock)
                 payload["leap_restock"] = true;
+       
 
             var id = await _caseProducts.CreateAsync(payload);
             _createdIds.Add(id);

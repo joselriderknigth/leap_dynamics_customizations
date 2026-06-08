@@ -56,7 +56,7 @@ namespace E2E.Api.Tests.Fixtures
                 payload["leap_commissonpercent"] = cfg.CommissionPercent.Value;
 
             if (cfg.CommissionAmount.HasValue)
-                payload["leap_commissionamount"] = cfg.CommissionAmount.Value;
+                payload["leap_commissionamount"] = cfg.CommissionAmount.Value;    
 
             if (cfg.HospitalOwnedOverride.HasValue)
                 payload["leap_hospitalownedoverride"] = cfg.HospitalOwnedOverride.Value;

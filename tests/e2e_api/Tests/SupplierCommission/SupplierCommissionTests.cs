@@ -21,11 +21,13 @@ namespace E2E.Api.Tests.Tests
         private CaseProductFixture _caseProducts = null!;
         private SupplierContractFixture _supplierContracts = null!;
         private SupplierCommissionRuleFixture _supplierCommissionRules = null!;
+        private PricingTierFixture _pricingTiers = null!;
 
         // Services
         private UsageFormService _usageForms = null!;
         private SupplierCommissionService _supplierCommissions = null!;
         private UsageFormDetailService _usageFormDetails = null!;
+        private PricingTierService _pricingTierService = null!;
 
         [TestInitialize]
         public void Setup()
@@ -36,10 +38,12 @@ namespace E2E.Api.Tests.Tests
             _caseProducts = new CaseProductFixture(Client, Config);
             _supplierContracts = new SupplierContractFixture(Client, Config);
             _supplierCommissionRules = new SupplierCommissionRuleFixture(Client, Config);
+            _pricingTiers = new PricingTierFixture(Client, Config);
 
             _usageForms = new UsageFormService(Client);
             _supplierCommissions = new SupplierCommissionService(Client);
             _usageFormDetails = new UsageFormDetailService(Client);
+            _pricingTierService = new PricingTierService(Client);
         }
 
         [TestCleanup]
@@ -51,6 +55,8 @@ namespace E2E.Api.Tests.Tests
                 await _cases.CleanupAsync();
             if (_supplierCommissionRules != null)
                 await _supplierCommissionRules.CleanupAsync();
+            if (_pricingTiers != null)
+                await _pricingTiers.CleanupAsync();
             if (_supplierContracts != null)
                 await _supplierContracts.CleanupAsync();
             if (_products != null)
@@ -751,6 +757,208 @@ namespace E2E.Api.Tests.Tests
             var productFamilyCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleProductFamily);
 
             TestContext.WriteLine($"✓ Most specific rule (Physician) correctly selected for override commission.");
+        }
+
+        [TestMethod]
+        public async Task SupplierCommission_PricingTierMatch_ShouldNotGenerateCommission()
+        {
+            var hospital = Seed.HospitalId;
+            var physician = Seed.PhysicianId;
+            var procedure = Seed.ProcedureId;
+            var caseRecord = await _cases.SetupAsync(hospital, physician, procedure);
+
+            Assert.IsNotNull(caseRecord, "Case record should exist after setup.");
+
+            var organizationId = Seed.OrganizationId;
+            var subjectId = Seed.SubjectId;
+            var unitGroupId = Seed.UnitGroupId;
+            var unitId = Seed.UnitId;
+            var manufacturer = await _accounts.SetupManufacturerAsync(OptionSetValues.Account.SalesCategory.Woundcare);
+            var supplier = await _accounts.SetupSupplierAsync();
+
+            var productFamily = await _products.SetupProductFamilyAsync(
+                organizationId,
+                subjectId,
+                unitGroupId,
+                unitId,
+                manufacturer,
+                OptionSetValues.Product.ProductType.StockAndBill
+            );
+
+            var product = await _products.SetupProductAsync(
+                organizationId,
+                subjectId,
+                unitGroupId,
+                unitId,
+                manufacturer,
+                productFamily,
+                OptionSetValues.Product.ProductType.StockAndBill,
+                costPrice: 100.00m
+            );
+
+            var caseProductId = await _caseProducts.SetupAsync(
+                CaseProductConfig.Default(caseRecord, hospital, supplier, manufacturer, productFamily, product) with
+                {
+                    Quantity = 1,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.StockAndBill,
+                    IsHospitalOwned = false,
+                    UnitPrice = 150.00m,
+                }
+            );
+
+            var supplierContractId = await _supplierContracts.SetupAsync(
+                SupplierContractConfig.Default(
+                    name: $"Test Contract {Config.CorrelationId}",
+                    supplierId: supplier,
+                    entityId: supplier,
+                    effectiveStartDate: DateTime.UtcNow.Date,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    AllHospitals = true,
+                    AllPhysicians = true,
+                }
+            );
+
+            var pricingTierId = await _pricingTiers.SetupAsync(
+                PricingTierConfig.Default(
+                    supplierContractId: supplierContractId,
+                    productId: product,
+                    ownerId: Config.OwnerUserId,
+                    name: $"Test Pricing Tier {Config.CorrelationId}"
+                ) with
+                {
+                    PriceLowerBound = 100.00m,
+                    PriceUpperBound = 200.00m,
+                    CommissionRate = 10.0m,
+                }
+            );
+
+            var matchingTiers = await _pricingTierService.GetMatchingAsync(
+                supplierContractId,
+                product,
+                150.00m
+            );
+            Assert.AreEqual(1, matchingTiers.Count, "A matching pricing tier should exist for the case product unit price.");
+
+            var ruleId = await _supplierCommissionRules.SetupAsync(
+                SupplierCommissionRuleConfig.Default(
+                    name: $"Test Rule Match {Config.CorrelationId}",
+                    supplierContractId: supplierContractId,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    CommissionPercent = 10.0m,
+                    ProductId = product,
+                }
+            );
+
+            await _cases.RegenCaseAsync(caseRecord);
+            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(5));
+
+            var commissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleId);
+            Assert.AreEqual(0, commissions.Count, "A pricing tier match should suppress supplier commission generation.");
+        }
+
+        [TestMethod]
+        public async Task SupplierCommission_PricingTierMismatch_ShouldGenerateCommission()
+        {
+            var hospital = Seed.HospitalId;
+            var physician = Seed.PhysicianId;
+            var procedure = Seed.ProcedureId;
+            var caseRecord = await _cases.SetupAsync(hospital, physician, procedure);
+
+            Assert.IsNotNull(caseRecord, "Case record should exist after setup.");
+
+            var organizationId = Seed.OrganizationId;
+            var subjectId = Seed.SubjectId;
+            var unitGroupId = Seed.UnitGroupId;
+            var unitId = Seed.UnitId;
+            var manufacturer = await _accounts.SetupManufacturerAsync(OptionSetValues.Account.SalesCategory.Woundcare);
+            var supplier = await _accounts.SetupSupplierAsync();
+
+            var productFamily = await _products.SetupProductFamilyAsync(
+                organizationId,
+                subjectId,
+                unitGroupId,
+                unitId,
+                manufacturer,
+                OptionSetValues.Product.ProductType.StockAndBill
+            );
+
+            var product = await _products.SetupProductAsync(
+                organizationId,
+                subjectId,
+                unitGroupId,
+                unitId,
+                manufacturer,
+                productFamily,
+                OptionSetValues.Product.ProductType.StockAndBill,
+                costPrice: 100.00m
+            );
+
+            var caseProductId = await _caseProducts.SetupAsync(
+                CaseProductConfig.Default(caseRecord, hospital, supplier, manufacturer, productFamily, product) with
+                {
+                    Quantity = 1,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.StockAndBill,
+                    IsHospitalOwned = false,
+                    UnitPrice = 250.00m,
+                }
+            );
+
+            var supplierContractId = await _supplierContracts.SetupAsync(
+                SupplierContractConfig.Default(
+                    name: $"Test Contract {Config.CorrelationId}",
+                    supplierId: supplier,
+                    entityId: supplier,
+                    effectiveStartDate: DateTime.UtcNow.Date,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    AllHospitals = true,
+                    AllPhysicians = true,
+                }
+            );
+
+            var pricingTierId = await _pricingTiers.SetupAsync(
+                PricingTierConfig.Default(
+                    supplierContractId: supplierContractId,
+                    productId: product,
+                    ownerId: Config.OwnerUserId,
+                    name: $"Test Pricing Tier {Config.CorrelationId}"
+                ) with
+                {
+                    PriceLowerBound = 100.00m,
+                    PriceUpperBound = 200.00m,
+                    CommissionRate = 10.0m,
+                }
+            );
+
+            var matchingTiers = await _pricingTierService.GetMatchingAsync(
+                supplierContractId,
+                product,
+                250.00m
+            );
+            Assert.AreEqual(0, matchingTiers.Count, "No pricing tier should match when unit price is outside the defined range.");
+
+            var ruleId = await _supplierCommissionRules.SetupAsync(
+                SupplierCommissionRuleConfig.Default(
+                    name: $"Test Rule Mismatch {Config.CorrelationId}",
+                    supplierContractId: supplierContractId,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    CommissionPercent = 10.0m,
+                    ProductId = product,
+                }
+            );
+
+            await _cases.RegenCaseAsync(caseRecord);
+            await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(5));
+
+            var commissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleId);
+            Assert.AreEqual(1, commissions.Count, "A pricing tier mismatch should generate a supplier commission record.");
         }
     }
 }

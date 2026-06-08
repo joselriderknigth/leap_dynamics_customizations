@@ -1,0 +1,15 @@
+<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+  <entity name="leap_pricingtier">
+    <attribute name="leap_pricingtierid" />
+    <attribute name="leap_productid" />
+    <attribute name="leap_leapcommissionrate" />
+    <order attribute="leap_leapcommissionrate" descending="false" />
+    <filter type="and">
+      <condition attribute="statecode" operator="eq" value="0" />
+      <condition attribute="leap_suppliercontractid" operator="eq" value="{SUPPLIERCONTRACT_ID}"/>
+      <condition attribute="leap_productid" operator="eq" value="{PRODUCT_ID}"/>
+      <condition attribute="leap_pricelowerbound" operator="le" value="{UNIT_PRICE}" />
+      <condition attribute="leap_priceupperbound" operator="ge" value="{UNIT_PRICE}" />
+    </filter>
+  </entity>
+</fetch>

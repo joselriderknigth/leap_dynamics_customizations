@@ -22,6 +22,7 @@ public record CaseProductConfig
     public decimal IOUnitPrice { get; init; }
     public int IOQuantity { get; init; }
 
+
     public static CaseProductConfig Default(
         Guid caseId,
         Guid hospitalId,

@@ -22,6 +22,7 @@ namespace E2E.Api.Tests.Config
         public const string SupplierContract = "leap_suppliercontract";
         public const string SupplierCommissionRule = "leap_suppliercontractcommission";
         public const string SupplierCommission = "leap_suppliercommission";
+        public const string PricingTier = "leap_pricingtier";
 
         public const string SalesAdjustmentRule = "leap_salesadjustmentrule";
         public const string SalesAdjustment = "leap_salesadjustment";
