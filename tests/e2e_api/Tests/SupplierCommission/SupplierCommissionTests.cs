@@ -756,7 +756,7 @@ namespace E2E.Api.Tests.Tests
             var productCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleProduct);
             var productFamilyCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleProductFamily);
 
-            TestContext.WriteLine($"✓ Most specific rule (Physician) correctly selected for override commission.");
+            TestContext.WriteLine($"✓ Most specific rule (Physician) correctly selected for supplier commission.");
         }
 
         [TestMethod]
