@@ -662,7 +662,7 @@ namespace E2E.Api.Tests.Tests
                 CaseProductConfig.Default(caseRecord, hospital, supplier, manufacturer, productFamily, product) with
                 {
                     Quantity = 1,
-                    ProductType = OptionSetValues.CaseProduct.ProductType.StockAndBill,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
                     IsHospitalOwned = false,
                     UnitPrice = 200.00m,
                 }
@@ -800,7 +800,7 @@ namespace E2E.Api.Tests.Tests
                 CaseProductConfig.Default(caseRecord, hospital, supplier, manufacturer, productFamily, product) with
                 {
                     Quantity = 1,
-                    ProductType = OptionSetValues.CaseProduct.ProductType.StockAndBill,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
                     IsHospitalOwned = false,
                     UnitPrice = 150.00m,
                 }
@@ -901,7 +901,7 @@ namespace E2E.Api.Tests.Tests
                 CaseProductConfig.Default(caseRecord, hospital, supplier, manufacturer, productFamily, product) with
                 {
                     Quantity = 1,
-                    ProductType = OptionSetValues.CaseProduct.ProductType.StockAndBill,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
                     IsHospitalOwned = false,
                     UnitPrice = 250.00m,
                 }
