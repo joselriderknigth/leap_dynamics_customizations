@@ -649,12 +649,12 @@ namespace E2E.Api.Tests.Tests
 
             var productFamily = await _products.SetupProductFamilyAsync(
                 Seed.OrganizationId, Seed.SubjectId, Seed.UnitGroupId, Seed.UnitId,
-                manufacturer, OptionSetValues.Product.ProductType.StockAndBill
+                manufacturer, OptionSetValues.Product.ProductType.Consignment
             );
 
             var product = await _products.SetupProductAsync(
                 Seed.OrganizationId, Seed.SubjectId, Seed.UnitGroupId, Seed.UnitId,
-                manufacturer, productFamily, OptionSetValues.Product.ProductType.StockAndBill,
+                manufacturer, productFamily, OptionSetValues.Product.ProductType.Consignment,
                 costPrice: 100.00m
             );
 
@@ -662,7 +662,7 @@ namespace E2E.Api.Tests.Tests
                 CaseProductConfig.Default(caseRecord, hospital, supplier, manufacturer, productFamily, product) with
                 {
                     Quantity = 1,
-                    ProductType = OptionSetValues.CaseProduct.ProductType.StockAndBill,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
                     IsHospitalOwned = false,
                     UnitPrice = 200.00m,
                 }
@@ -782,7 +782,7 @@ namespace E2E.Api.Tests.Tests
                 unitGroupId,
                 unitId,
                 manufacturer,
-                OptionSetValues.Product.ProductType.StockAndBill
+                OptionSetValues.Product.ProductType.Consignment
             );
 
             var product = await _products.SetupProductAsync(
@@ -792,7 +792,7 @@ namespace E2E.Api.Tests.Tests
                 unitId,
                 manufacturer,
                 productFamily,
-                OptionSetValues.Product.ProductType.StockAndBill,
+                OptionSetValues.Product.ProductType.Consignment,
                 costPrice: 100.00m
             );
 
@@ -800,7 +800,7 @@ namespace E2E.Api.Tests.Tests
                 CaseProductConfig.Default(caseRecord, hospital, supplier, manufacturer, productFamily, product) with
                 {
                     Quantity = 1,
-                    ProductType = OptionSetValues.CaseProduct.ProductType.StockAndBill,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
                     IsHospitalOwned = false,
                     UnitPrice = 150.00m,
                 }
@@ -883,7 +883,7 @@ namespace E2E.Api.Tests.Tests
                 unitGroupId,
                 unitId,
                 manufacturer,
-                OptionSetValues.Product.ProductType.StockAndBill
+                OptionSetValues.Product.ProductType.Consignment
             );
 
             var product = await _products.SetupProductAsync(
@@ -893,7 +893,7 @@ namespace E2E.Api.Tests.Tests
                 unitId,
                 manufacturer,
                 productFamily,
-                OptionSetValues.Product.ProductType.StockAndBill,
+                OptionSetValues.Product.ProductType.Consignment,
                 costPrice: 100.00m
             );
 
@@ -901,7 +901,7 @@ namespace E2E.Api.Tests.Tests
                 CaseProductConfig.Default(caseRecord, hospital, supplier, manufacturer, productFamily, product) with
                 {
                     Quantity = 1,
-                    ProductType = OptionSetValues.CaseProduct.ProductType.StockAndBill,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
                     IsHospitalOwned = false,
                     UnitPrice = 250.00m,
                 }
@@ -962,3 +962,4 @@ namespace E2E.Api.Tests.Tests
         }
     }
 }
+
