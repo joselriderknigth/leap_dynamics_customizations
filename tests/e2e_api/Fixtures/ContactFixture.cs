@@ -20,6 +20,32 @@ namespace E2E.Api.Tests.Fixtures
             _contacts = new ContactService(client);
         }
 
+        public async Task<Guid> SetupAsync(
+            string firstName,
+            string lastName,
+            int customerTypeCode,
+            int? salutation = null
+        )
+        {
+            var contactPayload = new Dictionary<string, object>
+            {
+                ["firstname"] = firstName,
+                ["middlename"] = _config.CorrelationId,
+                ["lastname"] = lastName,
+                ["customertypecode"] = customerTypeCode,
+                ["ownerid@odata.bind"] = $"/systemusers({_config.OwnerUserId})",
+                ["statecode"] = _config.DefaultStateCode,
+                ["statuscode"] = _config.DefaultStatusCode,
+            };
+
+            if (salutation.HasValue)
+                contactPayload["leap_salutation"] = salutation.Value;
+
+            var id = await _contacts.CreateAsync(contactPayload);
+            _createdIds.Add(id);
+            return id;
+        }
+
         public async Task<Guid> SetupPhysicianAsync()
         {
             var contactPayload = new Dictionary<string, object>
@@ -38,6 +64,7 @@ namespace E2E.Api.Tests.Fixtures
             _createdIds.Add(id);
             return id;
         }
+
 
         public async Task CleanupAsync()
         {
