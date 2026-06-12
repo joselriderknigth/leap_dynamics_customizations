@@ -627,7 +627,7 @@ namespace E2E.Api.Tests.Tests
             TestContext.WriteLine($"Assertions completed for Case ID: {caseRecord}");
         }
 
-                  // ============ TEST 1006: SupplierCommission_MultipleMatchingRules_ShouldUseMostSpecificRule ============
+        // ============ TEST 1006: SupplierCommission_MultipleMatchingRules_ShouldUseMostSpecificRule ============
         [TestMethod]
         public async Task SupplierCommission_MultipleMatchingRulesHospitalandPhysician_ShouldUseMostSpecificRule()
         {
@@ -641,9 +641,9 @@ namespace E2E.Api.Tests.Tests
             var hospital = Seed.HospitalId;
             var physician = Seed.PhysicianId;
             var procedure = Seed.ProcedureId;
-             var patientId = $"PAT-{Guid.NewGuid()}";
-            var caseDateTime = DateTime.UtcNow; 
-            var caseRecord = await _cases.SetupAsync(hospital, physician, procedure,patientId, caseDateTime);
+            var patientId = $"PAT-{Guid.NewGuid()}";
+            var caseDateTime = DateTime.UtcNow;
+            var caseRecord = await _cases.SetupAsync(hospital, physician, procedure, patientId, caseDateTime);
             var organizationId = Seed.OrganizationId;
             var subjectId = Seed.SubjectId;
             var unitGroupId = Seed.UnitGroupId;
@@ -677,7 +677,7 @@ namespace E2E.Api.Tests.Tests
                     Quantity = 1,
                     ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
                     IsHospitalOwned = false,
-                    UnitPrice = 200.00m,                                        
+                    UnitPrice = 200.00m,
                 }
             );
 
@@ -696,24 +696,24 @@ namespace E2E.Api.Tests.Tests
                     AllPhysicians = true,
                 }
             );
-                 
 
-       /*       var ruleProductFamily = await _supplierCommissionRules.SetupAsync(
-                SupplierCommissionRuleConfig.Default(    
-                    name: $"Test Rule Product Family {Config.CorrelationId}",                
-                    statusCode: Config.DefaultStatusCode,               
-                    ownerId: Config.OwnerUserId,
-                    supplierContractId: SupplierContractId    
-                ) with
-                {
-          
-                    EffectiveEndDate = contractEndDate,                                                       
-                    ProductFamilyId = productFamily,
-                     ProductId = product,
-                    OwnerId = Config.OwnerUserId, 
-                    CommissionPercent = 10.0m,                      
-                }
-            );  */
+
+            /*       var ruleProductFamily = await _supplierCommissionRules.SetupAsync(
+                     SupplierCommissionRuleConfig.Default(    
+                         name: $"Test Rule Product Family {Config.CorrelationId}",                
+                         statusCode: Config.DefaultStatusCode,               
+                         ownerId: Config.OwnerUserId,
+                         supplierContractId: SupplierContractId    
+                     ) with
+                     {
+
+                         EffectiveEndDate = contractEndDate,                                                       
+                         ProductFamilyId = productFamily,
+                          ProductId = product,
+                         OwnerId = Config.OwnerUserId, 
+                         CommissionPercent = 10.0m,                      
+                     }
+                 );  */
 
             /*  var ruleProduct = await _supplierCommissionRules.SetupAsync(       
                 SupplierCommissionRuleConfig.Default(  
@@ -732,27 +732,27 @@ namespace E2E.Api.Tests.Tests
             );  */
 
             var ruleHospital = await _supplierCommissionRules.SetupAsync(
-                SupplierCommissionRuleConfig.Default(     
-                    name: $"Test Rule Hospital {Config.CorrelationId}",   
-                    supplierContractId: SupplierContractId,            
+                SupplierCommissionRuleConfig.Default(
+                    name: $"Test Rule Hospital {Config.CorrelationId}",
+                    supplierContractId: SupplierContractId,
                     statusCode: Config.DefaultStatusCode,
                     ownerId: Config.OwnerUserId
                 ) with
-                {  
-                    HospitalId = hospital,      
+                {
+                    HospitalId = hospital,
                     CommissionPercent = 7.0m,
                     EffectiveStartDate = contractStartDate,
                 }
             );
 
             var rulePhysician = await _supplierCommissionRules.SetupAsync(
-                SupplierCommissionRuleConfig.Default(  
-                    name: $"Test Rule Physician {Config.CorrelationId}",                  
-                    statusCode: Config.DefaultStatusCode,                    
+                SupplierCommissionRuleConfig.Default(
+                    name: $"Test Rule Physician {Config.CorrelationId}",
+                    statusCode: Config.DefaultStatusCode,
                     ownerId: Config.OwnerUserId,
                     supplierContractId: SupplierContractId
                 ) with
-                {                    
+                {
                     PhysicianId = physician,
                     CommissionPercent = 10.0m,
                     EffectiveStartDate = contractStartDate,
@@ -763,7 +763,7 @@ namespace E2E.Api.Tests.Tests
             await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(5));
 
             var physicianCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, rulePhysician);
-             Assert.AreEqual(1, physicianCommissions.Count, "Most specific rule (Physician) should generate commission.");
+            Assert.AreEqual(1, physicianCommissions.Count, "Most specific rule (Physician) should generate commission.");
 
             var hospitalCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleHospital);
 
@@ -783,9 +783,9 @@ namespace E2E.Api.Tests.Tests
             var hospital = Seed.HospitalId;
             var physician = Seed.PhysicianId;
             var procedure = Seed.ProcedureId;
-             var patientId = $"PAT-{Guid.NewGuid()}";
-            var caseDateTime = DateTime.UtcNow; 
-            var caseRecord = await _cases.SetupAsync(hospital, physician, procedure,patientId, caseDateTime);
+            var patientId = $"PAT-{Guid.NewGuid()}";
+            var caseDateTime = DateTime.UtcNow;
+            var caseRecord = await _cases.SetupAsync(hospital, physician, procedure, patientId, caseDateTime);
             var organizationId = Seed.OrganizationId;
             var subjectId = Seed.SubjectId;
             var unitGroupId = Seed.UnitGroupId;
@@ -819,7 +819,7 @@ namespace E2E.Api.Tests.Tests
                     Quantity = 1,
                     ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
                     IsHospitalOwned = false,
-                    UnitPrice = 200.00m,                                        
+                    UnitPrice = 200.00m,
                 }
             );
 
@@ -838,42 +838,42 @@ namespace E2E.Api.Tests.Tests
                     AllPhysicians = true,
                 }
             );
-                 
 
-             var ruleProductFamily = await _supplierCommissionRules.SetupAsync(
-                SupplierCommissionRuleConfig.Default(    
-                    name: $"Test Rule Product Family {Config.CorrelationId}",                
-                    statusCode: Config.DefaultStatusCode,               
-                    ownerId: Config.OwnerUserId,
-                    supplierContractId: SupplierContractId    
-                ) with
-                {          
-                   EffectiveStartDate = contractStartDate,                                                   
-                    ProductFamilyId = productFamily,
-                     ProductId = product,
-                    CommissionPercent = 10.0m,                      
-                }
-            );  
 
-             var ruleProduct = await _supplierCommissionRules.SetupAsync(       
-                SupplierCommissionRuleConfig.Default(  
-                    name: $"Test Rule Product {Config.CorrelationId}",    
-                    supplierContractId: SupplierContractId,              
-                    statusCode: Config.DefaultStatusCode,                
-                    ownerId: Config.OwnerUserId
-                ) with
-                {  
-                    EffectiveStartDate = contractStartDate,
-                    CommissionPercent = 4.0m,      
-                    ProductId = product,   
-                }
-            );  
+            var ruleProductFamily = await _supplierCommissionRules.SetupAsync(
+               SupplierCommissionRuleConfig.Default(
+                   name: $"Test Rule Product Family {Config.CorrelationId}",
+                   statusCode: Config.DefaultStatusCode,
+                   ownerId: Config.OwnerUserId,
+                   supplierContractId: SupplierContractId
+               ) with
+               {
+                   EffectiveStartDate = contractStartDate,
+                   ProductFamilyId = productFamily,
+                   ProductId = product,
+                   CommissionPercent = 10.0m,
+               }
+           );
 
-                      await _cases.RegenCaseAsync(caseRecord);
+            var ruleProduct = await _supplierCommissionRules.SetupAsync(
+               SupplierCommissionRuleConfig.Default(
+                   name: $"Test Rule Product {Config.CorrelationId}",
+                   supplierContractId: SupplierContractId,
+                   statusCode: Config.DefaultStatusCode,
+                   ownerId: Config.OwnerUserId
+               ) with
+               {
+                   EffectiveStartDate = contractStartDate,
+                   CommissionPercent = 4.0m,
+                   ProductId = product,
+               }
+           );
+
+            await _cases.RegenCaseAsync(caseRecord);
             await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(5));
-                      
-             var productCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleProduct); 
-             var productFamilyCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleProductFamily); 
+
+            var productCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleProduct);
+            var productFamilyCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleProductFamily);
 
             TestContext.WriteLine($"✓ Most specific rule (Physician) correctly selected for supplier commission.");
         }
@@ -891,9 +891,9 @@ namespace E2E.Api.Tests.Tests
             var hospital = Seed.HospitalId;
             var physician = Seed.PhysicianId;
             var procedure = Seed.ProcedureId;
-             var patientId = $"PAT-{Guid.NewGuid()}";
-            var caseDateTime = DateTime.UtcNow; 
-            var caseRecord = await _cases.SetupAsync(hospital, physician, procedure,patientId, caseDateTime);
+            var patientId = $"PAT-{Guid.NewGuid()}";
+            var caseDateTime = DateTime.UtcNow;
+            var caseRecord = await _cases.SetupAsync(hospital, physician, procedure, patientId, caseDateTime);
             var organizationId = Seed.OrganizationId;
             var subjectId = Seed.SubjectId;
             var unitGroupId = Seed.UnitGroupId;
@@ -927,7 +927,7 @@ namespace E2E.Api.Tests.Tests
                     Quantity = 1,
                     ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
                     IsHospitalOwned = false,
-                    UnitPrice = 200.00m,                                        
+                    UnitPrice = 200.00m,
                 }
             );
 
@@ -945,21 +945,21 @@ namespace E2E.Api.Tests.Tests
                     AllHospitals = false,
                     AllPhysicians = true,
                 }
-            );                          
+            );
 
-             var ruleProduct = await _supplierCommissionRules.SetupAsync(       
-                SupplierCommissionRuleConfig.Default(  
-                    name: $"Test Rule Product {Config.CorrelationId}",    
-                    supplierContractId: SupplierContractId,              
-                    statusCode: Config.DefaultStatusCode,                
-                    ownerId: Config.OwnerUserId
-                ) with
-                {  
-                    EffectiveStartDate = contractStartDate,
-                    CommissionPercent = 4.0m,      
-                    ProductId = product,   
-                }
-            ); 
+            var ruleProduct = await _supplierCommissionRules.SetupAsync(
+               SupplierCommissionRuleConfig.Default(
+                   name: $"Test Rule Product {Config.CorrelationId}",
+                   supplierContractId: SupplierContractId,
+                   statusCode: Config.DefaultStatusCode,
+                   ownerId: Config.OwnerUserId
+               ) with
+               {
+                   EffectiveStartDate = contractStartDate,
+                   CommissionPercent = 4.0m,
+                   ProductId = product,
+               }
+           );
 
             var ruleId = await _supplierCommissionRules.SetupAsync(
                 SupplierCommissionRuleConfig.Default(
@@ -968,13 +968,13 @@ namespace E2E.Api.Tests.Tests
                     ownerId: Config.OwnerUserId
                 ) with
                 {
-                    EffectiveStartDate = contractStartDate,                    
+                    EffectiveStartDate = contractStartDate,
                     HospitalId = hospital,
                     CommissionPercent = 10.0m,
                 }
-            ); 
+            );
 
-             Assert.IsNotNull(ruleId, "Supplier Commission Rule record should exist after setup.");
+            Assert.IsNotNull(ruleId, "Supplier Commission Rule record should exist after setup.");
 
             TestContext.WriteLine(
                 $"Supplier Commission Rule created with HospitalId: {hospital} (matching case hospital)"
@@ -983,7 +983,7 @@ namespace E2E.Api.Tests.Tests
             await _cases.RegenCaseAsync(caseRecord);
             await _cases.WaitUntilRegenerateCompleteAsync(caseRecord, TimeSpan.FromSeconds(90), TimeSpan.FromSeconds(5));
 
-             // Verify commission was generated
+            // Verify commission was generated
             var commissions = await _supplierCommissions.GetByCaseAndRuleAsync(
                 caseRecord,
                 ruleId
@@ -995,7 +995,7 @@ namespace E2E.Api.Tests.Tests
                 "When rule has non-empty hospital field matching case hospital and contract has AllHospitals=false, should generate supplier commission."
             );
 
-             var productCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleProduct);              
+            var productCommissions = await _supplierCommissions.GetByCaseAndRuleAsync(caseRecord, ruleProduct);
 
             TestContext.WriteLine($"✓ Most specific rule (Physician) correctly selected for supplier commission.");
         }
@@ -1314,7 +1314,7 @@ namespace E2E.Api.Tests.Tests
                     ownerId: Config.OwnerUserId
                 ) with
                 {
-                    EffectiveStartDate = contractStartDate,                    
+                    EffectiveStartDate = contractStartDate,
                     HospitalId = hospital,
                     CommissionPercent = 10.0m,
                 }
@@ -1401,7 +1401,7 @@ namespace E2E.Api.Tests.Tests
                 OptionSetValues.Product.ProductType.Consignment,
                 costPrice: 100.00m
             );
-        
+
             var caseProductId = await _caseProducts.SetupAsync(
                 CaseProductConfig.Default(
                     caseRecord,
@@ -1458,7 +1458,7 @@ namespace E2E.Api.Tests.Tests
                     ownerId: Config.OwnerUserId
                 ) with
                 {
-                    EffectiveStartDate = contractStartDate,                    
+                    EffectiveStartDate = contractStartDate,
                     PhysicianId = physician,
                     CommissionPercent = 10.0m,
                 }
@@ -1593,7 +1593,7 @@ namespace E2E.Api.Tests.Tests
                 }
             );
 
-      
+
             // Create a DIFFERENT physician for the rule (Physician2)
             var physician2 = await _contacts.SetupPhysicianAsync();
             Assert.IsNotNull(physician2, "Physician 2 record should exist after setup.");
@@ -1710,14 +1710,14 @@ namespace E2E.Api.Tests.Tests
 
             TestContext.WriteLine($"Created Product with ID: {product} in Product Family: {productFamily}");
 
-           
+
             var caseProductId = await _caseProducts.SetupAsync(
                 CaseProductConfig.Default(caseRecord, hospital, supplier, manufacturer, productFamily, product) with
                 {
                     Quantity = 1,
                     ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
                     IsHospitalOwned = false,
-                    UnitPrice = 200.00m,                                        
+                    UnitPrice = 200.00m,
                 }
             );
 
@@ -1742,7 +1742,7 @@ namespace E2E.Api.Tests.Tests
                     effectiveStartDate: contractStartDate,
                     ownerId: Config.OwnerUserId
                 ) with
-                {              
+                {
                     AllHospitals = false,
                     AllPhysicians = false,
                 }
@@ -1752,23 +1752,23 @@ namespace E2E.Api.Tests.Tests
                 supplierContractId,
                 "Supplier Contract record should exist after setup."
             );
-    
+
 
             // Create supplier commission rule with populated ProductFamilyId matching the case product's family
             var ruleId = await _supplierCommissionRules.SetupAsync(
                 SupplierCommissionRuleConfig.Default(
                     name: $"Test Rule Product Family Match {Config.CorrelationId}",
-                    statusCode: Config.DefaultStatusCode,               
+                    statusCode: Config.DefaultStatusCode,
                     supplierContractId: supplierContractId,
                     ownerId: Config.OwnerUserId
                 ) with
                 {
                     HospitalId = hospital,
-                     PhysicianId = physician,
+                    PhysicianId = physician,
                     EffectiveEndDate = contractEndDate,
                     ProductFamilyId = productFamily,
-                      ProductId = product,
-                    OwnerId = Config.OwnerUserId, 
+                    ProductId = product,
+                    OwnerId = Config.OwnerUserId,
                     CommissionPercent = 10.0m,
                 }
             );
@@ -2515,6 +2515,71 @@ namespace E2E.Api.Tests.Tests
 
             TestContext.WriteLine(
                 "✓ Supplier Commission correctly NOT generated for non-matching hospital rule."
+            );
+        }
+
+        [TestMethod]
+        public async Task SupplierContract_CreateContractWithPhysicianContact_ShouldAddContactToRelationship()
+        {
+            /**
+            * Goal: Create a supplier contract, then create a contact record called "physician", 
+            * and add the contact to the leap_leap_suppliercontract_contact entity relationship.
+            * 
+            * Steps:
+            * 1. Setup supplier account
+            * 2. Create supplier contract
+            * 3. Create contact record (physician)
+            * 4. Add contact to supplier contract relationship
+            * 5. Verify the relationship was created
+            */
+
+            // Step 1: Setup supplier
+            var supplier = await _accounts.SetupSupplierAsync();
+            Assert.IsNotNull(supplier, "Supplier account should be created.");
+            TestContext.WriteLine($"Created Supplier with ID: {supplier}");
+
+            // Step 2: Create supplier contract
+            var supplierContractId = await _supplierContracts.SetupAsync(
+                SupplierContractConfig.Default(
+                    name: $"Test Contract {Config.CorrelationId}",
+                    supplierId: supplier,
+                    entityId: supplier,
+                    effectiveStartDate: DateTime.UtcNow.Date,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    AllHospitals = true,
+                    AllPhysicians = false,
+                }
+            );
+            Assert.IsNotNull(supplierContractId, "Supplier Contract should be created.");
+            TestContext.WriteLine($"Created Supplier Contract with ID: {supplierContractId}");
+
+            // Step 3: Create contact record (physician)
+            var physicianContact = await _contacts.SetupPhysicianAsync();          
+            Assert.IsNotNull(physicianContact, "Physician Contact should be created.");
+            TestContext.WriteLine($"Created Physician Contact with ID: {physicianContact}");
+
+            // Step 4: Add contact to supplier contract relationship
+            await Client.AddReferenceAsync(
+                sourceEntityLogicalName: EntityNames.SupplierContract,
+                sourceId: supplierContractId,
+                navigationPropertyName: "leap_leap_suppliercontract_contact",  /* "leap_suppliercontract_contact", */
+                targetEntityLogicalName: EntityNames.Contact,
+                targetId: physicianContact
+            );
+            TestContext.WriteLine(
+                $"Added Contact {physicianContact} to Supplier Contract {supplierContractId} relationship."
+            );
+
+            // Step 5: Verify the relationship was created by retrieving the supplier contract
+            var supplierContractRecord = await Client.GetAsync(
+                EntityNames.SupplierContract,
+                supplierContractId
+            );
+            Assert.IsNotNull(supplierContractRecord, "Supplier Contract record should exist.");
+            TestContext.WriteLine(
+                "✓ Supplier Contract with Contact relationship successfully created and verified."
             );
         }
     }

@@ -260,5 +260,58 @@ namespace E2E.Api.Tests.Utils
             using var doc = await JsonDocument.ParseAsync(await resp.Content.ReadAsStreamAsync());
             return doc.RootElement.GetProperty("value").EnumerateArray().ToList();
         }
+
+        // ---------------------------
+        // Relationship helpers
+        // ---------------------------
+
+        /// <summary>
+        /// Add a reference to a many-to-many relationship in Dataverse
+        /// </summary>
+        /// <param name="sourceEntityLogicalName">Source entity (e.g., "leap_suppliercontract")</param>
+        /// <param name="sourceId">Source record ID</param>
+        /// <param name="navigationPropertyName">Navigation property name for the relationship collection (may differ from relationship schema name)</param>
+        /// <param name="targetEntityLogicalName">Target entity (e.g., "contact")</param>
+        /// <param name="targetId">Target record ID</param>
+        public async Task AddReferenceAsync(
+            string sourceEntityLogicalName,
+            Guid sourceId,
+            string navigationPropertyName,
+            string targetEntityLogicalName,
+            Guid targetId
+        )
+        {
+            var client = await AuthenticatedClientAsync();
+            var baseUrl = _cfg.Auth.DynamicsUrl.TrimEnd('/');
+            
+            // URL format for many-to-many relationships: /{sourceEntity}s({sourceId})/{navigationProperty}/$ref
+            var url =
+                $"{baseUrl}/api/data/v9.2/{sourceEntityLogicalName}s({sourceId})/{navigationPropertyName}/$ref";
+
+            // Build the URI for the target record
+            var targetUri = $"{baseUrl}/api/data/v9.2/{targetEntityLogicalName}s({targetId})";
+
+            // OData entity reference link format
+            var payload = new Dictionary<string, object>
+            {
+                ["@odata.id"] = targetUri
+            };
+
+            var jsonPayload = JsonSerializer.Serialize(payload);
+            using var content = new StringContent(
+                jsonPayload,
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            using var resp = await client.PostAsync(url, content);
+
+            var raw = await resp.Content.ReadAsStringAsync();
+            if (!resp.IsSuccessStatusCode)
+            {
+                var errorMsg = $"Failed to add reference. URL: {url}, Payload: {jsonPayload}, Response: {raw}";
+                throw new DataverseException(resp.StatusCode, errorMsg);
+            }
+        }
     }
 }
