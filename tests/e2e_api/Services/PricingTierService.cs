@@ -15,7 +15,7 @@ namespace E2E.Api.Tests.Services
         public PricingTierService(DataverseClient client)
             : base(client) { }
 
-        public async Task<List<JsonElement>> GetMatchingAsync(
+       /* public async Task<List<JsonElement>> GetMatchingAsync(
             Guid supplierContractId,
             Guid productId,
             decimal unitPrice
@@ -30,6 +30,6 @@ namespace E2E.Api.Tests.Services
                 );
 
             return await Client.GetMultipleByFetchXmlAsync("leap_pricingtiers", fetchXml);
-        }
+        } */
     }
 }

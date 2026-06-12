@@ -20,7 +20,7 @@ namespace E2E.Api.Tests.Fixtures
             _contacts = new ContactService(client);
         }
 
-        public async Task<Guid> SetupAsync(
+        public async Task<Guid> CreateAuthorizexPhysicianAsync(
             string firstName,
             string lastName,
             int customerTypeCode,
