@@ -2519,7 +2519,7 @@ namespace E2E.Api.Tests.Tests
         }
 
         [TestMethod]
-        public async Task SupplierContract_CreateContractWithPhysicianContact_ShouldAddContactToRelationship()
+        public async Task SupplierContract_ContractWithPhysicianContactinListMatch_ShouldGenerateCommission()
         {
             /**
             * Goal: Create a supplier contract, then create a contact record called "physician", 
@@ -2581,6 +2581,613 @@ namespace E2E.Api.Tests.Tests
             TestContext.WriteLine(
                 "✓ Supplier Contract with Contact relationship successfully created and verified."
             );
+
+            var hospital = Seed.HospitalId;                        
+            var procedure = Seed.ProcedureId;
+            var caseRecord = await _cases.SetupAsync(hospital, physicianContact, procedure);
+
+              // Setup products and case products
+            var organizationId = Seed.OrganizationId;
+            var subjectId = Seed.SubjectId;
+            var unitGroupId = Seed.UnitGroupId;
+            var unitId = Seed.UnitId;
+            var manufacturer = await _accounts.SetupManufacturerAsync(
+                OptionSetValues.Account.SalesCategory.Woundcare
+            );            
+
+            var productFamily = await _products.SetupProductFamilyAsync(
+                organizationId,
+                subjectId,
+                unitGroupId,
+                unitId,
+                supplier,
+                OptionSetValues.Product.ProductType.Consignment
+            );
+
+            var product = await _products.SetupProductAsync(
+                organizationId,
+                subjectId,
+                unitGroupId,
+                unitId,
+                supplier,
+                productFamily,
+                OptionSetValues.Product.ProductType.Consignment,
+                costPrice: 100.00m
+            );
+
+            var caseProductId = await _caseProducts.SetupAsync(
+                CaseProductConfig.Default(
+                    caseRecord,
+                    hospital,
+                    supplier,
+                    manufacturer,
+                    productFamily,
+                    product
+                ) with
+                {
+                    Quantity = 1,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
+                    IsHospitalOwned = false,
+                    UnitPrice = 200.00m,
+                }
+            );
+
+            Assert.IsNotNull(
+                caseProductId,
+                "Case Product record should exist after setup."
+            );
+
+             // Create supplier commission rule with populated HospitalId matching the case's hospital
+            var ruleId = await _supplierCommissionRules.SetupAsync(
+                SupplierCommissionRuleConfig.Default(
+                    name: $"Test Rule Physician Match {Config.CorrelationId}",
+                    supplierContractId: supplierContractId,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    EffectiveStartDate = DateTime.UtcNow.Date,
+                    PhysicianId = physicianContact,
+                    CommissionPercent = 10.0m,
+                }
+            );
+
+            Assert.IsNotNull(ruleId, "Supplier Commission Rule record should exist after setup.");
+
+            TestContext.WriteLine(
+                $"Supplier Commission Rule created with PhysicianId: {physicianContact} (matching case physician)"
+            );
+
+             // Trigger case regeneration
+            await _cases.RegenCaseAsync(caseRecord);
+            await _cases.WaitUntilRegenerateCompleteAsync(
+                caseRecord,
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
+            );
+
+            TestContext.WriteLine("Case regeneration completed");
+
+            // Verify commission was generated
+            var commissions = await _supplierCommissions.GetByCaseAndRuleAsync(
+                caseRecord,
+                ruleId
+            );
+
+            Assert.AreEqual(
+                1,
+                commissions.Count,
+                "When rule has non-empty physician field matching case physician and contract has AllPhysicians=false, should generate supplier commission."
+            );
+
+            TestContext.WriteLine(
+                "✓ Supplier Commission correctly generated for matching physician rule."
+            );
+
         }
+
+        [TestMethod]
+        public async Task SupplierContract_ContractWithPhysicianContactinListNoMatch_ShouldNotGenerateCommission()
+        {
+            /**
+            * Goal: Create a supplier contract, then create a contact record called "physician", 
+            * and add the contact to the leap_leap_suppliercontract_contact entity relationship.
+            * 
+            * Steps:
+            * 1. Setup supplier account
+            * 2. Create supplier contract
+            * 3. Create contact record (physician)
+            * 4. Add contact to supplier contract relationship
+            * 5. Verify the relationship was created
+            */
+
+            // Step 1: Setup supplier
+            var supplier = await _accounts.SetupSupplierAsync();
+            Assert.IsNotNull(supplier, "Supplier account should be created.");
+            TestContext.WriteLine($"Created Supplier with ID: {supplier}");
+
+            // Step 2: Create supplier contract
+            var supplierContractId = await _supplierContracts.SetupAsync(
+                SupplierContractConfig.Default(
+                    name: $"Test Contract {Config.CorrelationId}",
+                    supplierId: supplier,
+                    entityId: supplier,
+                    effectiveStartDate: DateTime.UtcNow.Date,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    AllHospitals = true,
+                    AllPhysicians = false,
+                }
+            );
+            Assert.IsNotNull(supplierContractId, "Supplier Contract should be created.");
+            TestContext.WriteLine($"Created Supplier Contract with ID: {supplierContractId}");
+
+            // Step 3: Create contact record (physician)
+            var physicianContact = await _contacts.SetupPhysicianAsync();          
+            Assert.IsNotNull(physicianContact, "Physician Contact should be created.");
+            TestContext.WriteLine($"Created Physician Contact with ID: {physicianContact}");
+
+            // Step 4: Add contact to supplier contract relationship
+            await Client.AddReferenceAsync(
+                sourceEntityLogicalName: EntityNames.SupplierContract,
+                sourceId: supplierContractId,
+                navigationPropertyName: "leap_leap_suppliercontract_contact",  /* "leap_suppliercontract_contact", */
+                targetEntityLogicalName: EntityNames.Contact,
+                targetId: physicianContact
+            );
+            TestContext.WriteLine(
+                $"Added Contact {physicianContact} to Supplier Contract {supplierContractId} relationship."
+            );
+
+            // Step 5: Verify the relationship was created by retrieving the supplier contract
+            var supplierContractRecord = await Client.GetAsync(
+                EntityNames.SupplierContract,
+                supplierContractId
+            );
+            Assert.IsNotNull(supplierContractRecord, "Supplier Contract record should exist.");
+            TestContext.WriteLine(
+                "✓ Supplier Contract with Contact relationship successfully created and verified."
+            );
+
+            var hospital = Seed.HospitalId;    
+            var physician1 = Seed.PhysicianId;                    
+            var procedure = Seed.ProcedureId;
+            var caseRecord = await _cases.SetupAsync(hospital, physician1, procedure);
+
+              // Setup products and case products
+            var organizationId = Seed.OrganizationId;
+            var subjectId = Seed.SubjectId;
+            var unitGroupId = Seed.UnitGroupId;
+            var unitId = Seed.UnitId;
+            var manufacturer = await _accounts.SetupManufacturerAsync(
+                OptionSetValues.Account.SalesCategory.Woundcare
+            );            
+
+            var productFamily = await _products.SetupProductFamilyAsync(
+                organizationId,
+                subjectId,
+                unitGroupId,
+                unitId,
+                supplier,
+                OptionSetValues.Product.ProductType.Consignment
+            );
+
+            var product = await _products.SetupProductAsync(
+                organizationId,
+                subjectId,
+                unitGroupId,
+                unitId,
+                supplier,
+                productFamily,
+                OptionSetValues.Product.ProductType.Consignment,
+                costPrice: 100.00m
+            );
+
+            var caseProductId = await _caseProducts.SetupAsync(
+                CaseProductConfig.Default(
+                    caseRecord,
+                    hospital,
+                    supplier,
+                    manufacturer,
+                    productFamily,
+                    product
+                ) with
+                {
+                    Quantity = 1,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
+                    IsHospitalOwned = false,
+                    UnitPrice = 200.00m,
+                }
+            );
+
+            Assert.IsNotNull(
+                caseProductId,
+                "Case Product record should exist after setup."
+            );
+
+             // Create supplier commission rule with populated HospitalId matching the case's hospital
+            var ruleId = await _supplierCommissionRules.SetupAsync(
+                SupplierCommissionRuleConfig.Default(
+                    name: $"Test Rule Physician Match {Config.CorrelationId}",
+                    supplierContractId: supplierContractId,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    EffectiveStartDate = DateTime.UtcNow.Date,
+                    PhysicianId = physicianContact,
+                    CommissionPercent = 10.0m,
+                }
+            );
+
+            Assert.IsNotNull(ruleId, "Supplier Commission Rule record should exist after setup.");
+
+            TestContext.WriteLine(
+                $"Supplier Commission Rule created with PhysicianId: {physicianContact} (matching case physician)"
+            );
+
+             // Trigger case regeneration
+            await _cases.RegenCaseAsync(caseRecord);
+            await _cases.WaitUntilRegenerateCompleteAsync(
+                caseRecord,
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
+            );
+
+            TestContext.WriteLine("Case regeneration completed");
+
+            // Verify commission was generated
+            var commissions = await _supplierCommissions.GetByCaseAndRuleAsync(
+                caseRecord,
+                ruleId
+            );
+
+            Assert.AreEqual(
+                1,
+                commissions.Count,
+                "When rule has non-empty physician field matching case physician and contract has AllPhysicians=false, should generate supplier commission."
+            );
+
+            TestContext.WriteLine(
+                "✓ Supplier Commission correctly generated for matching physician rule."
+            );
+
+        }
+
+        [TestMethod]
+        public async Task SupplierContract_ContractWithHospitalinListMatch_ShouldGenerateCommission()
+        {
+            /**
+            * Goal: Create a supplier contract, then create a contact record called "physician", 
+            * and add the contact to the leap_leap_suppliercontract_contact entity relationship.
+            * 
+            * Steps:
+            * 1. Setup supplier account
+            * 2. Create supplier contract
+            * 3. Create contact record (physician)
+            * 4. Add contact to supplier contract relationship
+            * 5. Verify the relationship was created
+            */
+
+            // Step 1: Setup supplier
+            var supplier = await _accounts.SetupSupplierAsync();
+            Assert.IsNotNull(supplier, "Supplier account should be created.");
+            TestContext.WriteLine($"Created Supplier with ID: {supplier}");
+
+            // Step 2: Create supplier contract
+            var supplierContractId = await _supplierContracts.SetupAsync(
+                SupplierContractConfig.Default(
+                    name: $"Test Contract {Config.CorrelationId}",
+                    supplierId: supplier,
+                    entityId: supplier,
+                    effectiveStartDate: DateTime.UtcNow.Date,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    AllHospitals = false,
+                    AllPhysicians = true,
+                }
+            );
+            Assert.IsNotNull(supplierContractId, "Supplier Contract should be created.");
+            TestContext.WriteLine($"Created Supplier Contract with ID: {supplierContractId}");
+
+          // Create a DIFFERENT hospital for the rule (Hospital2)
+            var hospital2 = await _accounts.SetupHospitalAsync();
+            Assert.IsNotNull(hospital2, "Hospital 2 record should exist after setup.");
+            TestContext.WriteLine($"Created Hospital 2 with ID: {hospital2} (different from case hospital)");
+
+            // Step 4: Add contact to supplier contract relationship
+            await Client.AddReferenceAsync(
+                sourceEntityLogicalName: EntityNames.SupplierContract,
+                sourceId: supplierContractId,
+                navigationPropertyName: "leap_leap_suppliercontract_account",  
+                targetEntityLogicalName: EntityNames.Account,
+                targetId: hospital2
+            );
+            TestContext.WriteLine(
+                $"Added Contact {hospital2} to Supplier Contract {supplierContractId} relationship."
+            );
+
+            // Step 5: Verify the relationship was created by retrieving the supplier contract
+            var supplierContractRecord = await Client.GetAsync(
+                EntityNames.SupplierContract,
+                supplierContractId
+            );
+            Assert.IsNotNull(supplierContractRecord, "Supplier Contract record should exist.");
+            TestContext.WriteLine(
+                "✓ Supplier Contract with Contact relationship successfully created and verified."
+            );
+                              
+            var procedure = Seed.ProcedureId;
+            var physician = Seed.PhysicianId;
+            var caseRecord = await _cases.SetupAsync(hospital2, physician, procedure);
+
+              // Setup products and case products
+            var organizationId = Seed.OrganizationId;
+            var subjectId = Seed.SubjectId;
+            var unitGroupId = Seed.UnitGroupId;
+            var unitId = Seed.UnitId;
+            var manufacturer = await _accounts.SetupManufacturerAsync(
+                OptionSetValues.Account.SalesCategory.Woundcare
+            );            
+
+            var productFamily = await _products.SetupProductFamilyAsync(
+                organizationId,
+                subjectId,
+                unitGroupId,
+                unitId,
+                supplier,
+                OptionSetValues.Product.ProductType.Consignment
+            );
+
+            var product = await _products.SetupProductAsync(
+                organizationId,
+                subjectId,
+                unitGroupId,
+                unitId,
+                supplier,
+                productFamily,
+                OptionSetValues.Product.ProductType.Consignment,
+                costPrice: 100.00m
+            );
+
+            var caseProductId = await _caseProducts.SetupAsync(
+                CaseProductConfig.Default(
+                    caseRecord,
+                    hospital2,
+                    supplier,
+                    manufacturer,
+                    productFamily,
+                    product
+                ) with
+                {
+                    Quantity = 1,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
+                    IsHospitalOwned = false,
+                    UnitPrice = 200.00m,
+                }
+            );
+
+            Assert.IsNotNull(
+                caseProductId,
+                "Case Product record should exist after setup."
+            );
+
+             // Create supplier commission rule with populated HospitalId matching the case's hospital
+            var ruleId = await _supplierCommissionRules.SetupAsync(
+                SupplierCommissionRuleConfig.Default(
+                    name: $"Test Rule Hospital Match {Config.CorrelationId}",
+                    supplierContractId: supplierContractId,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    EffectiveStartDate = DateTime.UtcNow.Date,
+                    HospitalId = hospital2,
+                    CommissionPercent = 10.0m,
+                }
+            );
+
+            Assert.IsNotNull(ruleId, "Supplier Commission Rule record should exist after setup.");
+
+            TestContext.WriteLine(
+                $"Supplier Commission Rule created with HospitalId: {hospital2} (matching case hospital)"
+            );
+
+             // Trigger case regeneration
+            await _cases.RegenCaseAsync(caseRecord);
+            await _cases.WaitUntilRegenerateCompleteAsync(
+                caseRecord,
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
+            );
+
+            TestContext.WriteLine("Case regeneration completed");
+
+            // Verify commission was generated
+            var commissions = await _supplierCommissions.GetByCaseAndRuleAsync(
+                caseRecord,
+                ruleId
+            );
+
+            Assert.AreEqual(
+                1,
+                commissions.Count,
+                "When rule has non-empty physician field matching case physician and contract has AllPhysicians=false, should generate supplier commission."
+            );
+
+            TestContext.WriteLine(
+                "✓ Supplier Commission correctly generated for matching physician rule."
+            );
+
+        }
+
+         [TestMethod]
+        public async Task SupplierContract_ContractWithHospitalinListButNotMatch_ShouldNotGenerateCommission()
+        {
+            /**
+            * Goal: Create a supplier contract, then create a contact record called "physician", 
+            * and add the contact to the leap_leap_suppliercontract_contact entity relationship.
+            * 
+            * Steps:
+            * 1. Setup supplier account
+            * 2. Create supplier contract
+            * 3. Create contact record (physician)
+            * 4. Add contact to supplier contract relationship
+            * 5. Verify the relationship was created
+            */
+
+            // Step 1: Setup supplier
+            var supplier = await _accounts.SetupSupplierAsync();
+            Assert.IsNotNull(supplier, "Supplier account should be created.");
+            TestContext.WriteLine($"Created Supplier with ID: {supplier}");
+
+            // Step 2: Create supplier contract
+            var supplierContractId = await _supplierContracts.SetupAsync(
+                SupplierContractConfig.Default(
+                    name: $"Test Contract {Config.CorrelationId}",
+                    supplierId: supplier,
+                    entityId: supplier,
+                    effectiveStartDate: DateTime.UtcNow.Date,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    AllHospitals = false,
+                    AllPhysicians = true,
+                }
+            );
+            Assert.IsNotNull(supplierContractId, "Supplier Contract should be created.");
+            TestContext.WriteLine($"Created Supplier Contract with ID: {supplierContractId}");
+
+          // Create a DIFFERENT hospital for the rule (Hospital2)
+            var hospital2 = await _accounts.SetupHospitalAsync();
+            Assert.IsNotNull(hospital2, "Hospital 2 record should exist after setup.");
+            TestContext.WriteLine($"Created Hospital 2 with ID: {hospital2} (different from case hospital rule)");
+
+            // Step 4: Add contact to supplier contract relationship
+            await Client.AddReferenceAsync(
+                sourceEntityLogicalName: EntityNames.SupplierContract,
+                sourceId: supplierContractId,
+                navigationPropertyName: "leap_leap_suppliercontract_account",  
+                targetEntityLogicalName: EntityNames.Account,
+                targetId: hospital2
+            );
+            TestContext.WriteLine(
+                $"Added Contact {hospital2} to Supplier Contract {supplierContractId} relationship."
+            );
+
+            // Step 5: Verify the relationship was created by retrieving the supplier contract
+            var supplierContractRecord = await Client.GetAsync(
+                EntityNames.SupplierContract,
+                supplierContractId
+            );
+            Assert.IsNotNull(supplierContractRecord, "Supplier Contract record should exist.");
+            TestContext.WriteLine(
+                "✓ Supplier Contract with Contact relationship successfully created and verified."
+            );
+
+            var hospitalinit = Seed.HospitalId;                  
+            var procedure = Seed.ProcedureId;
+            var physician = Seed.PhysicianId;
+            var caseRecord = await _cases.SetupAsync(hospital2, physician, procedure);
+
+              // Setup products and case products
+            var organizationId = Seed.OrganizationId;
+            var subjectId = Seed.SubjectId;
+            var unitGroupId = Seed.UnitGroupId;
+            var unitId = Seed.UnitId;
+            var manufacturer = await _accounts.SetupManufacturerAsync(
+                OptionSetValues.Account.SalesCategory.Woundcare
+            );            
+
+            var productFamily = await _products.SetupProductFamilyAsync(
+                organizationId,
+                subjectId,
+                unitGroupId,
+                unitId,
+                supplier,
+                OptionSetValues.Product.ProductType.Consignment
+            );
+
+            var product = await _products.SetupProductAsync(
+                organizationId,
+                subjectId,
+                unitGroupId,
+                unitId,
+                supplier,
+                productFamily,
+                OptionSetValues.Product.ProductType.Consignment,
+                costPrice: 100.00m
+            );
+
+            var caseProductId = await _caseProducts.SetupAsync(
+                CaseProductConfig.Default(
+                    caseRecord,
+                    hospital2,
+                    supplier,
+                    manufacturer,
+                    productFamily,
+                    product
+                ) with
+                {
+                    Quantity = 1,
+                    ProductType = OptionSetValues.CaseProduct.ProductType.Consignment,
+                    IsHospitalOwned = false,
+                    UnitPrice = 200.00m,
+                }
+            );
+
+            Assert.IsNotNull(
+                caseProductId,
+                "Case Product record should exist after setup."
+            );
+
+             // Create supplier commission rule with populated HospitalId matching the case's hospital
+            var ruleId = await _supplierCommissionRules.SetupAsync(
+                SupplierCommissionRuleConfig.Default(
+                    name: $"Test Rule Hospital Match {Config.CorrelationId}",
+                    supplierContractId: supplierContractId,
+                    ownerId: Config.OwnerUserId
+                ) with
+                {
+                    EffectiveStartDate = DateTime.UtcNow.Date,
+                    HospitalId = hospitalinit,
+                    CommissionPercent = 10.0m,
+                }
+            );
+
+            Assert.IsNotNull(ruleId, "Supplier Commission Rule record should exist after setup.");
+
+            TestContext.WriteLine(
+                $"Supplier Commission Rule created with HospitalId: {hospitalinit} (Donot matching case use hospital2)"
+            );
+
+             // Trigger case regeneration
+            await _cases.RegenCaseAsync(caseRecord);
+            await _cases.WaitUntilRegenerateCompleteAsync(
+                caseRecord,
+                TimeSpan.FromSeconds(90),
+                TimeSpan.FromSeconds(5)
+            );
+
+            TestContext.WriteLine("Case regeneration completed");
+
+            // Verify commission was generated
+            var commissions = await _supplierCommissions.GetByCaseAndRuleAsync(
+                caseRecord,
+                ruleId
+            );
+
+            Assert.AreEqual(
+                1,
+                commissions.Count,
+                "When rule has non-empty physician field matching case physician and contract has AllPhysicians=false, should generate supplier commission."
+            );
+
+            TestContext.WriteLine(
+                "✓ Supplier Commission correctly generated for matching physician rule."
+            );
+
+        }
+
+
     }
 }

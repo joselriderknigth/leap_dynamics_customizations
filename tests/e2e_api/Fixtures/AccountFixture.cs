@@ -27,6 +27,8 @@ namespace E2E.Api.Tests.Fixtures
                 ["ownerid@odata.bind"] = $"/systemusers({_config.OwnerUserId})",
                 ["statecode"] = _config.DefaultStateCode,
                 ["statuscode"] = _config.DefaultStatusCode,
+                ["customertypecode"] = _config.DefaultAccountType,  // Hospital
+                ["leap_relationshipsubtype"] = _config.DefaultRelationshipType, // Customer
             };
             var accountId = await _accounts.CreateAsync(hospitalPayload);
             _createdIds.Add(accountId);

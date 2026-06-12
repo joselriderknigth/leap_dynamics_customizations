@@ -9,5 +9,8 @@ namespace E2E.Api.Tests.Config
         public Guid OwnerUserId { get; set; }
         public int DefaultStateCode { get; set; } = 0;
         public int DefaultStatusCode { get; set; } = 1;
+
+        public int DefaultAccountType { get; set; } = 293360001;
+        public int DefaultRelationshipType { get; set; } = 293360002;
     }
 }
