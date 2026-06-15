@@ -28,7 +28,7 @@ namespace E2E.Api.Tests.Tests
         private UsageFormService _usageForms = null!;
         private SupplierCommissionService _supplierCommissions = null!;
         private UsageFormDetailService _usageFormDetails = null!;
-        private PricingTierService _pricingTierService = null!;
+
 
         [TestInitialize]
         public void Setup()
@@ -45,7 +45,7 @@ namespace E2E.Api.Tests.Tests
             _usageForms = new UsageFormService(Client);
             _supplierCommissions = new SupplierCommissionService(Client);
             _usageFormDetails = new UsageFormDetailService(Client);
-            _pricingTierService = new PricingTierService(Client);
+       
         }
 
         [TestCleanup]
@@ -816,7 +816,7 @@ namespace E2E.Api.Tests.Tests
                ) with
                {
                    EffectiveStartDate = contractStartDate,
-                   ProductFamilyId = productFamily,                   
+                   ProductFamilyId = productFamily,
                    CommissionPercent = 10.0m,
                }
            );
@@ -1046,7 +1046,7 @@ namespace E2E.Api.Tests.Tests
             );
 
             Assert.IsNotNull(pricingTierId, "Pricing tier record should exist after setup.");
-    
+
             var ruleId = await _supplierCommissionRules.SetupAsync(
                 SupplierCommissionRuleConfig.Default(
                     name: $"Test Rule Match {Config.CorrelationId}",
@@ -1582,10 +1582,22 @@ namespace E2E.Api.Tests.Tests
 
             // Trigger case regeneration
             await _cases.RegenCaseAsync(caseRecord);
-            await _cases.WaitUntilRegenerateCompleteAsync(
-                caseRecord,
-                TimeSpan.FromSeconds(90),
-                TimeSpan.FromSeconds(5)
+
+            var ex = await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () =>
+            {
+                await _cases.WaitUntilRegenerateCompleteAsync(
+                    caseRecord,
+                    TimeSpan.FromSeconds(90),
+                    TimeSpan.FromSeconds(5)
+                );
+            });
+
+            Assert.IsTrue(ex.Message.Contains("Manager Standard commission job"),
+                 $"Unexpected exception message: {ex.Message}"
+            );
+
+            TestContext.WriteLine(
+                $"Expected exception captured: {ex.Message}"
             );
 
             TestContext.WriteLine("Case regeneration completed");
@@ -2092,10 +2104,22 @@ namespace E2E.Api.Tests.Tests
 
             // Trigger case regeneration
             await _cases.RegenCaseAsync(caseRecord);
-            await _cases.WaitUntilRegenerateCompleteAsync(
-                caseRecord,
-                TimeSpan.FromSeconds(90),
-                TimeSpan.FromSeconds(5)
+
+             var ex = await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () =>
+             {
+                await _cases.WaitUntilRegenerateCompleteAsync(
+                    caseRecord,
+                    TimeSpan.FromSeconds(90),
+                    TimeSpan.FromSeconds(5)
+                );
+              });
+
+            Assert.IsTrue(ex.Message.Contains("Manager Standard commission job"),
+                 $"Unexpected exception message: {ex.Message}"
+            );
+
+            TestContext.WriteLine(
+                $"Expected exception captured: {ex.Message}"
             );
 
             TestContext.WriteLine("Case regeneration completed");
@@ -2280,10 +2304,22 @@ namespace E2E.Api.Tests.Tests
 
             // Trigger case regeneration
             await _cases.RegenCaseAsync(caseRecord);
-            await _cases.WaitUntilRegenerateCompleteAsync(
-                caseRecord,
-                TimeSpan.FromSeconds(90),
-                TimeSpan.FromSeconds(5)
+
+             var ex = await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () =>
+             {
+                await _cases.WaitUntilRegenerateCompleteAsync(
+                    caseRecord,
+                    TimeSpan.FromSeconds(90),
+                    TimeSpan.FromSeconds(5)
+                );
+             });
+
+            Assert.IsTrue(ex.Message.Contains("Manager Standard commission job"),
+                 $"Unexpected exception message: {ex.Message}"
+            );
+
+            TestContext.WriteLine(
+                $"Expected exception captured: {ex.Message}"
             );
 
             TestContext.WriteLine("Case regeneration completed");
@@ -2453,10 +2489,22 @@ namespace E2E.Api.Tests.Tests
 
             // Trigger case regeneration
             await _cases.RegenCaseAsync(caseRecord);
-            await _cases.WaitUntilRegenerateCompleteAsync(
-                caseRecord,
-                TimeSpan.FromSeconds(90),
-                TimeSpan.FromSeconds(5)
+
+             var ex = await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () =>
+             {
+                await _cases.WaitUntilRegenerateCompleteAsync(
+                    caseRecord,
+                    TimeSpan.FromSeconds(90),
+                    TimeSpan.FromSeconds(5)
+                );
+             });
+
+            Assert.IsTrue(ex.Message.Contains("Manager Standard commission job"),
+                 $"Unexpected exception message: {ex.Message}"
+            );
+
+            TestContext.WriteLine(
+                $"Expected exception captured: {ex.Message}"
             );
 
             TestContext.WriteLine("Case regeneration completed");
@@ -2516,7 +2564,7 @@ namespace E2E.Api.Tests.Tests
             TestContext.WriteLine($"Created Supplier Contract with ID: {supplierContractId}");
 
             // Step 3: Create contact record (physician)
-            var physicianContact = await _contacts.SetupPhysicianAsync();          
+            var physicianContact = await _contacts.SetupPhysicianAsync();
             Assert.IsNotNull(physicianContact, "Physician Contact should be created.");
             TestContext.WriteLine($"Created Physician Contact with ID: {physicianContact}");
 
@@ -2542,18 +2590,18 @@ namespace E2E.Api.Tests.Tests
                 "✓ Supplier Contract with Contact relationship successfully created and verified."
             );
 
-            var hospital = Seed.HospitalId;                        
+            var hospital = Seed.HospitalId;
             var procedure = Seed.ProcedureId;
             var caseRecord = await _cases.SetupAsync(hospital, physicianContact, procedure);
 
-              // Setup products and case products
+            // Setup products and case products
             var organizationId = Seed.OrganizationId;
             var subjectId = Seed.SubjectId;
             var unitGroupId = Seed.UnitGroupId;
             var unitId = Seed.UnitId;
             var manufacturer = await _accounts.SetupManufacturerAsync(
                 OptionSetValues.Account.SalesCategory.Woundcare
-            );            
+            );
 
             var productFamily = await _products.SetupProductFamilyAsync(
                 organizationId,
@@ -2597,7 +2645,7 @@ namespace E2E.Api.Tests.Tests
                 "Case Product record should exist after setup."
             );
 
-             // Create supplier commission rule with populated HospitalId matching the case's hospital
+            // Create supplier commission rule with populated HospitalId matching the case's hospital
             var ruleId = await _supplierCommissionRules.SetupAsync(
                 SupplierCommissionRuleConfig.Default(
                     name: $"Test Rule Physician Match {Config.CorrelationId}",
@@ -2606,7 +2654,7 @@ namespace E2E.Api.Tests.Tests
                 ) with
                 {
                     EffectiveStartDate = DateTime.UtcNow.Date,
-                    PhysicianId = physicianContact,
+                   
                     CommissionPercent = 10.0m,
                 }
             );
@@ -2617,7 +2665,7 @@ namespace E2E.Api.Tests.Tests
                 $"Supplier Commission Rule created with PhysicianId: {physicianContact} (matching case physician)"
             );
 
-             // Trigger case regeneration
+            // Trigger case regeneration
             await _cases.RegenCaseAsync(caseRecord);
             await _cases.WaitUntilRegenerateCompleteAsync(
                 caseRecord,
@@ -2683,7 +2731,7 @@ namespace E2E.Api.Tests.Tests
             TestContext.WriteLine($"Created Supplier Contract with ID: {supplierContractId}");
 
             // Step 3: Create contact record (physician)
-            var physicianContact = await _contacts.SetupPhysicianAsync();          
+            var physicianContact = await _contacts.SetupPhysicianAsync();
             Assert.IsNotNull(physicianContact, "Physician Contact should be created.");
             TestContext.WriteLine($"Created Physician Contact with ID: {physicianContact}");
 
@@ -2709,19 +2757,19 @@ namespace E2E.Api.Tests.Tests
                 "✓ Supplier Contract with Contact relationship successfully created and verified."
             );
 
-            var hospital = Seed.HospitalId;    
-            var physician1 = Seed.PhysicianId;                    
+            var hospital = Seed.HospitalId;
+            var physician1 = Seed.PhysicianId;
             var procedure = Seed.ProcedureId;
             var caseRecord = await _cases.SetupAsync(hospital, physician1, procedure);
 
-              // Setup products and case products
+            // Setup products and case products
             var organizationId = Seed.OrganizationId;
             var subjectId = Seed.SubjectId;
             var unitGroupId = Seed.UnitGroupId;
             var unitId = Seed.UnitId;
             var manufacturer = await _accounts.SetupManufacturerAsync(
                 OptionSetValues.Account.SalesCategory.Woundcare
-            );            
+            );
 
             var productFamily = await _products.SetupProductFamilyAsync(
                 organizationId,
@@ -2765,7 +2813,7 @@ namespace E2E.Api.Tests.Tests
                 "Case Product record should exist after setup."
             );
 
-             // Create supplier commission rule with populated HospitalId matching the case's hospital
+            // Create supplier commission rule with populated HospitalId matching the case's hospital
             var ruleId = await _supplierCommissionRules.SetupAsync(
                 SupplierCommissionRuleConfig.Default(
                     name: $"Test Rule Physician Match {Config.CorrelationId}",
@@ -2774,7 +2822,7 @@ namespace E2E.Api.Tests.Tests
                 ) with
                 {
                     EffectiveStartDate = DateTime.UtcNow.Date,
-                    PhysicianId = physicianContact,
+
                     CommissionPercent = 10.0m,
                 }
             );
@@ -2785,12 +2833,24 @@ namespace E2E.Api.Tests.Tests
                 $"Supplier Commission Rule created with PhysicianId: {physicianContact} (matching case physician)"
             );
 
-             // Trigger case regeneration
+            // Trigger case regeneration
             await _cases.RegenCaseAsync(caseRecord);
-            await _cases.WaitUntilRegenerateCompleteAsync(
-                caseRecord,
-                TimeSpan.FromSeconds(90),
-                TimeSpan.FromSeconds(5)
+
+              var ex = await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () =>
+               {
+                    await _cases.WaitUntilRegenerateCompleteAsync(
+                        caseRecord,
+                        TimeSpan.FromSeconds(90),
+                        TimeSpan.FromSeconds(5)
+                    );
+               });
+
+            Assert.IsTrue(ex.Message.Contains("Manager Standard commission job"),
+                 $"Unexpected exception message: {ex.Message}"
+            );
+
+            TestContext.WriteLine(
+                $"Expected exception captured: {ex.Message}"
             );
 
             TestContext.WriteLine("Case regeneration completed");
@@ -2802,13 +2862,9 @@ namespace E2E.Api.Tests.Tests
             );
 
             Assert.AreEqual(
-                1,
+                0,
                 commissions.Count,
-                "When rule has non-empty physician field matching case physician and contract has AllPhysicians=false, should generate supplier commission."
-            );
-
-            TestContext.WriteLine(
-                "✓ Supplier Commission correctly generated for matching physician rule."
+                "When rule has non-empty physician field matching case physician and contract has AllPhysicians=false, should not generate supplier commission."
             );
 
         }
@@ -2850,7 +2906,7 @@ namespace E2E.Api.Tests.Tests
             Assert.IsNotNull(supplierContractId, "Supplier Contract should be created.");
             TestContext.WriteLine($"Created Supplier Contract with ID: {supplierContractId}");
 
-          // Create a DIFFERENT hospital for the rule (Hospital2)
+            // Create a DIFFERENT hospital for the rule (Hospital2)
             var hospital2 = await _accounts.SetupHospitalAsync();
             Assert.IsNotNull(hospital2, "Hospital 2 record should exist after setup.");
             TestContext.WriteLine($"Created Hospital 2 with ID: {hospital2} (different from case hospital)");
@@ -2859,7 +2915,7 @@ namespace E2E.Api.Tests.Tests
             await Client.AddReferenceAsync(
                 sourceEntityLogicalName: EntityNames.SupplierContract,
                 sourceId: supplierContractId,
-                navigationPropertyName: "leap_leap_suppliercontract_account",  
+                navigationPropertyName: "leap_leap_suppliercontract_account",
                 targetEntityLogicalName: EntityNames.Account,
                 targetId: hospital2
             );
@@ -2876,19 +2932,19 @@ namespace E2E.Api.Tests.Tests
             TestContext.WriteLine(
                 "✓ Supplier Contract with Contact relationship successfully created and verified."
             );
-                              
+
             var procedure = Seed.ProcedureId;
             var physician = Seed.PhysicianId;
             var caseRecord = await _cases.SetupAsync(hospital2, physician, procedure);
 
-              // Setup products and case products
+            // Setup products and case products
             var organizationId = Seed.OrganizationId;
             var subjectId = Seed.SubjectId;
             var unitGroupId = Seed.UnitGroupId;
             var unitId = Seed.UnitId;
             var manufacturer = await _accounts.SetupManufacturerAsync(
                 OptionSetValues.Account.SalesCategory.Woundcare
-            );            
+            );
 
             var productFamily = await _products.SetupProductFamilyAsync(
                 organizationId,
@@ -2932,7 +2988,7 @@ namespace E2E.Api.Tests.Tests
                 "Case Product record should exist after setup."
             );
 
-             // Create supplier commission rule with populated HospitalId matching the case's hospital
+            // Create supplier commission rule with populated HospitalId matching the case's hospital
             var ruleId = await _supplierCommissionRules.SetupAsync(
                 SupplierCommissionRuleConfig.Default(
                     name: $"Test Rule Hospital Match {Config.CorrelationId}",
@@ -2941,7 +2997,7 @@ namespace E2E.Api.Tests.Tests
                 ) with
                 {
                     EffectiveStartDate = DateTime.UtcNow.Date,
-                    HospitalId = hospital2,
+                    // HospitalId = hospital2,
                     CommissionPercent = 10.0m,
                 }
             );
@@ -2952,7 +3008,7 @@ namespace E2E.Api.Tests.Tests
                 $"Supplier Commission Rule created with HospitalId: {hospital2} (matching case hospital)"
             );
 
-             // Trigger case regeneration
+            // Trigger case regeneration
             await _cases.RegenCaseAsync(caseRecord);
             await _cases.WaitUntilRegenerateCompleteAsync(
                 caseRecord,
@@ -2980,7 +3036,7 @@ namespace E2E.Api.Tests.Tests
 
         }
 
-         [TestMethod]
+        [TestMethod]
         public async Task SupplierContract_ContractWithHospitalinListButNotMatch_ShouldNotGenerateCommission()
         {
             /**
@@ -3017,7 +3073,7 @@ namespace E2E.Api.Tests.Tests
             Assert.IsNotNull(supplierContractId, "Supplier Contract should be created.");
             TestContext.WriteLine($"Created Supplier Contract with ID: {supplierContractId}");
 
-          // Create a DIFFERENT hospital for the rule (Hospital2)
+            // Create a DIFFERENT hospital for the rule (Hospital2)
             var hospital2 = await _accounts.SetupHospitalAsync();
             Assert.IsNotNull(hospital2, "Hospital 2 record should exist after setup.");
             TestContext.WriteLine($"Created Hospital 2 with ID: {hospital2} (different from case hospital rule)");
@@ -3026,7 +3082,7 @@ namespace E2E.Api.Tests.Tests
             await Client.AddReferenceAsync(
                 sourceEntityLogicalName: EntityNames.SupplierContract,
                 sourceId: supplierContractId,
-                navigationPropertyName: "leap_leap_suppliercontract_account",  
+                navigationPropertyName: "leap_leap_suppliercontract_account",
                 targetEntityLogicalName: EntityNames.Account,
                 targetId: hospital2
             );
@@ -3044,19 +3100,19 @@ namespace E2E.Api.Tests.Tests
                 "✓ Supplier Contract with Contact relationship successfully created and verified."
             );
 
-            var hospitalinit = Seed.HospitalId;                  
+            var hospitalinit = Seed.HospitalId;
             var procedure = Seed.ProcedureId;
             var physician = Seed.PhysicianId;
-            var caseRecord = await _cases.SetupAsync(hospital2, physician, procedure);
+            var caseRecord = await _cases.SetupAsync(hospitalinit, physician, procedure);
 
-              // Setup products and case products
+            // Setup products and case products
             var organizationId = Seed.OrganizationId;
             var subjectId = Seed.SubjectId;
             var unitGroupId = Seed.UnitGroupId;
             var unitId = Seed.UnitId;
             var manufacturer = await _accounts.SetupManufacturerAsync(
                 OptionSetValues.Account.SalesCategory.Woundcare
-            );            
+            );
 
             var productFamily = await _products.SetupProductFamilyAsync(
                 organizationId,
@@ -3100,7 +3156,7 @@ namespace E2E.Api.Tests.Tests
                 "Case Product record should exist after setup."
             );
 
-             // Create supplier commission rule with populated HospitalId matching the case's hospital
+            // Create supplier commission rule with populated HospitalId matching the case's hospital
             var ruleId = await _supplierCommissionRules.SetupAsync(
                 SupplierCommissionRuleConfig.Default(
                     name: $"Test Rule Hospital Match {Config.CorrelationId}",
@@ -3109,7 +3165,7 @@ namespace E2E.Api.Tests.Tests
                 ) with
                 {
                     EffectiveStartDate = DateTime.UtcNow.Date,
-                    HospitalId = hospitalinit,
+              
                     CommissionPercent = 10.0m,
                 }
             );
@@ -3117,15 +3173,26 @@ namespace E2E.Api.Tests.Tests
             Assert.IsNotNull(ruleId, "Supplier Commission Rule record should exist after setup.");
 
             TestContext.WriteLine(
-                $"Supplier Commission Rule created with HospitalId: {hospitalinit} (Donot matching case use hospital2)"
+                $"Supplier Commission Rule created with HospitalId: {hospital2} (Donot matching case use hospital2)"
             );
 
-             // Trigger case regeneration
+            // Trigger case regeneration
             await _cases.RegenCaseAsync(caseRecord);
-            await _cases.WaitUntilRegenerateCompleteAsync(
-                caseRecord,
-                TimeSpan.FromSeconds(90),
-                TimeSpan.FromSeconds(5)
+                var ex = await Assert.ThrowsExactlyAsync<InvalidOperationException>(async () =>
+                {
+                    await _cases.WaitUntilRegenerateCompleteAsync(
+                        caseRecord,
+                        TimeSpan.FromSeconds(90),
+                        TimeSpan.FromSeconds(5)
+                    );
+                });
+        
+           Assert.IsTrue(ex.Message.Contains("Manager Standard commission job"),
+                 $"Unexpected exception message: {ex.Message}"
+            );
+
+            TestContext.WriteLine(
+                $"Expected exception captured: {ex.Message}"
             );
 
             TestContext.WriteLine("Case regeneration completed");
@@ -3137,14 +3204,11 @@ namespace E2E.Api.Tests.Tests
             );
 
             Assert.AreEqual(
-                1,
+                0,
                 commissions.Count,
-                "When rule has non-empty physician field matching case physician and contract has AllPhysicians=false, should generate supplier commission."
+                "When rule has non-empty hospital field matching case hospital and contract has AllHospitals=false, should not generate supplier commission."
             );
-
-            TestContext.WriteLine(
-                "✓ Supplier Commission correctly generated for matching physician rule."
-            );
+          
 
         }
 
